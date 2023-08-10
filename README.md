@@ -6,7 +6,9 @@
 
 なおユーザ認証はCognitoまたはKeycloakを用いることとする。
 ログインしたユーザは自身の名前を変更する機能を持つ。
-   
+
+SMSの料金はCognitoを使う場合ここに従う(https://aws.amazon.com/jp/sns/sms-pricing/) 
+
 ---
 
 ## 1. ユーザ認証とアカウント管理 (15点)
