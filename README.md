@@ -8,11 +8,17 @@
 ログインしたユーザは自身の名前を変更する機能を持つ。
 
 SMSの料金はCognitoを使う場合ここに従う(https://aws.amazon.com/jp/sns/sms-pricing/) 
-1通あたり１円のように読める・・・が・・・？ (Base Price + Cariier Price )   
+1通あたり１円のように読める・・・が・・・？ (Base Price + Carrier Price )   
 
 ![image](https://github.com/bringitp/ndrr/assets/141851166/aa9709a4-6e16-42eb-9a7b-4d02350c96c2)  
 
 ---
+
+## 0. ユーザ認証 (15点)
+- 買う？
+- LINE認証つかっちゃう？
+- まさかのAWSでCognito
+- まさかのKeycloak
 
 ## 1. ユーザ認証とアカウント管理 (15点)
 - CognitoまたはKeycloakを使用してユーザー認証を実装
