@@ -1,3 +1,5 @@
+## テーブル名はMySQLに準拠するために小文字で統一することとする。  
+
 #### 0. ユーザ認証基盤 (15点)
 
 **users テーブル**
@@ -12,12 +14,14 @@
 | privilege      | ENUM         | NOT NULL, DEFAULT 'user'            | 特権レベル（'user', 'premium', など）         |
 | ng_list        | TEXT         |                                     | 個別チャットの相手のNGリスト                   |
 
-**user_sessions テーブル**
-- session_id (Primary Key)
-- user_id (Foreign Key: users.user_id)
-- access_token
-- refresh_token
-- expiration_date
+**user_sessions**
+| カラム名         | データ型       | 制約                                 | 説明                                      |
+|----------------|--------------|-------------------------------------|-----------------------------------------|
+| session_id     | VARCHAR(64)  | PRIMARY KEY                         | セッションID                               |
+| user_id        | INT          | NOT NULL                            | ユーザーID                                |
+| access_token   | VARCHAR(128) | NOT NULL                            | アクセストークン                           |
+| refresh_token  | VARCHAR(128) | NOT NULL                            | リフレッシュトークン                         |
+| expiration_date| TIMESTAMP    | NOT NULL                            | 有効期限のタイムスタンプ                         |
 
 #### 1. ユーザ認証とアカウント管理 (30点)
 
@@ -36,10 +40,13 @@
 | last_activity| TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 最終アクティビティのタイムスタンプ               |
 
 **room_members テーブル**
-- member_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- user_id (Foreign Key: users.user_id)
-- joined_at
+| カラム名        | データ型       | 制約                                 | 説明                                      |
+|---------------|--------------|-------------------------------------|-----------------------------------------|
+| member_id     | INT          | PRIMARY KEY, AUTO_INCREMENT         | メンバーID                                |
+| room_id       | INT          | NOT NULL                            | 関連する部屋ID                              |
+| user_id       | INT          | NOT NULL                            | ユーザーID                                 |
+| joined_at     | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 入室日時                                   |
+
 
 #### 3. 部屋管理機能 (20点)
 
@@ -57,16 +64,22 @@
 | sent_at       | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | メッセージ送信のタイムスタンプ                    |
 
 **blocked_users テーブル**
-- block_id (Primary Key)
-- blocking_user_id (Foreign Key: users.user_id)
-- blocked_user_id (Foreign Key: users.user_id)
+| カラム名           | データ型       | 制約                                 | 説明                                      |
+|------------------|--------------|-------------------------------------|-----------------------------------------|
+| block_id         | INT          | PRIMARY KEY, AUTO_INCREMENT         | ブロックID                                |
+| blocking_user_id | INT          | NOT NULL                            | ブロックするユーザーのユーザーID                  |
+| blocked_user_id  | INT          | NOT NULL                            | ブロックされるユーザーのユーザーID                |
+
 
 **images テーブル**
-- image_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- sender_id (Foreign Key: users.user_id)
-- image_url
-- timestamp
+| カラム名         | データ型       | 制約                                 | 説明                                      |
+|----------------|--------------|-------------------------------------|-----------------------------------------|
+| image_id       | INT          | PRIMARY KEY, AUTO_INCREMENT         | 画像ID                                    |
+| room_id        | INT          | NOT NULL                            | 関連する部屋ID                              |
+| sender_id      | INT          | NOT NULL                            | 画像を送信したユーザーのユーザーID              |
+| image_url      | VARCHAR(255) | NOT NULL                            | 画像のURL                                 |
+| timestamp      | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 画像のタイムスタンプ                           |
+
 
 #### 5. 部屋主の機能 (15点)
 
@@ -103,19 +116,23 @@
 #### 13. SPAM対策 (5点)
 
 **spam_users テーブル**
-- spam_id (Primary Key)
-- user_id (Foreign Key: users.user_id)
-- spam_points
-- last_spam_activity
+| カラム名            | データ型       | 制約                                 | 説明                                      |
+|-------------------|--------------|-------------------------------------|-----------------------------------------|
+| spam_id           | INT          | PRIMARY KEY, AUTO_INCREMENT         | SPAMユーザーID                             |
+| user_id           | INT          | NOT NULL                            | SPAM行為を行ったユーザーのユーザーID             |
+| spam_points       | INT          | NOT NULL                            | SPAM行為のポイント                         |
+| last_spam_activity| TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 最後のSPAM活動のタイムスタンプ                |
 
 **banned_users テーブル**
-- ban_id (Primary Key)
-- user_id (Foreign Key: users.user_id)
-- ban_start_date
-- ban_end_date
+| カラム名           | データ型       | 制約                                 | 説明                                      |
+|------------------|--------------|-------------------------------------|-----------------------------------------|
+| ban_id           | INT          | PRIMARY KEY, AUTO_INCREMENT         | BANユーザーID                             |
+| user_id          | INT          | NOT NULL                            | BANされたユーザーのID
 
 **spam_messages テーブル**
-- spam_message_id (Primary Key)
-- user_id (Foreign Key: users.user_id)
-- message
-- timestamp
+| カラム名            | データ型       | 制約                                 | 説明                                      |
+|-------------------|--------------|-------------------------------------|-----------------------------------------|
+| spam_message_id  | INT          | PRIMARY KEY, AUTO_INCREMENT         | SPAMメッセージID                           |
+| user_id           | INT          | NOT NULL                            | SPAM行為を行ったユーザーのユーザーID             |
+| message           | TEXT         | NOT NULL                            | SPAMメッセージの内容                       |
+| timestamp         | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | SPAMメッセージのタイムスタンプ               |
