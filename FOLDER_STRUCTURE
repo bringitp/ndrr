@@ -1,0 +1,39 @@
+```
+chat_app/
+├── app/   アプリケーションコードのメインフォルダ
+│   ├── api/  APIエンドポイントに関連するコードを格納
+│   │   ├── __init__.py
+│   │   ├── auth/  認証に関連するコードを格納
+│   │   │   ├── __init__.py
+│   │   │   ├── endpoints/ 
+│   │   │   │   ├── line_auth.py   LINE認証エンドポイント
+│   │   │   │   ├── google_auth.py  Google認証エンドポイント
+│   │   │   ├── models/  認証に関連するデータモデル
+│   │   │   │   ├── user.py  ユーザモデル
+│   │   │   ├── auth_service.py 認証サービスのロジックを提供するモジュール  
+│   │   ├── rooms/   チャット部屋に関連するコードを格納  
+│   │   │   ├── __init__.py
+│   │   │   ├── endpoints/  部屋管理とアクションのエンドポイント
+│   │   │   │   ├── room_management.py   部屋作成・削除・編集などのエンドポイント
+│   │   │   │   ├── room_actions.py   部屋内でのアクションのエンドポイント
+│   │   │   ├── models/  部屋に関連するデータモデル  
+│   │   │   │   ├── room.py  部屋モデル
+│   │   │   ├── room_service.py  部屋関連のサービスのロジックを提供するモジュール
+│   ├── database/  データベース関連のコードを格納
+│   │   ├── __init__.py
+│   │   ├── base.py   SQLAlchemyのベースモデル  API関連のテストコード
+│   │   ├── session.py  SQLAlchemyセッションの管理
+│   ├── main.py
+├── tests/ テストコードのフォルダ
+│   ├── __init__.py
+│   ├── api/  API関連のテストコード
+│   │   ├── auth/   認証テストコード 
+│   │   │   ├── test_line_auth.py
+│   │   │   ├── test_google_auth.py
+│   │   ├── rooms/  部屋関連のテストコード
+│   │   │   ├── test_room_management.py
+│   │   │   ├── test_room_actions.py
+│   ├── conftest.py  テストの設定
+├── requirements.txt  依存ライブラリのリスト
+
+```
