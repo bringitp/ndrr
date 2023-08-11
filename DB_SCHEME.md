@@ -12,6 +12,7 @@
 - profile_picture (アイコンのURLなど)
 - registration_date
 - last_login_date
+- privileged_user (課金ユーザなどの特権ユーザの状態)
 
 **user_sessions テーブル**
 - session_id (Primary Key)
@@ -20,44 +21,31 @@
 - refresh_token
 - expiration_date
 
-#### 部屋機能
-
-**rooms テーブル**
-- room_id (Primary Key)
-- room_name
-- max_users
-- status (active or inactive)
-- created_by (Foreign Key: users.user_id)
-- creation_date
-
-**room_users テーブル**
-- room_user_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- user_id (Foreign Key: users.user_id)
-- join_date
-
-#### チャット機能
-
-**messages テーブル**
-- message_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- sender_id (Foreign Key: users.user_id)
-- receiver_id (Foreign Key: users.user_id)
-- content
-- timestamp
-- read_status
-
 **blocked_users テーブル**
 - block_id (Primary Key)
 - blocking_user_id (Foreign Key: users.user_id)
 - blocked_user_id (Foreign Key: users.user_id)
 
-**images テーブル**
-- image_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- sender_id (Foreign Key: users.user_id)
-- image_url
-- timestamp
+**ng_lists テーブル**
+- ng_list_id (Primary Key)
+- user_id (Foreign Key: users.user_id)
+- blocked_user_id (Foreign Key: users.user_id)
+
+#### ユーザ認証とアカウント管理
+
+(既存のテーブルを使用)
+
+#### 固定部屋機能
+
+(部屋テーブルを使用)
+
+#### 部屋管理機能
+
+(部屋テーブルを使用)
+
+#### 部屋内チャット機能
+
+(メッセージテーブルを使用)
 
 #### 部屋主の機能
 
@@ -65,15 +53,31 @@
 
 #### 通知とアラート
 
-**notifications テーブル**
-- notification_id (Primary Key)
-- user_id (Foreign Key: users.user_id)
-- message
-- timestamp
+(通知テーブルを使用)
 
 #### セキュリティとプライバシー
 
 (ユーザーテーブルとセッションテーブルを使用)
+
+#### 拡張性とスケーラビリティ
+
+(バックアップ戦略に関するテーブルなどが必要)
+
+#### UI/UX デザイン
+
+(データベースには関連しない)
+
+#### モバイル対応
+
+(データベースには関連しない)
+
+#### 法的およびコンプライアンス要件
+
+(データベースには関連しない)
+
+#### デプロイと運用
+
+(データベースには関連しない)
 
 #### SPAM対策
 
