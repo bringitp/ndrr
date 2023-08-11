@@ -48,13 +48,13 @@
 #### 4. 部屋内チャット機能 (30点)
 
 **messages テーブル**
-- message_id (Primary Key)
-- room_id (Foreign Key: rooms.room_id)
-- sender_id (Foreign Key: users.user_id)
-- receiver_id (Foreign Key: users.user_id)
-- content
-- timestamp
-- read_status
+| カラム名        | データ型       | 制約                                 | 説明                                      |
+|---------------|--------------|-------------------------------------|-----------------------------------------|
+| id            | INT          | PRIMARY KEY, AUTO_INCREMENT         | メッセージID                                |
+| room_id       | INT          | NOT NULL                            | 関連する部屋ID                              |
+| sender_id     | INT          | NOT NULL                            | 送信者のユーザーID                            |
+| content       | TEXT         | NOT NULL                            | メッセージの内容                             |
+| sent_at       | TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | メッセージ送信のタイムスタンプ                    |
 
 **blocked_users テーブル**
 - block_id (Primary Key)
