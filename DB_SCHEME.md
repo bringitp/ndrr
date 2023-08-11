@@ -1,15 +1,16 @@
 #### 0. ユーザ認証基盤 (15点)
 
 **users テーブル**
-- user_id (Primary Key)
-- username
-- email
-- password_hash
-- oauth_provider
-- oauth_id
-- profile_picture
-- registration_date
-- last_login_date
+| カラム名         | データ型       | 制約                                 | 説明                                      |
+|----------------|--------------|-------------------------------------|-----------------------------------------|
+| id             | INT          | PRIMARY KEY, AUTO_INCREMENT         | ユーザーID                                |
+| username       | VARCHAR(50)  | UNIQUE, NOT NULL                    | ユーザー名（ユニークで、50文字以下）           |
+| password_hash  | VARCHAR(128) | NOT NULL                            | パスワードハッシュ                          |
+| email          | VARCHAR(100) | UNIQUE, NOT NULL                    | メールアドレス                             |
+| avatar         | VARCHAR(100) |                                     | アバター画像のファイルパス                     |
+| trip           | VARCHAR(32)  | NOT NULL                            | トリップ（ユーザー識別のための文字列）            |
+| privilege      | ENUM         | NOT NULL, DEFAULT 'user'            | 特権レベル（'user', 'premium', など）         |
+| ng_list        | TEXT         |                                     | 個別チャットの相手のNGリスト                   |
 
 **user_sessions テーブル**
 - session_id (Primary Key)
