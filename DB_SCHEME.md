@@ -26,13 +26,14 @@
 #### 2. 固定部屋機能 (5点)
 
 **rooms テーブル**
-- room_id (Primary Key)
-- room_name
-- max_capacity
-- active_status
-- created_by (Foreign Key: users.user_id)
-- created_at
-- updated_at
+| カラム名        | データ型       | 制約                                 | 説明                                      |
+|---------------|--------------|-------------------------------------|-----------------------------------------|
+| id            | INT          | PRIMARY KEY, AUTO_INCREMENT         | 部屋ID                                    |
+| name          | VARCHAR(50)  | NOT NULL                            | 部屋名（50文字以下）                        |
+| owner_id      | INT          | NOT NULL                            | 部屋主のユーザーID                           |
+| max_capacity  | INT          | NOT NULL, DEFAULT 20                | 部屋の最大人数（デフォルト20人）                 |
+| status        | ENUM         | NOT NULL, DEFAULT 'active'          | 部屋の状態（'active', 'inactive' など）        |
+| last_activity| TIMESTAMP    | NOT NULL, DEFAULT CURRENT_TIMESTAMP | 最終アクティビティのタイムスタンプ               |
 
 **room_members テーブル**
 - member_id (Primary Key)
