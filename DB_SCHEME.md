@@ -2,8 +2,6 @@
 
 ```sql
 
-
-```
 -- users テーブル
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -106,7 +104,7 @@ CREATE TABLE spam_messages (
 );
 
 
-
+```
 
 #### 0. ユーザ認証基盤 (15点)
 
