@@ -1,2 +1,2 @@
 #!/bin/bash
-pytest chat_app/tests/
+python -m pytest chat_app/tests/
