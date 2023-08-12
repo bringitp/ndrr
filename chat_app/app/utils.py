@@ -1,4 +1,11 @@
 import os
+
+# db_utils.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+import configparser
+
 def find_settings_ini():
     current_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -39,3 +46,20 @@ def get_db_config():
         return config['database']
     else:
         return None
+
+
+# 設定を読み込む関数
+def get_db_settings():
+    settings_path = find_settings_ini()
+    config = configparser.ConfigParser()
+    config.read(settings_path)
+    dbserver = config['database']['dbserver']
+    return dbserver
+
+# データベースエンジンとセッションを作成する関数
+def create_db_engine_and_session():
+    dbserver = get_db_settings()
+    engine = create_engine(dbserver)
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    return engine, SessionLocal, declarative_base()
+

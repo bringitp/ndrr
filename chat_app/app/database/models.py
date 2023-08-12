@@ -89,7 +89,7 @@ class Message(Base):
     sent_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     
     sender = relationship('User')
-    room = relationship('Room')
+    room = relationship('Room') 
 
 
 class Image(Base):
@@ -100,7 +100,7 @@ class Image(Base):
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     image_url = Column(String(255), nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
-    
+    username = relationship('User')
     sender = relationship('User')
     room = relationship('Room')
 
