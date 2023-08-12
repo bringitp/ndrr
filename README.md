@@ -33,7 +33,7 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
 
 ---
 
-## 要件定義書
+## 要件定義書　これを毎回ChatGPTに投げながら細かい部分を深堀していく。とても大事。
 ---
 
 ## 0. ユーザ認証基盤 (15点)
