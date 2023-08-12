@@ -38,7 +38,8 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE
 #### 開発風景写真集
 [開発風景](https://github.com/bringitp/ndrr/blob/main/%E9%96%8B%E7%99%BA%E9%A2%A8%E6%99%AF%E5%86%99%E7%9C%9F%E9%9B%86.md)
 #### 構成図のようなもの
-![構成図のようなもの](https://github.com/bringitp/ndrr/assets/141851166/c4b0b062-eab5-4df5-bdf2-9bae9c6643a0)
+![無題の図形描画](https://github.com/bringitp/ndrr/assets/141851166/8a86ed6a-a5ca-4492-b815-f0feb5484e0e)
+
 
 
 ---
