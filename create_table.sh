@@ -1,0 +1,1 @@
+python ./chat_app/app/database/create_tables.py 
