@@ -1,0 +1,4 @@
+# config/development.py
+
+DATABASE_URL = "postgresql://username:password@localhost/dbname"
+SECRET_KEY = "your-secret-key"

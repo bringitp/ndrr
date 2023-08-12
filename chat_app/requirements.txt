@@ -1,4 +1,5 @@
 fastapi==0.68.0
 uvicorn==0.15.0
-SQLAlchemy==1.4.26
-pytest==7.0.1
+sqlalchemy==1.4.23
+mysqlclient==2.1.0  # MySQLデータベースに接続するため
+pydantic==1.8.2     # FastAPIでのデータバリデーションに利用
