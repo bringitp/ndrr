@@ -40,7 +40,8 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE
 #### バックエンドの構成図のようなもの
 ![無題の図形描画 (2)](https://github.com/bringitp/ndrr/assets/141851166/753110cf-bc64-4839-925c-177588c8eccd)
 #### Oauth2.0発行の概念図のようなもの
-![アクセスToken発行](https://github.com/bringitp/ndrr/assets/141851166/cda4b9e3-5586-47dd-a1ed-e65345079f44)
+![アクセスToken発行 (2)](https://github.com/bringitp/ndrr/assets/141851166/dc4def90-9313-4a63-9631-32c418ad919a)
+
 
 ---
 
