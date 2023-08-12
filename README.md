@@ -1,18 +1,35 @@
 # ndrr
 
    
-チャットサイトを作ることを考える。実装部分の大枠を考えたい。実装をリストにせよ。
+チャットサイトを作ることを考える。実装部分の大枠を考えたい。
 部屋をつくることができるサイトで、部屋の上限人数は２０人。使われなくなった部屋は廃棄される。部屋主は部屋名の変更、部屋の人数の変更、部屋にいる人を部屋から追い出す機能がある。
 
 なおユーザ認証はLINE認証かGoogleアカウントの認証OAuth 2.0を用いることとする。
 ログインしたユーザは自身の名前を変更する機能を持つ。
 
-SMSの料金はCognitoを使う場合ここに従う(https://aws.amazon.com/jp/sns/sms-pricing/) 
-1通あたり１円のように読める・・・が・・・？ (Base Price + Carrier Price )   
-
-![image](https://github.com/bringitp/ndrr/assets/141851166/aa9709a4-6e16-42eb-9a7b-4d02350c96c2)  
 SMSは予算的に使わない
 
+# DB SCHEME
+https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
+# FOLDER STRUCTURE
+https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
+
+
+# 開発
+---
+ややTDDを意識した感じで。
+ConohaのVPS Ubuntu 2x系で動けばいいやという感
+
+Backend
+MySQL
+Python 3.10.12 SQLAlchemy
+FastAPI
+
+Frontend
+? 未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
+---
+
+# 要件定義書
 ---
 
 ## 0. ユーザ認証基盤 (15点)
