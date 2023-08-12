@@ -9,13 +9,11 @@
 
 SMSは予算的に使わない
 
-# DB SCHEME
+### DB SCHEME
 https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
-# FOLDER STRUCTURE
+### FOLDER STRUCTURE
 https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
-
-
-# 開発
+### 開発
 ---
 ややTDDを意識した感じで。
 ConohaのVPS Ubuntu 2x系で動けばいいやという感
