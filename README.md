@@ -1,18 +1,40 @@
 # ndrr
 
    
-チャットサイトを作ることを考える。実装部分の大枠を考えたい。実装をリストにせよ。
+チャットサイトを作ることを考える。実装部分の大枠を考えたい。
 部屋をつくることができるサイトで、部屋の上限人数は２０人。使われなくなった部屋は廃棄される。部屋主は部屋名の変更、部屋の人数の変更、部屋にいる人を部屋から追い出す機能がある。
 
 なおユーザ認証はLINE認証かGoogleアカウントの認証OAuth 2.0を用いることとする。
 ログインしたユーザは自身の名前を変更する機能を持つ。
 
-SMSの料金はCognitoを使う場合ここに従う(https://aws.amazon.com/jp/sns/sms-pricing/) 
-1通あたり１円のように読める・・・が・・・？ (Base Price + Carrier Price )   
-
-![image](https://github.com/bringitp/ndrr/assets/141851166/aa9709a4-6e16-42eb-9a7b-4d02350c96c2)  
 SMSは予算的に使わない
 
+### 開発
+---
+ChatGPTに全フリした開発手法で開発していく。要件定義書を毎回投げて新規チャットで細かく深堀した部分を聞いていく。  
+ややTDDを意識した感じで。  
+ConohaのVPS Ubuntu 2x系で動けばいいやという感  
+おおよそ100人くらいが同時にチャットを応答速度3秒以内のレスポンスでできればよしとする 
+  
+#### Backend
+MySQL
+Python 3.10.12 SQLAlchemy
+FastAPI
+なんらかのWAF
+
+#### Frontend
+未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
+
+#### DB SCHEME
+https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
+#### FOLDER STRUCTURE
+https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
+#### 開発風景写真集
+[https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md](https://github.com/bringitp/ndrr/blob/main/%E9%96%8B%E7%99%BA%E9%A2%A8%E6%99%AF%E5%86%99%E7%9C%9F%E9%9B%86.md)
+
+---
+
+## 要件定義書　これを毎回ChatGPTに投げながら細かい部分を深堀していく。とても大事。
 ---
 
 ## 0. ユーザ認証基盤 (15点)
