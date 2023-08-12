@@ -13,11 +13,13 @@ SMSは予算的に使わない
 ---
 ややTDDを意識した感じで。
 ConohaのVPS Ubuntu 2x系で動けばいいやという感
+おおよそ100人くらいが同時にチャットを応答速度3秒以内のレスポンスでできればよしとする
 
 #### Backend
 MySQL
 Python 3.10.12 SQLAlchemy
 FastAPI
+なんらかのWAF
 
 #### Frontend
 未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
@@ -31,7 +33,7 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
 
 ---
 
-# 要件定義書
+## 要件定義書
 ---
 
 ## 0. ユーザ認証基盤 (15点)
