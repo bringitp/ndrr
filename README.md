@@ -9,22 +9,26 @@
 
 SMSは予算的に使わない
 
-### DB SCHEME
-https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
-### FOLDER STRUCTURE
-https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
 ### 開発
 ---
 ややTDDを意識した感じで。
 ConohaのVPS Ubuntu 2x系で動けばいいやという感
 
-Backend
+#### Backend
 MySQL
 Python 3.10.12 SQLAlchemy
 FastAPI
 
-Frontend
-? 未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
+#### Frontend
+未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
+
+#### DB SCHEME
+https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
+#### FOLDER STRUCTURE
+https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
+#### 開発風景写真集
+https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE.md
+
 ---
 
 # 要件定義書
