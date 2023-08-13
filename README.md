@@ -3,7 +3,8 @@
 チャットサイトを作ることを考える。
 部屋をつくることができるサイトで、部屋の上限人数は２０人。使われなくなった部屋は廃棄される。部屋主は部屋名の変更、部屋の人数の変更、部屋にいる人を部屋から追い出す機能がある。
 
-なおユーザ認証はLINE認証かGoogleアカウントの認証OAuth 2.0を用いることとする。
+x なおユーザ認証はLINE認証かGoogleアカウントの認証OAuth 2.0を用いることとする。  
+o OktaによるAuth2.0を利用する  
 ログインしたユーザは自身の名前を変更する機能を持つ。
 
 SMSは予算的に使わない
@@ -38,7 +39,7 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE
 #### 開発風景写真集
 [開発風景](https://github.com/bringitp/ndrr/blob/main/%E9%96%8B%E7%99%BA%E9%A2%A8%E6%99%AF%E5%86%99%E7%9C%9F%E9%9B%86.md)
 #### Oauth2.0発行の概念図のようなもの
-![アクセスToken発行 (2)](https://github.com/bringitp/ndrr/assets/141851166/dc4def90-9313-4a63-9631-32c418ad919a)
+![アクセスToken発行 Okta](https://github.com/bringitp/ndrr/assets/141851166/5162dd51-c596-494a-9789-b364501e2a38)
 #### バックエンドの構成図のようなもの
 ![無題の図形描画 (2)](https://github.com/bringitp/ndrr/assets/141851166/753110cf-bc64-4839-925c-177588c8eccd)
 
