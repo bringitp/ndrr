@@ -1,4 +1,4 @@
-# ndrr
+# ■ ndrr
    
 チャットサイトを作ることを考える。
 部屋をつくることができるサイトで、部屋の上限人数は２０人。使われなくなった部屋は廃棄される。部屋主は部屋名の変更、部屋の人数の変更、部屋にいる人を部屋から追い出す機能がある。
@@ -9,39 +9,39 @@ o OktaによるAuth2.0を利用する
 
 SMSは予算的に使わない
 
-### 観念理論を設計理念とする。
+### ■ 観念理論を設計理念とする。
 自由度多様性の高さは精神成熟の証。最大限保障し問題の早期発見等に活用が吉。民度の低い集団ほど不都合な存在を嫌悪排除。  
 雑言等は不遇な未熟者の自己投影・同属嫌悪。表現狩り等で自由奪えば却って暴発。必要なのは排除処罰ではなく治療教育。  
 
 ![image](https://github.com/bringitp/ndrr/assets/141851166/d936bcf7-b349-4cca-9c8b-30630bd8c9be)
 
 
-### 開発
+### ■ 開発
 ---
 ChatGPTに全フリした開発手法で開発していく。要件定義書を毎回投げて新規チャットで細かく深堀した部分を聞いていく。  
 ややTDDを意識した感じで。  
 ConohaのVPS Ubuntu 2x系で動けばいいやという感  
 おおよそ100人くらいが同時にチャットを応答速度3秒以内のレスポンスでできればよしとする 
   
-#### Auth2.0
+#### ■ Auth2.0
 ![スクリーンショット_2023-08-13_18-31-57](https://github.com/bringitp/ndrr/assets/141851166/e24fbed6-f9ad-4af7-ae5b-9cf5fe1b55f3)
 #### YahooIDで開発すると俺だけがやられる仕組みであるらしい（却下）
 ![スクリーンショット_2023-08-13_21-14-51](https://github.com/bringitp/ndrr/assets/141851166/732ce20f-6ec2-44fe-9235-74dc696409e1)
 
-#### Backend
+#### ■ Backend
 MySQL
 Python 3.10.12 SQLAlchemy
 FastAPI
 なんらかのWAF
 
-#### Frontend
+#### ■ Frontend
 未定。多分React OAuth2.0に対応したフレームワークがあればそれを採用
 
-#### DB SCHEME
+#### ■ DB SCHEME
 https://github.com/bringitp/ndrr/blob/main/DB_SCHEME.md
-#### FOLDER STRUCTURE
+#### ■ FOLDER STRUCTURE
 https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE
-#### 開発風景写真集
+#### ■ 開発風景写真集
 [開発風景](https://github.com/bringitp/ndrr/blob/main/%E9%96%8B%E7%99%BA%E9%A2%A8%E6%99%AF%E5%86%99%E7%9C%9F%E9%9B%86.md)
 #### Oauth2.0発行の概念図のようなもの
 ![アクセスToken発行 Okta](https://github.com/bringitp/ndrr/assets/141851166/5162dd51-c596-494a-9789-b364501e2a38)
@@ -50,7 +50,7 @@ https://github.com/bringitp/ndrr/blob/main/FOLDER_STRUCTURE
 
 ---
 
-## 要件定義書　これを毎回ChatGPTに投げながら細かい部分を深堀していく。とても大事。
+## ■ 要件定義書　これを毎回ChatGPTに投げながら細かい部分を深堀していく。とても大事。
 ---
 
 ## 0. ユーザ認証基盤 (15点)
