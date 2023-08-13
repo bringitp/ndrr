@@ -25,6 +25,8 @@ ConohaのVPS Ubuntu 2x系で動けばいいやという感
   
 #### Auth2.0
 ![スクリーンショット_2023-08-13_18-31-57](https://github.com/bringitp/ndrr/assets/141851166/e24fbed6-f9ad-4af7-ae5b-9cf5fe1b55f3)
+#### YahooIDで開発すると俺だけがやられる仕組みであるらしい（却下）
+![スクリーンショット_2023-08-13_21-14-51](https://github.com/bringitp/ndrr/assets/141851166/732ce20f-6ec2-44fe-9235-74dc696409e1)
 
 #### Backend
 MySQL
