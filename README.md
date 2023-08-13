@@ -23,6 +23,9 @@ ChatGPTに全フリした開発手法で開発していく。要件定義書を�
 ConohaのVPS Ubuntu 2x系で動けばいいやという感  
 おおよそ100人くらいが同時にチャットを応答速度3秒以内のレスポンスでできればよしとする 
   
+#### Auth2.0
+![スクリーンショット_2023-08-13_18-31-57](https://github.com/bringitp/ndrr/assets/141851166/e24fbed6-f9ad-4af7-ae5b-9cf5fe1b55f3)
+
 #### Backend
 MySQL
 Python 3.10.12 SQLAlchemy
