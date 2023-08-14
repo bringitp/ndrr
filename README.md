@@ -15,6 +15,8 @@ SMSは予算的に使わない
 
 ![image](https://github.com/bringitp/ndrr/assets/141851166/d936bcf7-b349-4cca-9c8b-30630bd8c9be)
 
+### ■ 流行りのAI攻撃みたいなものがあるらしい
+https://anond.hatelabo.jp/20230710091130
 
 ### ■ 開発
 ---
