@@ -1,0 +1,23 @@
+{
+  "name": "ndrr",
+  "version": "1.0.0",
+  "description": "チャットサイトを作ることを考える。実装部分の大枠を考えたい。 部屋をつくることができるサイトで、部屋の上限人数は２０人。使われなくなった部屋は廃棄される。部屋主は部屋名の変更、部屋の人数の変更、部屋にいる人を部屋から追い出す機能がある。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bringitp/ndrr.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bringitp/ndrr/issues"
+  },
+  "homepage": "https://github.com/bringitp/ndrr#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-oauth2-jwt-bearer": "^1.5.0"
+  }
+}
