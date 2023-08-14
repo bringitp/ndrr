@@ -6,7 +6,8 @@ start_keycloak() {
   echo "Starting Keycloak..."
   docker run -d --name $CONTAINER_NAME -p 8180:8180 \
     -e KEYCLOAK_ADMIN=admin -e KEYCLOAK_ADMIN_PASSWORD=admin \
-    quay.io/keycloak/keycloak:latest start-dev --http-port 8180 --http-relative-path /auth
+    quay.io/keycloak/keycloak:latest start-dev --http-port 8180 --http-relative-path /auth --proxy=reencrypt  # --proxy=reencrypt に変更
+
 
   echo "Keycloak is now running."
 }
@@ -35,4 +36,5 @@ case "$1" in
 esac
 
 exit 0
+
 
