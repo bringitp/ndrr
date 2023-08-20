@@ -114,18 +114,19 @@ CREATE TABLE spam_messages (
 ```sql
 -- ダミーデータ
 -- users テーブルのダミーデータ
-INSERT INTO users (username, password_hash, sub, avatar, trip, karma, privilege)
+INSERT INTO users (username, sub, avatar, trip, karma, created_at, lastlogin_at, lastlogout_at, privilege, ng_list)
 VALUES
-    ('alice', 'hash1', 'sub1', 'avatar1.jpg', 'trip1', 100, 'user'),
-    ('bob', 'hash2', 'sub2', 'avatar2.jpg', 'trip2', 50, 'user'),
-    ('carol', 'hash3', 'sub3', 'avatar3.jpg', 'trip3', 75, 'premium'),
-    ('dave', 'hash4', 'sub4', 'avatar4.jpg', 'trip4', 25, 'user'),
-    ('eve', 'hash5', 'sub5', 'avatar5.jpg', 'trip5', 60, 'user'),
-    ('frank', 'hash6', 'sub6', 'avatar6.jpg', 'trip6', 90, 'premium'),
-    ('grace', 'hash7', 'sub7', 'avatar7.jpg', 'trip7', 70, 'user'),
-    ('helen', 'hash8', 'sub8', 'avatar8.jpg', 'trip8', 80, 'premium'),
-    ('irene', 'hash9', 'sub9', 'avatar9.jpg', 'trip9', 40, 'user'),
-    ('jack', 'hash10', 'sub10', 'avatar10.jpg', 'trip10', 55, 'user');
+    ('user1', 'sub1', 'avatar1.jpg', 'trip1', 100, '2023-08-21 12:00:00', '2023-08-21 12:00:00', '2023-08-21 12:00:00', 'user', NULL),
+    ('user2', 'sub2', 'avatar2.jpg', 'trip2', 150, '2023-08-21 13:00:00', '2023-08-21 13:00:00', '2023-08-21 13:00:00', 'user', NULL),
+    ('user3', 'sub3', 'avatar3.jpg', 'trip3', 200, '2023-08-21 14:00:00', '2023-08-21 14:00:00', '2023-08-21 14:00:00', 'user', NULL),
+    ('user4', 'sub4', 'avatar4.jpg', 'trip4', 50, '2023-08-21 15:00:00', '2023-08-21 15:00:00', '2023-08-21 15:00:00', 'user', NULL),
+    ('premiumuser1', 'sub5', 'avatar5.jpg', 'trip5', 300, '2023-08-21 16:00:00', '2023-08-21 16:00:00', '2023-08-21 16:00:00', 'premium', NULL),
+    ('premiumuser2', 'sub6', 'avatar6.jpg', 'trip6', 500, '2023-08-21 17:00:00', '2023-08-21 17:00:00', '2023-08-21 17:00:00', 'premium', NULL),
+    ('user5', 'sub7', 'avatar7.jpg', 'trip7', 120, '2023-08-21 18:00:00', '2023-08-21 18:00:00', '2023-08-21 18:00:00', 'user', NULL),
+    ('premiumuser3', 'sub8', 'avatar8.jpg', 'trip8', 250, '2023-08-21 19:00:00', '2023-08-21 19:00:00', '2023-08-21 19:00:00', 'premium', NULL),
+    ('user6', 'sub9', 'avatar9.jpg', 'trip9', 80, '2023-08-21 20:00:00', '2023-08-21 20:00:00', '2023-08-21 20:00:00', 'user', NULL),
+    ('user7', 'sub10', 'avatar10.jpg', 'trip10', 70, '2023-08-21 21:00:00', '2023-08-21 21:00:00', '2023-08-21 21:00:00', 'user', NULL);
+
 
 -- user_sessions テーブルのダミーデータ
 INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expiration_date)
