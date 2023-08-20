@@ -108,6 +108,15 @@ CREATE TABLE spam_messages (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- suspicious_messages テーブル
+CREATE TABLE suspicious_messages (
+    suspicious_message_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    message TEXT NOT NULL,
+    timestamp TIMESTAMP NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 ```
 
 
@@ -320,6 +329,8 @@ VALUES
     (6, 2, 'こんにちは！'),
     (8, 2, '週末の予定を考えていますか？'),
     (9, 1, 'あなたの個人情報が流出しました！');
+
+
 
 
 ```
