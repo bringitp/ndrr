@@ -30,3 +30,26 @@ if response.status_code == 200:
 else:
     print("Failed to retrieve access token. Status code:", response.status_code)
     print("Response:", response.text)
+
+
+import jwt
+import requests
+jwt_token = access_token
+
+# KeycloakのURLとRealm名を設定
+keycloak_url = "https://ron-the-rocker.net/auth"
+realm = "ndrr"  # ご自身のRealm名に置き換えてください
+
+# Keycloakの公開鍵を取得
+jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
+print (jwks_url)
+response = requests.get(jwks_url)
+jwks_data = response.json()
+public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+
+options = {"verify_signature": True, "verify_aud": False, "exp": True}
+#        return keycloak_instance.decode_token(given_token, key=given_key, options=options)
+
+# JWTトークンのデコード
+decoded_token = jwt.decode(jwt_token, public_key, algorithms=["RS256"], options=options)
+print(decoded_token)
