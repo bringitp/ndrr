@@ -55,7 +55,7 @@ CREATE TABLE messages (
     room_id INT NOT NULL,
     sender_id INT NOT NULL,
     content TEXT NOT NULL,
-    toxicity TEXT NOT NULL,
+    toxicity INT NOT NULL,
     sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (sender_id) REFERENCES users(id)
