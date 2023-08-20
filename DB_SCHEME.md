@@ -7,9 +7,13 @@ CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(128) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    sub VARCHAR(100) UNIQUE NOT NULL,
     avatar VARCHAR(100),
     trip VARCHAR(32) NOT NULL,
+    karma INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    lastlogin_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    lastlogout_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     privilege ENUM('user', 'premium') NOT NULL DEFAULT 'user',
     ng_list TEXT
 );
@@ -51,6 +55,7 @@ CREATE TABLE messages (
     room_id INT NOT NULL,
     sender_id INT NOT NULL,
     content TEXT NOT NULL,
+    toxicity TEXT NOT NULL,
     sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (sender_id) REFERENCES users(id)
@@ -98,6 +103,7 @@ CREATE TABLE banned_users (
 CREATE TABLE spam_messages (
     spam_message_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
+    spam_type INT NOT NULL,
     message TEXT NOT NULL,
     timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
