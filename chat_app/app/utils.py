@@ -1,10 +1,24 @@
 import os
 
 # db_utils.py
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import configparser
+
+def get_dbserver_config():
+    settings_path = find_settings_ini()
+# settings.iniから接続情報を読み込む
+    config = configparser.ConfigParser()
+    config.read(settings_path)
+
+# 環境変数が設定されている場合はそれを優先
+    value = os.environ.get('dbserver')
+    if value is None:
+        value = config.get('database', 'dbserver')
+
+    return value
 
 def find_settings_ini():
     current_dir = os.path.dirname(os.path.abspath(__file__))
