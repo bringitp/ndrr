@@ -114,136 +114,145 @@ CREATE TABLE spam_messages (
 
 ```sql
 -- ダミーデータ
-
 -- users テーブルのダミーデータ
-INSERT INTO users (username, password_hash, email, avatar, trip, privilege, ng_list)
+INSERT INTO users (username, password_hash, sub, avatar, trip, karma, privilege)
 VALUES
-    ('ユーザー1', 'hashed_password_1', 'user1@example.com', NULL, 'trip1', 'user', NULL),
-    ('ユーザー2', 'hashed_password_2', 'user2@example.com', NULL, 'trip2', 'user', NULL),
-    ('ユーザー3', 'hashed_password_3', 'user3@example.com', NULL, 'trip3', 'user', NULL),
-    ('ユーザー4', 'hashed_password_4', 'user4@example.com', NULL, 'trip4', 'user', NULL),
-    ('ユーザー5', 'hashed_password_5', 'user5@example.com', NULL, 'trip5', 'user', NULL),
-    ('ユーザー6', 'hashed_password_6', 'user6@example.com', NULL, 'trip6', 'user', NULL),
-    ('ユーザー7', 'hashed_password_7', 'user7@example.com', NULL, 'trip7', 'user', NULL),
-    ('ユーザー8', 'hashed_password_8', 'user8@example.com', NULL, 'trip8', 'user', NULL),
-    ('ユーザー9', 'hashed_password_9', 'user9@example.com', NULL, 'trip9', 'user', NULL),
-    ('ユーザー10', 'hashed_password_10', 'user10@example.com', NULL, 'trip10', 'user', NULL);
+    ('alice', 'hash1', 'sub1', 'avatar1.jpg', 'trip1', 100, 'user'),
+    ('bob', 'hash2', 'sub2', 'avatar2.jpg', 'trip2', 50, 'user'),
+    ('carol', 'hash3', 'sub3', 'avatar3.jpg', 'trip3', 75, 'premium'),
+    ('dave', 'hash4', 'sub4', 'avatar4.jpg', 'trip4', 25, 'user'),
+    ('eve', 'hash5', 'sub5', 'avatar5.jpg', 'trip5', 60, 'user'),
+    ('frank', 'hash6', 'sub6', 'avatar6.jpg', 'trip6', 90, 'premium'),
+    ('grace', 'hash7', 'sub7', 'avatar7.jpg', 'trip7', 70, 'user'),
+    ('helen', 'hash8', 'sub8', 'avatar8.jpg', 'trip8', 80, 'premium'),
+    ('irene', 'hash9', 'sub9', 'avatar9.jpg', 'trip9', 40, 'user'),
+    ('jack', 'hash10', 'sub10', 'avatar10.jpg', 'trip10', 55, 'user');
 
 -- user_sessions テーブルのダミーデータ
 INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expiration_date)
 VALUES
-    ('session1', 1, 'access_token_1', 'refresh_token_1', '2023-08-11 12:00:00'),
-    ('session2', 2, 'access_token_2', 'refresh_token_2', '2023-08-11 12:30:00'),
-    ('session3', 3, 'access_token_3', 'refresh_token_3', '2023-08-11 13:00:00'),
-    ('session4', 4, 'access_token_4', 'refresh_token_4', '2023-08-11 13:30:00'),
-    ('session5', 5, 'access_token_5', 'refresh_token_5', '2023-08-11 14:00:00'),
-    ('session6', 6, 'access_token_6', 'refresh_token_6', '2023-08-11 14:30:00'),
-    ('session7', 7, 'access_token_7', 'refresh_token_7', '2023-08-11 15:00:00'),
-    ('session8', 8, 'access_token_8', 'refresh_token_8', '2023-08-11 15:30:00'),
-    ('session9', 9, 'access_token_9', 'refresh_token_9', '2023-08-11 16:00:00'),
-    ('session10', 10, 'access_token_10', 'refresh_token_10', '2023-08-11 16:30:00');
+    ('session_id1', 1, 'access_token1', 'refresh_token1', '2023-12-31 23:59:59'),
+    ('session_id2', 2, 'access_token2', 'refresh_token2', '2023-12-31 23:59:59'),
+    ('session_id3', 3, 'access_token3', 'refresh_token3', '2023-12-31 23:59:59'),
+    ('session_id4', 4, 'access_token4', 'refresh_token4', '2023-12-31 23:59:59'),
+    ('session_id5', 5, 'access_token5', 'refresh_token5', '2023-12-31 23:59:59'),
+    ('session_id6', 6, 'access_token6', 'refresh_token6', '2023-12-31 23:59:59'),
+    ('session_id7', 7, 'access_token7', 'refresh_token7', '2023-12-31 23:59:59'),
+    ('session_id8', 8, 'access_token8', 'refresh_token8', '2023-12-31 23:59:59'),
+    ('session_id9', 9, 'access_token9', 'refresh_token9', '2023-12-31 23:59:59'),
+    ('session_id10', 10, 'access_token10', 'refresh_token10', '2023-12-31 23:59:59');
 
 -- rooms テーブルのダミーデータ
-INSERT INTO rooms (name, owner_id, max_capacity, status, last_activity)
+INSERT INTO rooms (name, owner_id, max_capacity, status)
 VALUES
-    ('部屋1', 1, 10, 'active', '2023-08-11 12:00:00'),
-    ('部屋2', 2, 10, 'active', '2023-08-11 12:30:00'),
-    ('部屋3', 3, 15, 'active', '2023-08-11 13:00:00'),
-    ('部屋4', 4, 15, 'active', '2023-08-11 13:30:00'),
-    ('部屋5', 5, 20, 'inactive', '2023-08-11 14:00:00'),
-    ('部屋6', 6, 20, 'inactive', '2023-08-11 14:30:00'),
-    ('部屋7', 7, 10, 'active', '2023-08-11 15:00:00'),
-    ('部屋8', 8, 10, 'active', '2023-08-11 15:30:00'),
-    ('部屋9', 9, 15, 'active', '2023-08-11 16:00:00'),
-    ('部屋10', 10, 15, 'active', '2023-08-11 16:30:00');
-
+    ('Room 1', 1, 10, 'active'),
+    ('Room 2', 2, 15, 'inactive'),
+    ('Room 3', 3, 20, 'active'),
+    ('Room 4', 4, 10, 'active'),
+    ('Room 5', 5, 10, 'inactive'),
+    ('Room 6', 6, 20, 'active'),
+    ('Room 7', 7, 15, 'active'),
+    ('Room 8', 8, 15, 'inactive'),
+    ('Room 9', 9, 20, 'active'),
+    ('Room 10', 10, 10, 'active');
 
 -- room_members テーブルのダミーデータ
-INSERT INTO room_members (room_id, user_id, joined_at)
+INSERT INTO room_members (room_id, user_id)
 VALUES
-    (1, 1, '2023-08-11 12:00:00'),
-    (1, 2, '2023-08-11 12:05:00'),
-    (1, 3, '2023-08-11 12:10:00'),
-    (2, 2, '2023-08-11 12:30:00'),
-    (2, 3, '2023-08-11 12:35:00'),
-    (3, 1, '2023-08-11 13:00:00'),
-    (3, 3, '2023-08-11 13:05:00'),
-    (3, 5, '2023-08-11 13:10:00'),
-    (4, 4, '2023-08-11 13:30:00'),
-    (5, 5, '2023-08-11 14:00:00');
+    (1, 1),
+    (1, 2),
+    (2, 2),
+    (3, 3),
+    (3, 4),
+    (4, 5),
+    (5, 6),
+    (6, 7),
+    (6, 8),
+    (7, 9);
 
 -- messages テーブルのダミーデータ
-INSERT INTO messages (room_id, sender_id, content, sent_at)
+INSERT INTO messages (room_id, sender_id, content, toxicity)
 VALUES
-    (1, 1, 'こんにちは！', '2023-08-11 12:01:00'),
-    (1, 2, 'やあ、元気？', '2023-08-11 12:03:00'),
-    (1, 1, '元気だよ！', '2023-08-11 12:06:00'),
-    (2, 2, 'この部屋楽しいね', '2023-08-11 12:31:00'),
-    (2, 3, '本当だ！', '2023-08-11 12:32:00'),
-    (3, 1, 'みんなおはよう！', '2023-08-11 13:02:00'),
-    (3, 3, 'おはよう！', '2023-08-11 13:04:00'),
-    (4, 4, '今日の天気はどうかな？', '2023-08-11 13:32:00'),
-    (5, 5, 'みんな元気かな', '2023-08-11 14:03:00'),
-    (5, 4, '元気だよ！', '2023-08-11 14:05:00');
+    (1, 1, 'こんにちは！', 0),
+    (1, 2, '元気ですか？', 0),
+    (2, 2, '今日の宿題、難しいなあ', 0),
+    (2, 3, 'うん、私もわからない', 0),
+    (3, 4, 'どなたか、私にチャットして！', 0),
+    (3, 5, '私も待ってました！', 0),
+    (4, 6, '誰か部屋に来てー', 0),
+    (4, 7, '私もこっち！', 0),
+    (5, 8, '暇な人いる？', 0),
+    (5, 9, '私も暇！', 0);
 
 -- blocked_users テーブルのダミーデータ
 INSERT INTO blocked_users (blocking_user_id, blocked_user_id)
 VALUES
     (1, 2),
-    (1, 3),
-    (2, 3),
-    (3, 5),
-    (4, 5),
-    (5, 1),
-    (5, 2),
-    (5, 3),
-    (5, 4),
-    (5, 6);
+    (2, 1),
+    (3, 4),
+    (4, 3),
+    (5, 6),
+    (6, 5),
+    (7, 8),
+    (8, 7),
+    (9, 10),
+    (10, 9);
 
 -- images テーブルのダミーデータ
-INSERT INTO images (room_id, sender_id, image_url, timestamp)
+INSERT INTO images (room_id, sender_id, image_url)
 VALUES
-    (1, 1, 'image_url_1.jpg', '2023-08-11 12:02:00'),
-    (1, 2, 'image_url_2.jpg', '2023-08-11 12:04:00'),
-    (2, 2, 'image_url_3.jpg', '2023-08-11 12:32:00'),
-    (3, 1, 'image_url_4.jpg', '2023-08-11 13:03:00'),
-    (3, 3, 'image_url_5.jpg', '2023-08-11 13:05:00'),
-    (4, 4, 'image_url_6.jpg', '2023-08-11 13:33:00'),
-    (5, 5, 'image_url_7.jpg', '2023-08-11 14:04:00'),
-    (5, 4, 'image_url_8.jpg', '2023-08-11 14:06:00'),
-    (6, 6, 'image_url_9.jpg', '2023-08-11 14:34:00'),
-    (7, 7, 'image_url_10.jpg', '2023-08-11 15:01:00');
+    (1, 1, 'image1.jpg'),
+    (1, 2, 'image2.jpg'),
+    (2, 3, 'image3.jpg'),
+    (3, 4, 'image4.jpg'),
+    (4, 5, 'image5.jpg'),
+    (5, 6, 'image6.jpg'),
+    (6, 7, 'image7.jpg'),
+    (7, 8, 'image8.jpg'),
+    (8, 9, 'image9.jpg'),
+    (9, 10, 'image10.jpg');
 
 -- spam_users テーブルのダミーデータ
-INSERT INTO spam_users (user_id, spam_points, last_spam_activity)
+INSERT INTO spam_users (user_id, spam_points)
 VALUES
-    (1, 3, '2023-08-10 15:00:00'),
-    (2, 5, '2023-08-10 16:00:00'),
-    (3, 2, '2023-08-10 17:00:00'),
-    (4, 7, '2023-08-10 18:00:00'),
-    (5, 10, '2023-08-10 19:00:00'),
-    (6, 1, '2023-08-10 20:00:00'),
-    (7, 4, '2023-08-10 21:00:00'),
-    (8, 8, '2023-08-10 22:00:00'),
-    (9, 6, '2023-08-10 23:00:00'),
-    (10, 9, '2023-08-11 00:00:00');
+    (1, 5),
+    (2, 2),
+    (3, 10),
+    (4, 3),
+    (5, 7),
+    (6, 1),
+    (7, 8),
+    (8, 6),
+    (9, 4),
+    (10, 9);
 
 -- banned_users テーブルのダミーデータ
-INSERT INTO banned_users (user_id, ban_start_date, ban_end_date)
+INSERT INTO banned_users (user_id, ban_end_date)
 VALUES
-    (5, '2023-08-11 14:00:00', '2023-08-12 14:00:00'),
-    (8, '2023-08-11 15:00:00', '2023-08-13 15:00:00');
+    (3, '2023-08-31 23:59:59'),
+    (7, '2023-09-15 23:59:59'),
+    (10, '2023-08-25 23:59:59'),
+    (2, '2023-09-01 23:59:59'),
+    (5, '2023-08-28 23:59:59'),
+    (8, '2023-08-30 23:59:59'),
+    (4, '2023-09-05 23:59:59'),
+    (9, '2023-09-10 23:59:59'),
+    (6, '2023-09-20 23:59:59'),
+    (1, '2023-08-23 23:59:59');
 
 -- spam_messages テーブルのダミーデータ
-INSERT INTO spam_messages (user_id, message, timestamp)
+INSERT INTO spam_messages (user_id, spam_type, message)
 VALUES
-    (3, 'スパムメッセージ1', '2023-08-10 16:00:00'),
-    (5, 'スパムメッセージ2', '2023-08-10 17:00:00'),
-    (4, 'スパムメッセージ3', '2023-08-10 18:00:00'),
-    (7, 'スパムメッセージ4', '2023-08-10 19:00:00'),
-    (2, 'スパムメッセージ5', '2023-08-10 20:00:00'),
-    (6, 'スパムメッセージ6', '2023-08-10 21:00:00'),
-    (10, 'スパムメッセージ7', '2023-08-11 00:00:00');
+    (1, 1, 'これはスパムじゃないよ！'),
+    (2, 2, 'お腹がすいた…'),
+    (3, 1, '無料ゲームをプレイしよう！'),
+    (4, 2, 'これは重要な情報です！'),
+    (5, 1, 'おめでとう、あなたは当選者です！'),
+    (6, 2, 'こんばんは'),
+    (7, 1, 'クリックして10000ドルを手に入れよう！'),
+    (8, 2, '明日の天気は晴れ！'),
+    (9, 1, 'あなたのパスワードは漏れています！'),
+    (10, 2, '新商品のお知らせ');
 
 ```
 
