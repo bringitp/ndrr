@@ -4,7 +4,6 @@ import os
 # 例: PATH環境変数を取得
 client_secret = os.environ.get('client_secret')
 
-# Keycloakの設定
 keycloak_base_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
 client_id = "python-client"
@@ -30,7 +29,6 @@ if response.status_code == 200:
 else:
     print("Failed to retrieve access token. Status code:", response.status_code)
     print("Response:", response.text)
-
 
 import jwt
 import requests

@@ -72,8 +72,7 @@ def get_db_settings():
 
 # データベースエンジンとセッションを作成する関数
 def create_db_engine_and_session():
-    dbserver = get_db_settings()
-    engine = create_engine(dbserver)
+    engine = create_engine(get_dbserver_config())
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
     return engine, SessionLocal, declarative_base()
 

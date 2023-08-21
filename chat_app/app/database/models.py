@@ -6,30 +6,64 @@ from sqlalchemy import text
 
 Base = declarative_base()
 
-class User(Base):
-    __tablename__ = 'users'
+class BlockedUser(Base):
+    __tablename__ = 'blocked_users'
+    
+    block_id = Column(Integer, primary_key=True)
+    blocking_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    blocked_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    
+    blocking_user = relationship("User", back_populates="blocked_users", foreign_keys=[blocking_user_id])
+    blocked_user = relationship("User", back_populates="blocked_by_users", foreign_keys=[blocked_user_id])
+
+class Room(Base):
+    __tablename__ = 'rooms'
     
     id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    max_capacity = Column(Integer, nullable=False, default=20)
+    status = Column(Enum('active', 'inactive'), nullable=False, default='active')
+    last_activity = Column(TIMESTAMP, nullable=False)
+    
+    owner = relationship("User", back_populates="owned_rooms", foreign_keys=[owner_id])
+    room_members = relationship("RoomMember", back_populates="room")
+    messages = relationship("Message", back_populates="room")
+    images = relationship("Image", back_populates="room")
+
+class User(Base):
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     sub = Column(String(100), unique=True, nullable=False)
     avatar = Column(String(100))
     trip = Column(String(32), nullable=False)
     karma = Column(Integer, nullable=False)
-    created_at = Column(TIMESTAMP, nullable=False)
-    lastlogin_at = Column(TIMESTAMP, nullable=False)
-    lastlogout_at = Column(TIMESTAMP, nullable=False)
-    privilege = Column(Enum('user', 'premium'), nullable=False, default='user')
-    ng_list = Column(Text)
-    
-    sessions = relationship("UserSession", back_populates="user")
+    spam_activity_score = Column(Integer, nullable=False)
+    created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    lastlogin_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    lastlogout_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
+    privilege = Column(Enum('user', 'premium', name='privilege_enum'), nullable=False, default='user')
+    ng_user_list = Column(Text)
+
+
+    owned_rooms = relationship("Room", back_populates="owner", foreign_keys=[Room.owner_id])
     room_memberships = relationship("RoomMember", back_populates="user")
+
+    sessions = relationship("UserSession", back_populates="user")
     sent_messages = relationship("Message", back_populates="sender")
-    blocked_users = relationship("BlockedUser", back_populates="blocking_user")
-    blocked_by_users = relationship("BlockedUser", back_populates="blocked_user")
+    blocked_by_users = relationship("BlockedUser", back_populates="blocking_user", foreign_keys="[BlockedUser.blocking_user_id]")
+    room_memberships = relationship("RoomMember", back_populates="user")
     images = relationship("Image", back_populates="sender")
     spam_users = relationship("SpamUser", back_populates="user")
+    # blocked_usersの関連定義にforeign_keys引数を追加
+    blocked_users = relationship("BlockedUser", back_populates="blocked_user", foreign_keys="[BlockedUser.blocked_user_id]")    
     banned_users = relationship("BannedUser", back_populates="user")
     spam_messages = relationship("SpamMessage", back_populates="user")
+    suspicious_messages = relationship("SuspiciousMessage", back_populates="user")  # ここに関連性を追加
+
+
 
 class UserSession(Base):
     __tablename__ = 'user_sessions'
@@ -42,20 +76,7 @@ class UserSession(Base):
     
     user = relationship("User", back_populates="sessions")
 
-class Room(Base):
-    __tablename__ = 'rooms'
-    
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), nullable=False)
-    owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    max_capacity = Column(Integer, nullable=False, default=20)
-    status = Column(Enum('active', 'inactive'), nullable=False, default='active')
-    last_activity = Column(TIMESTAMP, nullable=False)
-    
-    owner = relationship("User", back_populates="room_memberships")
-    room_members = relationship("RoomMember", back_populates="room")
-    messages = relationship("Message", back_populates="room")
-    images = relationship("Image", back_populates="room")
+
 
 class RoomMember(Base):
     __tablename__ = 'room_members'
@@ -81,15 +102,7 @@ class Message(Base):
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_messages")
 
-class BlockedUser(Base):
-    __tablename__ = 'blocked_users'
-    
-    block_id = Column(Integer, primary_key=True)
-    blocking_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    blocked_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    
-    blocking_user = relationship("User", back_populates="blocked_users", foreign_keys=[blocking_user_id])
-    blocked_user = relationship("User", back_populates="blocked_by_users", foreign_keys=[blocked_user_id])
+
 
 class Image(Base):
     __tablename__ = 'images'
@@ -143,6 +156,6 @@ class SuspiciousMessage(Base):
     message = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     
-    user = relationship("User", back_populates="suspicious_messages")   
+    user = relationship("User", back_populates="suspicious_messages")
 
 # SQLAlchemyのエンジンを作成してデータベースに接続

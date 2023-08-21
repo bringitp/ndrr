@@ -1,16 +1,16 @@
 -- users テーブルのダミーデータ
-INSERT INTO users (username, sub, avatar, trip, karma, created_at, lastlogin_at, lastlogout_at, privilege, ng_list)
+INSERT INTO users (username, sub, avatar, trip, karma, spam_activity_score, ng_user_list)
 VALUES
-    ('user1', 'sub1', 'avatar1.jpg', 'trip1', 100, '2023-08-21 12:00:00', '2023-08-21 12:00:00', '2023-08-21 12:00:00', 'user', NULL),
-    ('user2', 'sub2', 'avatar2.jpg', 'trip2', 150, '2023-08-21 13:00:00', '2023-08-21 13:00:00', '2023-08-21 13:00:00', 'user', NULL),
-    ('user3', 'sub3', 'avatar3.jpg', 'trip3', 200, '2023-08-21 14:00:00', '2023-08-21 14:00:00', '2023-08-21 14:00:00', 'user', NULL),
-    ('user4', 'sub4', 'avatar4.jpg', 'trip4', 50, '2023-08-21 15:00:00', '2023-08-21 15:00:00', '2023-08-21 15:00:00', 'user', NULL),
-    ('premiumuser1', 'sub5', 'avatar5.jpg', 'trip5', 300, '2023-08-21 16:00:00', '2023-08-21 16:00:00', '2023-08-21 16:00:00', 'premium', NULL),
-    ('premiumuser2', 'sub6', 'avatar6.jpg', 'trip6', 500, '2023-08-21 17:00:00', '2023-08-21 17:00:00', '2023-08-21 17:00:00', 'premium', NULL),
-    ('user5', 'sub7', 'avatar7.jpg', 'trip7', 120, '2023-08-21 18:00:00', '2023-08-21 18:00:00', '2023-08-21 18:00:00', 'user', NULL),
-    ('premiumuser3', 'sub8', 'avatar8.jpg', 'trip8', 250, '2023-08-21 19:00:00', '2023-08-21 19:00:00', '2023-08-21 19:00:00', 'premium', NULL),
-    ('user6', 'sub9', 'avatar9.jpg', 'trip9', 80, '2023-08-21 20:00:00', '2023-08-21 20:00:00', '2023-08-21 20:00:00', 'user', NULL),
-    ('user7', 'sub10', 'avatar10.jpg', 'trip10', 70, '2023-08-21 21:00:00', '2023-08-21 21:00:00', '2023-08-21 21:00:00', 'user', NULL);
+    ('user_zero', '2aca956a-c4f0-4af7-b78f-ab33e7a6ea13', 'avatar1.jpg', 'trip123', 50, 3, '["spam", "baduser"]'),
+    ('user2', 'sub2', 'avatar2.jpg', 'trip456', 75, 1, NULL),
+    ('user3', 'sub3', 'avatar3.jpg', 'trip789', 90, 5, '["block", "report"]'),
+    ('user4', 'sub4', 'avatar4.jpg', 'tripabc', 30, 8, NULL),
+    ('user5', 'sub5', 'avatar5.jpg', 'tripxyz', 20, 2, '["spam", "annoying"]'),
+    ('user6', 'sub6', 'avatar6.jpg', 'trip123', 10, 4, NULL),
+    ('user7', 'sub7', 'avatar7.jpg', 'trip456', 65, 6, '["block", "inappropriate"]'),
+    ('user8', 'sub8', 'avatar8.jpg', 'trip789', 40, 7, NULL),
+    ('user9', 'sub9', 'avatar9.jpg', 'tripabc', 55, 9, '["spam", "rude"]'),
+    ('user10', 'sub10', 'avatar10.jpg', 'tripxyz', 70, 0, '["block", "annoying"]');
 
 
 -- user_sessions テーブルのダミーデータ
