@@ -23,8 +23,10 @@ class Room(Base):
     name = Column(String(50), nullable=False)
     owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     max_capacity = Column(Integer, nullable=False, default=20)
+    restricted_level_by_karma = Column(Integer, nullable=False, default=50)
     status = Column(Enum('active', 'inactive'), nullable=False, default='active')
     last_activity = Column(TIMESTAMP, nullable=False)
+
     
     owner = relationship("User", back_populates="owned_rooms", foreign_keys=[owner_id])
     room_members = relationship("RoomMember", back_populates="room")
@@ -38,6 +40,7 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False)
     sub = Column(String(100), unique=True, nullable=False)
     avatar = Column(String(100))
+    profile = Column(String(200))
     trip = Column(String(32), nullable=False)
     karma = Column(Integer, nullable=False)
     spam_activity_score = Column(Integer, nullable=False)
