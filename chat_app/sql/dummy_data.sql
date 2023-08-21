@@ -30,7 +30,7 @@ VALUES
 -- rooms テーブルのダミーデータ
 INSERT INTO rooms (name, owner_id,restricted_level_by_karma, max_capacity, status, last_activity)
 VALUES
-    ('Room 1', 1, 50,10, 'active', '2023-08-21 12:00:00'),
+    ('🐟超ふつうなお部屋', 1, 50,10, 'active', '2023-08-21 12:00:00'),
     ('Room 2', 2, 50, 15, 'active', '2023-08-21 13:00:00'),
     ('Room 3', 3, 50, 8, 'active', '2023-08-21 14:00:00'),
     ('Room 4', 4, 50, 25, 'active', '2023-08-21 15:00:00'),

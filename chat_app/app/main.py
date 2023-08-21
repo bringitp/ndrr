@@ -54,7 +54,7 @@ def get_current_user(Authorization: str = Header(None)) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
-@app.get("/rooms/{room_id}/messages", response_model=Dict[str, Any])
+@app.get("/rooms/{room_id}/messages", response_model=Dict[str, Any] )
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 10,
     login_user: LoginUser = Depends(get_current_user)
