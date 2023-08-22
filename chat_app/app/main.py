@@ -46,7 +46,7 @@ def get_current_user(Authorization: str = Header(None)) -> User:
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
     
     db = SessionLocal()
     user = db.query(User).filter(User.sub == sub).first()
