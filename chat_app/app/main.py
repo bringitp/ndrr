@@ -14,6 +14,12 @@ engine, SessionLocal, Base = create_db_engine_and_session()
 keycloak_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
 
+jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
+response = requests.get(jwks_url)
+jwks_data = response.json()
+#public_key_data=jwks_data['keys'][1]
+public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
+
 class UserToken:
     sub: str
 
@@ -33,11 +39,11 @@ def get_current_user(Authorization: str = Header(None)) -> User:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
 
         options = {"verify_signature": True, "verify_aud": False, "exp": True}
-        jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
-        response = requests.get(jwks_url)
-        jwks_data = response.json()
+        #jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
+        #response = requests.get(jwks_url)
+        #jwks_data = response.json()
         token_bytes = token_string.encode('utf-8')
-        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
+        #public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
         payload = jwt.decode(token_bytes, public_key, algorithms=["RS256"], options=options)
         sub: str = payload.get("sub")
         if sub is None:
