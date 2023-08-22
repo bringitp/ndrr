@@ -1,13 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends, Header,status
+from fastapi import FastAPI, HTTPException, Depends, Header, status
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session
-from chat_app.app.database.models import Message, User,Room
-from typing import List,Dict,Any
+from chat_app.app.database.models import Message, User, Room
+from typing import List, Dict, Any
 from jose import jwt
 import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 import requests
-import os
 
 app = FastAPI()
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -17,7 +16,6 @@ realm = "ndrr"
 jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 response = requests.get(jwks_url)
 jwks_data = response.json()
-#public_key_data=jwks_data['keys'][1]
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
 
 class UserToken:
@@ -38,64 +36,47 @@ def get_current_user(Authorization: str = Header(None)) -> User:
         if bearer != "Bearer":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
 
-        options = {"verify_signature": True, "verify_aud": False, "exp": True}
-        #jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
-        #response = requests.get(jwks_url)
-        #jwks_data = response.json()
-        token_bytes = token_string.encode('utf-8')
-        #public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
-        payload = jwt.decode(token_bytes, public_key, algorithms=["RS256"], options=options)
-        sub: str = payload.get("sub")
-        if sub is None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
+        sub = validate_token(token_string)
 
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
-    
+
     db = SessionLocal()
+    user = get_user_by_sub(sub, db)
+    return user
+
+def validate_token(token_string: str) -> str:
+    options = {"verify_signature": True, "verify_aud": False, "exp": True}
+    token_bytes = token_string.encode('utf-8')
+    payload = jwt.decode(token_bytes, public_key, algorithms=["RS256"], options=options)
+    sub: str = payload.get("sub")
+    if sub is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
+    return sub
+
+def get_user_by_sub(sub: str, db: Session) -> User:
     user = db.query(User).filter(User.sub == sub).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
-
-    restricted_karma_over_limit = Column(Integer, nullable=True, default=0)
-    restricted_karma_under_limit = Column(Integer, nullable=True, default=0)
-    lux = Column(Integer, nullable=True, default=0)
-
-
-@app.get("/rooms/{room_id}/messages", response_model=Dict[str, Any] )
+@app.get("/rooms/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 10,
     login_user: LoginUser = Depends(get_current_user)
 ):
-
     db = SessionLocal()
-    room = db.query(Room).filter(Room.id == room_id).offset(skip).limit(limit).first()
-    response_data = {
-        "room" : {
-            "room_id": room.id,
-            "room_label" : room.label,
-            "room_name": room.name,
-            "room_owner_id": room.owner_id,
-            "room_max_capacity" : room.max_capacity ,
-            "room_label" : room.label,
-            "room_restricted_karma_over_limit" : room.restricted_karma_over_limit,
-            "room_restricted_karma_under_limit" : room.restricted_karma_under_limit,
-            "room_lux" : room.lux,
-        } ,
-        "messages" : []
-    }
-
+    
+    room = db.query(Room).filter(Room.id == room_id).first()
     if room is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    if room.restricted_karma_over_limit  <  login_user.karma and room.restricted_karma_over_limit != 0:
+    if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
 
-    if room.restricted_karma_under_limit  <  login_user.karma and room.restricted_karma_under_limit != 0:
+    if room.restricted_karma_under_limit < login_user.karma and room.restricted_karma_under_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
     messages = (
@@ -105,6 +86,20 @@ async def get_room_messages(
         .limit(limit)
         .all()
     )
+
+    response_data = {
+        "room": {
+            "room_id": room.id,
+            "room_label": room.label,
+            "room_name": room.name,
+            "room_owner_id": room.owner_id,
+            "room_max_capacity": room.max_capacity,
+            "room_restricted_karma_over_limit": room.restricted_karma_over_limit,
+            "room_restricted_karma_under_limit": room.restricted_karma_under_limit,
+            "room_lux": room.lux,
+        },
+        "messages": []
+    }
 
     for message in messages:
         sender = db.query(User).filter(User.id == message.sender_id).first()
@@ -119,7 +114,7 @@ async def get_room_messages(
                 "karma": sender.karma,
                 "profile": sender.profile
             },
-        }      
+        }
         response_data["messages"].append(message_data)
 
     return response_data
