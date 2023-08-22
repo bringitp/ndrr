@@ -1,7 +1,7 @@
 -- users テーブルのダミーデータ
 INSERT INTO users (username, sub, life,avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
 VALUES
-    ('user_zero', '2aca956a-c4f0-4af7-b78f-ab33e7a6ea13', 10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
+    ('user_zero', '37475cba-f8a7-47f3-adb9-75ca09c1afa4', 10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
     ('user2', 'sub2', 10, 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
     ('user3', 'sub3', 10, 'avatar3.jpg', 'エペ募集','trip789', 90, 5, '["block", "report"]'),
     ('user4', 'sub4', 10, 'avatar4.jpg', '旅行好きなひと〜','tripabc', 30, 8, NULL),

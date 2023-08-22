@@ -37,7 +37,7 @@ def get_current_user(Authorization: str = Header(None)) -> User:
         response = requests.get(jwks_url)
         jwks_data = response.json()
         token_bytes = token_string.encode('utf-8')
-        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
         payload = jwt.decode(token_bytes, public_key, algorithms=["RS256"], options=options)
         sub: str = payload.get("sub")
         if sub is None:
@@ -45,7 +45,7 @@ def get_current_user(Authorization: str = Header(None)) -> User:
 
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except jwt.JWTError:
+    except Exception as e:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
     
     db = SessionLocal()

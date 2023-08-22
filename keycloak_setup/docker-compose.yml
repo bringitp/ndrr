@@ -1,25 +1,28 @@
+  GNU nano 6.2                                                                                                                   docker-compose.yml                                                                                                                            
 version: '3.8'
 services:
   mysql:
     image: mysql:8.0
     environment:
-      MYSQL_ROOT_PASSWORD: LocalDev5.
+      MYSQL_ROOT_PASSWORD: DevDev5.
       MYSQL_DATABASE: keycloak
     ports:
       - "3307:3306"
+    volumes:
+      - mysql_data:/root/mysql   # Volume for data persistence
     networks:
       - keycloak-network
   keycloak:
     image: quay.io/keycloak/keycloak:22.0.0
     environment:
       KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN_PASSWORD: hilite
       DB_VENDOR: MYSQL
       DB_ADDR: mysql
       DB_PORT: 3306
       DB_DATABASE: keycloak
       DB_USER: root
-      DB_PASSWORD: LocalDev5.
+      DB_PASSWORD: DevDev5.
     ports:
       - "8180:8180"
     command: start-dev --http-port 8180 --http-relative-path /auth --proxy=reencrypt
@@ -29,4 +32,7 @@ services:
 networks:
   keycloak-network:
     driver: bridge
+
+volumes:
+  mysql_data:  # Define the named volume
 
