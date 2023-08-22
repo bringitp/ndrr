@@ -1,1 +1,1 @@
-python ./chat_app/app/database/insert_dummy_data.py 
+python3 ./chat_app/app/database/insert_dummy_data.py 

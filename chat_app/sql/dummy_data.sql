@@ -1,16 +1,16 @@
 -- users テーブルのダミーデータ
-INSERT INTO users (username, sub, avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
+INSERT INTO users (username, sub, life,avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
 VALUES
-    ('user_zero', '2aca956a-c4f0-4af7-b78f-ab33e7a6ea13', 'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
-    ('user2', 'sub2', 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
-    ('user3', 'sub3', 'avatar3.jpg', 'エペ募集','trip789', 90, 5, '["block", "report"]'),
-    ('user4', 'sub4', 'avatar4.jpg', '旅行好きなひと〜','tripabc', 30, 8, NULL),
-    ('user5', 'sub5', 'avatar5.jpg', '使いこなせないけどコスメ買い漁りたい','tripxyz', 20, 2, '["spam", "annoying"]'),
-    ('user6', 'sub6', 'avatar6.jpg', '頭痛い。。。','trip123', 10, 4, NULL),
-    ('user7', 'sub7', 'avatar7.jpg', 'ねむねむ','trip456', 65, 6, '["block", "inappropriate"]'),
-    ('user8', 'sub8', 'avatar8.jpg', '(*´ω`*)','trip789', 40, 7, NULL),
-    ('user9', 'sub9', 'avatar9.jpg', '仕事でやらかした。ついてないな','tripabc', 55, 9, '["spam", "rude"]'),
-    ('user10', 'sub10', 'avatar10.jpg', '正しい希望は正しい絶望から','tripxyz', 70, 0, '["block", "annoying"]');
+    ('user_zero', '2aca956a-c4f0-4af7-b78f-ab33e7a6ea13', 10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
+    ('user2', 'sub2', 10, 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
+    ('user3', 'sub3', 10, 'avatar3.jpg', 'エペ募集','trip789', 90, 5, '["block", "report"]'),
+    ('user4', 'sub4', 10, 'avatar4.jpg', '旅行好きなひと〜','tripabc', 30, 8, NULL),
+    ('user5', 'sub5', 10, 'avatar5.jpg', '使いこなせないけどコスメ買い漁りたい','tripxyz', 20, 2, '["spam", "annoying"]'),
+    ('user6', 'sub6', 10, 'avatar6.jpg', '頭痛い。。。','trip123', 10, 4, NULL),
+    ('user7', 'sub7', 10, 'avatar7.jpg', 'ねむねむ','trip456', 65, 6, '["block", "inappropriate"]'),
+    ('user8', 'sub8', 10, 'avatar8.jpg', '(*´ω`*)','trip789', 40, 7, NULL),
+    ('user9', 'sub9', 10, 'avatar9.jpg', '仕事でやらかした。ついてないな','tripabc', 55, 9, '["spam", "rude"]'),
+    ('user10', 'sub10', 10, 'avatar10.jpg', '正しい希望は正しい絶望から','tripxyz', 70, 0, '["block", "annoying"]');
 
 
 -- user_sessions テーブルのダミーデータ
@@ -28,18 +28,20 @@ VALUES
     ('session_id10', 10, 'access_token10', 'refresh_token10', '2023-12-31 23:59:59');
 
 -- rooms テーブルのダミーデータ
-INSERT INTO rooms (name, owner_id,restricted_level_by_karma, max_capacity, status, last_activity)
+
+
+INSERT INTO rooms (name, label,owner_id,max_capacity  ,restricted_karma_over_limit, restricted_karma_under_limit,lux, status, last_activity)
 VALUES
-    ('🐟超ふつうなお部屋', 1, 50,10, 'active', '2023-08-21 12:00:00'),
-    ('Room 2', 2, 50, 15, 'active', '2023-08-21 13:00:00'),
-    ('Room 3', 3, 50, 8, 'active', '2023-08-21 14:00:00'),
-    ('Room 4', 4, 50, 25, 'active', '2023-08-21 15:00:00'),
-    ('Room 5', 5, 50, 12, 'inactive', '2023-08-21 16:00:00'),
-    ('Room 6', 6, 50, 18, 'active', '2023-08-21 17:00:00'),
-    ('Room 7', 7, 50, 30, 'inactive', '2023-08-21 18:00:00'),
-    ('Room 8', 8, 50, 20, 'active', '2023-08-21 19:00:00'),
-    ('Room 9', 9, 50, 10, 'inactive', '2023-08-21 20:00:00'),
-    ('Room 10', 10, 50, 15, 'active', '2023-08-21 21:00:00');
+    ('🐟超ふつうなお部屋','🌽' ,1,20, 0,0,0, 'active', '2023-08-21 12:00:00'),
+    ('お盆休み','( ˘ω˘)ｽﾔｧ' ,2,20, 0,0,0 , 'active', '2023-08-21 13:00:00'),
+    ('Room 3','さわやか', 3,20, 0,0,0 , 'active', '2023-08-21 14:00:00'),
+    ('Room 4','🐟超ふつうなお部屋', 4,20, 0,0,0 , 'active', '2023-08-21 15:00:00'),
+    ('Room 5','🐟超ふつうなお部屋', 5,20, 0,0,0 , 'inactive', '2023-08-21 16:00:00'),
+    ('Room 6','🐟超ふつうなお部屋', 6,20, 0,0,0 , 'active', '2023-08-21 17:00:00'),
+    ('Room 7','🐟超ふつうなお部屋', 7,20, 0,0,0 , 'inactive', '2023-08-21 18:00:00'),
+    ('Room 8','🐟超ふつうなお部屋', 8,20, 0,0,0 , 'active', '2023-08-21 19:00:00'),
+    ('Room 9','🐟超ふつうなお部屋' ,9,20, 0,0,0 , 'inactive', '2023-08-21 20:00:00'),
+    ('Room 10','🐟超ふつうなお部屋' ,10,20, 0,0,0, 'active', '2023-08-21 21:00:00');
 -- room_members テーブルのダミーデータ
 INSERT INTO room_members (room_id, user_id, joined_at)
 VALUES

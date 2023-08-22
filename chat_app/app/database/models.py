@@ -16,14 +16,20 @@ class BlockedUser(Base):
     blocking_user = relationship("User", back_populates="blocked_users", foreign_keys=[blocking_user_id])
     blocked_user = relationship("User", back_populates="blocked_by_users", foreign_keys=[blocked_user_id])
 
+
+
 class Room(Base):
     __tablename__ = 'rooms'
     
     id = Column(Integer, primary_key=True)
     name = Column(String(50), nullable=False)
+    label = Column(String(300), nullable=True)
     owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     max_capacity = Column(Integer, nullable=False, default=20)
-    restricted_level_by_karma = Column(Integer, nullable=False, default=50)
+    restricted_karma_over_limit = Column(Integer, nullable=True, default=0)
+    restricted_karma_under_limit = Column(Integer, nullable=True, default=0)
+    lux = Column(Integer, nullable=True, default=0)
+
     status = Column(Enum('active', 'inactive'), nullable=False, default='active')
     last_activity = Column(TIMESTAMP, nullable=False)
 
@@ -43,6 +49,7 @@ class User(Base):
     profile = Column(String(200))
     trip = Column(String(32), nullable=False)
     karma = Column(Integer, nullable=False)
+    life = Column(Integer, nullable=False)
     spam_activity_score = Column(Integer, nullable=False)
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogin_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())

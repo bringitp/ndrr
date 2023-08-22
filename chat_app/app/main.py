@@ -54,6 +54,12 @@ def get_current_user(Authorization: str = Header(None)) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
+
+    restricted_karma_over_limit = Column(Integer, nullable=True, default=0)
+    restricted_karma_under_limit = Column(Integer, nullable=True, default=0)
+    lux = Column(Integer, nullable=True, default=0)
+
+
 @app.get("/rooms/{room_id}/messages", response_model=Dict[str, Any] )
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 10,
@@ -65,10 +71,14 @@ async def get_room_messages(
     response_data = {
         "room" : {
             "room_id": room.id,
+            "room_label" : room.label,
             "room_name": room.name,
             "room_owner_id": room.owner_id,
             "room_max_capacity" : room.max_capacity ,
-            "room_restricted_level_by_karma" : room.restricted_level_by_karma 
+            "room_label" : room.label,
+            "room_restricted_karma_over_limit" : room.restricted_karma_over_limit,
+            "room_restricted_karma_under_limit" : room.restricted_karma_under_limit,
+            "room_lux" : room.lux,
         } ,
         "messages" : []
     }
@@ -76,8 +86,11 @@ async def get_room_messages(
     if room is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    if room.restricted_level_by_karma  > login_user.karma:
+    if room.restricted_karma_over_limit  <  login_user.karma and room.restricted_karma_over_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+
+    if room.restricted_karma_under_limit  <  login_user.karma and room.restricted_karma_under_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
     messages = (
         db.query(Message)
