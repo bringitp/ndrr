@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends,Form
+from fastapi import Request, HTTPException
 from typing import List
 from fastapi import FastAPI, HTTPException, Depends, Header, status
 from sqlalchemy.orm import Session
@@ -9,6 +10,8 @@ from jose import jwt
 import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError
 import requests
+from typing import Optional
+from datetime import datetime
 
 app = FastAPI()
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -123,3 +126,56 @@ async def get_room_messages(
         response_data["messages"].append(message_data)
 
     return response_data
+
+
+
+
+@router.post("/rooms/{room_id}/messages", response_model=Dict[str, Any])
+async def create_room_message(
+    room_id: int, 
+    request: Request,
+    login_user: LoginUser = Depends(get_current_user)
+):
+
+    data = await request.json()
+    message_content = data.get("message_content")
+    if message_content is None:
+        raise HTTPException(status_code=422, detail="message_content is required")
+
+
+    print (message_content)
+    db = SessionLocal()
+
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if room is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+    if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+
+    if room.restricted_karma_under_limit < login_user.karma and room.restricted_karma_under_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+
+    new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000,sent_at=datetime.now())
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+
+    response_data = {
+        "room_id": room.id,
+        "message_id": new_message.id,
+        "content": new_message.content,
+        "sent_at": new_message.sent_at,
+        "sender": {
+            "username": login_user.username,
+            "avatar": login_user.avatar,
+            "karma": login_user.karma,
+            "profile": login_user.profile
+        },
+    }
+
+    return response_data
+
+
+# ルーターをFastAPIアプリケーションに組み込む
+app.include_router(router)
