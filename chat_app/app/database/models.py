@@ -57,7 +57,6 @@ class User(Base):
     privilege = Column(Enum('user', 'premium', name='privilege_enum'), nullable=False, default='user')
     ng_user_list = Column(Text)
 
-
     owned_rooms = relationship("Room", back_populates="owner", foreign_keys=[Room.owner_id])
     room_memberships = relationship("RoomMember", back_populates="user")
 
@@ -73,8 +72,6 @@ class User(Base):
     spam_messages = relationship("SpamMessage", back_populates="user")
     suspicious_messages = relationship("SuspiciousMessage", back_populates="user")  # ここに関連性を追加
 
-
-
 class UserSession(Base):
     __tablename__ = 'user_sessions'
     
@@ -85,8 +82,6 @@ class UserSession(Base):
     expiration_date = Column(TIMESTAMP, nullable=False)
     
     user = relationship("User", back_populates="sessions")
-
-
 
 class RoomMember(Base):
     __tablename__ = 'room_members'
