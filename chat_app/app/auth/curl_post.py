@@ -7,7 +7,7 @@ headers = {
 }
 
 data = {
-    "message_content": "Hello, this is a new message!"
+    "message_content": "あまり食欲わかない暑さですね"
 }
 
 response = requests.post(url, json=data, headers=headers)

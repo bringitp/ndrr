@@ -1,28 +1,21 @@
-from fastapi import APIRouter, Depends,Form
-from fastapi import Request, HTTPException
-from typing import List
-from fastapi import FastAPI, HTTPException, Depends, Header, status
+from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session
-from chat_app.app.database.models import Message, User, Room
-from typing import List, Dict, Any
-from jose import jwt
-import jwt
-from jose.exceptions import ExpiredSignatureError, JWTError
-import requests
-from typing import Optional
+from chat_app.app.database.models import Message, Room, User
+from typing import Dict, Any
 from datetime import datetime
+import requests
+import jwt
 
 app = FastAPI()
 engine, SessionLocal, Base = create_db_engine_and_session()
+
 keycloak_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
-
 jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 response = requests.get(jwks_url)
 jwks_data = response.json()
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
-
 
 router = APIRouter()
 
@@ -33,9 +26,16 @@ class LoginUser(UserToken):
     id: int
     karma: int
     username: str
-    avatar: str    
+    avatar: str
 
-def get_current_user(Authorization: str = Header(None)) -> User:
+def get_db():
+    try:
+        db = SessionLocal()
+        yield db
+    finally:
+        db.close()
+
+def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     if Authorization is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
 
@@ -51,14 +51,12 @@ def get_current_user(Authorization: str = Header(None)) -> User:
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
 
-    db = SessionLocal()
     user = get_user_by_sub(sub, db)
     return user
 
 def validate_token(token_string: str) -> str:
     options = {"verify_signature": True, "verify_aud": False, "exp": True}
-    token_bytes = token_string.encode('utf-8')
-    payload = jwt.decode(token_bytes, public_key, algorithms=["RS256"], options=options)
+    payload = jwt.decode(token_string, public_key, algorithms=["RS256"], options=options)
     sub: str = payload.get("sub")
     if sub is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
@@ -73,12 +71,11 @@ def get_user_by_sub(sub: str, db: Session) -> User:
 @router.get("/rooms/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 10,
-    login_user: LoginUser = Depends(get_current_user)
+    login_user: LoginUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
-    db = SessionLocal()
-    
     room = db.query(Room).filter(Room.id == room_id).first()
-    if room is None:
+    if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
     if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
@@ -127,14 +124,12 @@ async def get_room_messages(
 
     return response_data
 
-
-
-
 @router.post("/rooms/{room_id}/messages", response_model=Dict[str, Any])
 async def create_room_message(
     room_id: int, 
     request: Request,
-    login_user: LoginUser = Depends(get_current_user)
+    login_user: LoginUser = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
 
     data = await request.json()
@@ -142,12 +137,8 @@ async def create_room_message(
     if message_content is None:
         raise HTTPException(status_code=422, detail="message_content is required")
 
-
-    print (message_content)
-    db = SessionLocal()
-
     room = db.query(Room).filter(Room.id == room_id).first()
-    if room is None:
+    if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
     if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
@@ -156,7 +147,7 @@ async def create_room_message(
     if room.restricted_karma_under_limit < login_user.karma and room.restricted_karma_under_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
-    new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000,sent_at=datetime.now())
+    new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000, sent_at=datetime.now())
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
@@ -176,6 +167,4 @@ async def create_room_message(
 
     return response_data
 
-
-# ルーターをFastAPIアプリケーションに組み込む
 app.include_router(router)
