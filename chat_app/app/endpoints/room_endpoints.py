@@ -78,10 +78,10 @@ async def get_room_messages(
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
+    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
 
-    if room.restricted_karma_under_limit < login_user.karma and room.restricted_karma_under_limit != 0:
+    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
     messages = (
@@ -144,10 +144,10 @@ async def create_room_message(
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    if room.restricted_karma_over_limit < login_user.karma and room.restricted_karma_over_limit != 0:
+    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
 
-    if room.restricted_karma_under_limit < login_user.karma and room.restricted_karma_under_limit != 0:
+    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
     new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000, sent_at=datetime.now())
