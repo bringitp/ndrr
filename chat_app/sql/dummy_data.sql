@@ -29,12 +29,11 @@ VALUES
 
 -- rooms テーブルのダミーデータ
 
-
-INSERT INTO rooms (name, label,owner_id,max_capacity  ,restricted_karma_over_limit, restricted_karma_under_limit,lux, status, last_activity)
+INSERT INTO rooms (name, label,owner_id,max_capacity  ,over_karma_limit, under_karma_limit,lux, status, last_activity)
 VALUES
     ('🐟超ふつうなお部屋','🌽' ,1,20, 0,0,0, 'active', '2023-08-21 12:00:00'),
     ('お盆休み','( ˘ω˘)ｽﾔｧ' ,2,20, 0,0,0 , 'active', '2023-08-21 13:00:00'),
-    ('Room 3','さわやか', 3,20, 0,0,0 , 'active', '2023-08-21 14:00:00'),
+    ('たのしいお部屋','さわやか', 3,20, 0,0,0 , 'active', '2023-08-21 14:00:00'),
     ('Room 4','🐟超ふつうなお部屋', 4,20, 0,0,0 , 'active', '2023-08-21 15:00:00'),
     ('Room 5','🐟超ふつうなお部屋', 5,20, 0,0,0 , 'inactive', '2023-08-21 16:00:00'),
     ('Room 6','🐟超ふつうなお部屋', 6,20, 0,0,0 , 'active', '2023-08-21 17:00:00'),

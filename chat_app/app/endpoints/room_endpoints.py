@@ -99,8 +99,8 @@ async def get_room_messages(
             "room_name": room.name,
             "room_owner_id": room.owner_id,
             "room_max_capacity": room.max_capacity,
-            "room_restricted_karma_over_limit": room.restricted_karma_over_limit,
-            "room_restricted_karma_under_limit": room.restricted_karma_under_limit,
+            "room_restricted_karma_over_limit": room.over_karma_limit,
+            "room_restricted_karma_under_limit": room.under_karma_limit,
             "room_lux": room.lux,
         },
         "messages": []
@@ -112,6 +112,9 @@ async def get_room_messages(
             "id": message.id,
             "room_id": message.room_id,
             "content": message.content,
+            "toxicity": message.toxicity,
+            "sentiment": message.sentiment,
+            "fluence": message.fluence,            
             "sent_at": message.sent_at,
             "sender": {
                 "username": sender.username,

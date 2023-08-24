@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Enum, ForeignKey, Text, TIMESTAMP
+from sqlalchemy import create_engine, Column, Integer, String, Enum, ForeignKey, Text, TIMESTAMP, Float
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -26,14 +26,12 @@ class Room(Base):
     label = Column(String(300), nullable=True)
     owner_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     max_capacity = Column(Integer, nullable=False, default=20)
-    restricted_karma_over_limit = Column(Integer, nullable=True, default=0)
-    restricted_karma_under_limit = Column(Integer, nullable=True, default=0)
+    over_karma_limit = Column(Integer, nullable=True, default=0)
+    under_karma_limit = Column(Integer, nullable=True, default=0)
     lux = Column(Integer, nullable=True, default=0)
 
     status = Column(Enum('active', 'inactive'), nullable=False, default='active')
-    last_activity = Column(TIMESTAMP, nullable=False)
-
-    
+    last_activity = Column(TIMESTAMP, nullable=False)    
     owner = relationship("User", back_populates="owned_rooms", foreign_keys=[owner_id])
     room_members = relationship("RoomMember", back_populates="room")
     messages = relationship("Message", back_populates="room")
@@ -48,9 +46,10 @@ class User(Base):
     avatar = Column(String(100))
     profile = Column(String(200))
     trip = Column(String(32), nullable=False)
-    karma = Column(Integer, nullable=False)
     life = Column(Integer, nullable=False)
-    spam_activity_score = Column(Integer, nullable=False)
+    spam_activity_score = Column(Float(precision=6), nullable=False)  # 小数型に変更
+    karma = Column(Float(precision=6), nullable=False)  # 小数型に変更
+
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogin_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogout_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
@@ -101,12 +100,16 @@ class Message(Base):
     room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     content = Column(Text, nullable=False)
-    toxicity = Column(Integer, nullable=False)
+    toxicity      =  Column(Float(precision=6), nullable=True)  
+    sentiment     =  Column(Float(precision=6), nullable=True)
+    constructive  =  Column(Float(precision=6), nullable=True)
+    incendiary    =  Column(Float(precision=6), nullable=True)
+    foxy           =  Column(Float(precision=6), nullable=True)
+    fluence       =  Column(Float(precision=6), nullable=True)
     sent_at = Column(TIMESTAMP, nullable=False)
     
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_messages")
-
 
 
 class Image(Base):
@@ -147,6 +150,7 @@ class SpamMessage(Base):
     spam_message_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     spam_type = Column(Integer, nullable=False)
+    score    = Column(Float(precision=6), nullable=True)    
     message = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False)
     
@@ -158,6 +162,8 @@ class SuspiciousMessage(Base):
     suspicious_message_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     spam_type = Column(Integer, nullable=False)    
+    score    = Column(Float(precision=6), nullable=True)  
+
     message = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     
