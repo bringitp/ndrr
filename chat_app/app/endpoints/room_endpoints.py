@@ -145,7 +145,7 @@ async def create_room_message(
     message_content = data.get("message_content")
     if message_content is None:
         raise HTTPException(status_code=422, detail="message_content is required")
-    if message_content is length(message_content) > 255:
+    if message_content is len(message_content) > 255:
         raise HTTPException(status_code=406, detail="message_content is too long")
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
