@@ -5,12 +5,12 @@ import os
 # 例: PATH環境変数を取得
 client_secret = os.environ.get('client_secret')
 print (client_secret)
-client_secret = "nWGeyYqq7js1nDUeiZn3semncIlXtBYo"
+client_secret = "ZbmoJBG5g0Sk5ymG7UdtWC3mtjDXuqaM"
 print (client_secret)
 keycloak_base_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
 client_id = "python-client"
-username = "test0"
+username = "test1"
 password = "testtest"
 
 # トークンエンドポイントにリクエストを送信してトークンを取得
