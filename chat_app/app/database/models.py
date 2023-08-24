@@ -42,6 +42,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
+    allowed_name_changes = Column(Integer, nullable=False)
     sub = Column(String(100), unique=True, nullable=False)
     avatar = Column(String(100))
     profile = Column(String(200))
@@ -75,7 +76,7 @@ class UserSession(Base):
     __tablename__ = 'user_sessions'
     
     session_id = Column(String(64), primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('users.id'), default = 5,nullable=False)
     access_token = Column(String(128), nullable=False)
     refresh_token = Column(String(128), nullable=False)
     expiration_date = Column(TIMESTAMP, nullable=False)

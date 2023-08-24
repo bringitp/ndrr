@@ -6,6 +6,10 @@ from typing import Dict, Any
 from datetime import datetime
 import requests
 import jwt
+from janome.tokenizer import Tokenizer
+import logging
+# ログ設定
+logging.basicConfig(level=logging.INFO)  # ログレベルを設定
 
 app = FastAPI()
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -135,6 +139,8 @@ async def create_room_message(
     db: Session = Depends(get_db)
 ):
 
+
+
     data = await request.json()
     message_content = data.get("message_content")
     if message_content is None:
@@ -150,6 +156,12 @@ async def create_room_message(
 
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+
+    t = Tokenizer()
+    tokens = t.tokenize(message_content)
+
+    for token in tokens:
+        logging.info(f"Surface: {token.surface}, Part of Speech: {token.part_of_speech}")  # ログを記録
 
     new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000, sent_at=datetime.now())
     db.add(new_message)

@@ -8,9 +8,6 @@ def tokenize_text(text):
 if __name__ == "__main__":
     text = "それはとてもつまらないしね"
     tokens = tokenize_text(text)
-
-    text2 = "それはとてもつまらないシネ"
-    tokens2 = tokenize_text(text2)
     
     for token in tokens:
         print(f"Surface: {token.surface}, Part of Speech: {token.part_of_speech}")

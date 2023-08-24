@@ -1,16 +1,16 @@
 -- users テーブルのダミーデータ
-INSERT INTO users (username, sub, life,avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
+INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
 VALUES
-    ('user_zero', '37475cba-f8a7-47f3-adb9-75ca09c1afa4', 10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
-    ('user2', 'sub2', 10, 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
-    ('user3', 'sub3', 10, 'avatar3.jpg', 'エペ募集','trip789', 90, 5, '["block", "report"]'),
-    ('user4', 'sub4', 10, 'avatar4.jpg', '旅行好きなひと〜','tripabc', 30, 8, NULL),
-    ('user5', 'sub5', 10, 'avatar5.jpg', '使いこなせないけどコスメ買い漁りたい','tripxyz', 20, 2, '["spam", "annoying"]'),
-    ('user6', 'sub6', 10, 'avatar6.jpg', '頭痛い。。。','trip123', 10, 4, NULL),
-    ('user7', 'sub7', 10, 'avatar7.jpg', 'ねむねむ','trip456', 65, 6, '["block", "inappropriate"]'),
-    ('user8', 'sub8', 10, 'avatar8.jpg', '(*´ω`*)','trip789', 40, 7, NULL),
-    ('user9', 'sub9', 10, 'avatar9.jpg', '仕事でやらかした。ついてないな','tripabc', 55, 9, '["spam", "rude"]'),
-    ('user10', 'sub10', 10, 'avatar10.jpg', '正しい希望は正しい絶望から','tripxyz', 70, 0, '["block", "annoying"]');
+    ('user_zero', '37475cba-f8a7-47f3-adb9-75ca09c1afa4', 3,10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
+    ('user2', 'sub2', 10, 3, 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
+    ('user3', 'sub3', 10, 3, 'avatar3.jpg',  'エペ募集','trip789', 90, 5, '["block", "report"]'),
+    ('user4', 'sub4', 10, 3, 'avatar4.jpg',  '旅行好きなひと〜','tripabc', 30, 8, NULL),
+    ('user5', 'sub5', 10, 3, 'avatar5.jpg',  '使いこなせないけどコスメ買い漁りたい','tripxyz', 20, 2, '["spam", "annoying"]'),
+    ('user6', 'sub6', 10, 3, 'avatar6.jpg',  '頭痛い。。。','trip123', 10, 4, NULL),
+    ('user7', 'sub7', 10, 3, 'avatar7.jpg',  'ねむねむ','trip456', 65, 6, '["block", "inappropriate"]'),
+    ('user8', 'sub8', 10, 3, 'avatar8.jpg',  '(*´ω`*)','trip789', 40, 7, NULL),
+    ('user9', 'sub9', 10, 3, 'avatar9.jpg',  '仕事でやらかした。ついてないな','tripabc', 55, 9, '["spam", "rude"]'),
+    ('user10', 'sub10', 10, 3, 'avatar10.jpg', '正しい希望は正しい絶望から','tripxyz', 70, 0, '["block", "annoying"]');
 
 
 -- user_sessions テーブルのダミーデータ
