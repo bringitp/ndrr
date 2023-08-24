@@ -113,22 +113,12 @@ def check_ng_words(message_content: str, ng_words: set) -> None:
     if any(token.surface in ng_words for token in tokens):
         raise HTTPException(status_code=406, detail="NG words found in the message")
 
-@router.post("/rooms/{room_id}/messages", response_model=Dict[str, Any])
-async def create_room_message(
-    room_id: int, 
-    request: Request,
+@router.get("/rooms/{room_id}/messages", response_model=Dict[str, Any])
+async def get_room_messages(
+    room_id: int, skip: int = 0, limit: int = 10,
     login_user: LoginUser = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = BackgroundTasks()
+    db: Session = Depends(get_db)
 ):
-
-    data = await request.json()
-    message_content = data.get("message_content")
-    if not message_content:
-        raise HTTPException(status_code=422, detail="message_content is required")
-    if len(message_content) > 255:
-        raise HTTPException(status_code=406, detail="message_content is too long")
-
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
@@ -139,37 +129,56 @@ async def create_room_message(
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
-    check_post_frequency_within_15_seconds(login_user.id, db)
-    check_ng_words(message_content, ng_words)
-
-    same_content_count = (
+    total_messages = (
         db.query(Message)
-        .filter(Message.sender_id == login_user.id, Message.content == message_content)
+        .filter(Message.room_id == room_id)
         .count()
     )
-    if same_content_count >= MAX_POST_COUNT:
-        raise HTTPException(status_code=406, detail="Repeated content")
 
-    last_post_times[login_user.sub] = datetime.now()
-
-    new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, toxicity=1000, sent_at=datetime.now())
-    db.add(new_message)
-    db.commit()
-    db.refresh(new_message)
+    messages = (
+        db.query(Message)
+        .filter(Message.room_id == room_id)
+        .order_by(Message.id.desc())  # IDを降順に並び替える
+        .offset(skip)
+        .limit(min(limit, 30))  # 30件以下に制限
+        .all()
+    )
+    messages = list(reversed(messages))  # メッセージの順番を逆にする
 
     response_data = {
-        "room_id": room.id,
-        "message_id": new_message.id,
-        "content": new_message.content,
-        "sent_at": new_message.sent_at,
-        "sender": {
-            "username": login_user.username,
-            "avatar": login_user.avatar,
-            "karma": login_user.karma,
-            "profile": login_user.profile
+        "room": {
+            "room_id": room.id,
+            "room_label": room.label,
+            "room_name": room.name,
+            "room_owner_id": room.owner_id,
+            "room_max_capacity": room.max_capacity,
+            "room_restricted_karma_over_limit": room.over_karma_limit,
+            "room_restricted_karma_under_limit": room.under_karma_limit,
+            "room_lux": room.lux,
         },
+        "messages": []
     }
+
+    for message in reversed(messages):  # Display new messages at the top
+        sender = db.query(User).filter(User.id == message.sender_id).first()
+        message_data = {
+            "id": message.id,
+            "room_id": message.room_id,
+            "content": message.content,
+            "toxicity": message.toxicity,
+            "sentiment": message.sentiment,
+            "fluence": message.fluence,            
+            "sent_at": message.sent_at,
+            "sender": {
+                "username": sender.username,
+                "avatar": sender.avatar,
+                "karma": sender.karma,
+                "profile": sender.profile
+            },
+        }
+        response_data["messages"].append(message_data)
+
+    response_data["total_messages"] = total_messages  # Include total message count
 
     return response_data
 
-app.include_router(router)

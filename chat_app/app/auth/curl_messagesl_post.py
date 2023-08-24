@@ -1,10 +1,10 @@
 import requests
-
+from config import TOKEN  # config.py ファイルからトークンをインポート
 url = "http://localhost:7777/rooms/1/messages"
 #url = "https://ron-the-rocker.net/ndrr/rooms/1/messages"
 headers = {
-   "Authorization": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTI5MjM3MjEsImlhdCI6MTY5Mjg4NzcyMSwianRpIjoiNjc4MzlhNTktOTI0MC00OTNiLTlhMWItM2UwYmE4YTM5ZjQ0IiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiOGRhNTAzNWYtODM2NC00ODBhLTllZjUtZWQ3ZmVlN2UwZWFlIiwic2NvcGUiOiIiLCJzaWQiOiI4ZGE1MDM1Zi04MzY0LTQ4MGEtOWVmNS1lZDdmZWU3ZTBlYWUifQ.ATfcGaSQDsS-oYtFPlZedA8XcIOQZtvv8GfTUAPNL1Ap9wIxXDJFB1OEKXWyolkQVmRjjO6g1D93OFAhFIOQiweaWlaopb6Txed64Vbc9YGnq5kIefSLW7qwbOWNPOl8auqdtRsQuJ-tSdbH-yCC0HKva76IrnolPlURpRGKYnFwKtq4ZyA_RrRf9no9pHQS9lvqU0csRMIf3eOlzlewsI6FQ_SZoX-o5kLIvEQqoETb42inWA8AacHlWAnYaaZQrF3SoCTTvjHDvWtdgJnwNeUPWn_UXh7BO44YvPV19GDBqIiWT0zQwlMy_iIVy76sqUYkGi2Mc9UqaaqrfmAg1Q"
-    ,"Content-Type": "application/json"
+    "Authorization": f"Bearer {TOKEN}"
+   ,"Content-Type": "application/json"
 }
 movie_dialogues = [
     "こんにちは。映画好きのあなた、最近どんな映画を観ましたか？",
