@@ -4,8 +4,7 @@ import os
 
 # 例: PATH環境変数を取得
 client_secret = os.environ.get('client_secret')
-print (client_secret)
-client_secret = "ZbmoJBG5g0Sk5ymG7UdtWC3mtjDXuqaM"
+
 print (client_secret)
 keycloak_base_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
@@ -42,7 +41,7 @@ jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 print (jwks_url)
 response = requests.get(jwks_url)
 jwks_data = response.json()
-public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
+public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
 options = {"verify_signature": True, "verify_aud": False, "exp": True}
 
 # JWTトークンのデコード

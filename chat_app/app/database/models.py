@@ -16,8 +16,6 @@ class BlockedUser(Base):
     blocking_user = relationship("User", back_populates="blocked_users", foreign_keys=[blocking_user_id])
     blocked_user = relationship("User", back_populates="blocked_by_users", foreign_keys=[blocked_user_id])
 
-
-
 class Room(Base):
     __tablename__ = 'rooms'
     
