@@ -21,7 +21,7 @@ const roomId = urlParams.get('room_id');
 const apiUrl = window.location.pathname.startsWith('/ndrr')
     ? `/ndrr/api/rooms/${roomId}/messages`
     : `/rooms/${roomId}/messages`;
-    
+
 const headers = new Headers();
 headers.append("Authorization", `Bearer ${TOKEN}`);
 
@@ -66,7 +66,6 @@ fetch(apiUrl, { headers })
                 <div>Avator: ${message.sender.avatar}</div>
                 <div>Karma: ${message.sender.karma}</div>
                 <div><strong>Content:</strong> ${message.content}</div>
-                <div>Karma: ${message.sender.karma}</div>
                 <div>Profile: ${message.sender.profile}</div>
             `;
             messageList.appendChild(listItem);
