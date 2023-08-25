@@ -9,6 +9,7 @@ app = FastAPI()
 # ルーターをアプリに追加
 app.include_router(root_router)
 app.include_router(rooms_get_router)
+app.include_router(rooms_post_router)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 
