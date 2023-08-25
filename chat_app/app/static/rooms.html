@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .room {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+        }
+        .room-name {
+            font-weight: bold;
+        }
+        .room-info {
+            margin-top: 5px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chat Room List</h1>
+    <div id="room-list"></div>
+    <script>
+        const roomListDiv = document.getElementById("room-list");
+
+        // Determine the API URL based on current URL
+        const apiUrl = window.location.pathname.startsWith('/ndrr')
+            ? '/ndrr/api/rooms'
+            : '/rooms';
+
+        // Fetch data from the determined API URL
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(roomsData => {
+                roomsData.rooms.forEach(room => {
+                    const roomDiv = document.createElement("div");
+                    roomDiv.className = "room";
+
+                    const roomNameDiv = document.createElement("div");
+                    roomNameDiv.className = "room-name";
+                    roomNameDiv.textContent = room.name;
+
+                    const roomInfoDiv = document.createElement("div");
+                    roomInfoDiv.className = "room-info";
+                    roomInfoDiv.textContent = `Owner: ${room.owner.username}, Members: ${room.room_members.length}, Status: ${room.status}`;
+
+                    roomDiv.appendChild(roomNameDiv);
+                    roomDiv.appendChild(roomInfoDiv);
+
+                    // Display user names
+                    if (room.room_members.length > 0) {
+                        const memberList = document.createElement("ul");
+                        room.room_members.forEach(member => {
+                            const memberItem = document.createElement("li");
+                            memberItem.textContent = member.username;
+                            memberList.appendChild(memberItem);
+                        });
+                        roomDiv.appendChild(memberList);
+                    }
+
+                    roomListDiv.appendChild(roomDiv);
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching data:", error);
+            });
+    </script>
+</body>
+</html>
