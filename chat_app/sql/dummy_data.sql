@@ -2,7 +2,7 @@
 INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar, profile ,trip, karma, spam_activity_score, ng_user_list)
 VALUES
     ('user_zero', '2d498e84-f366-4d69-bf54-5f92ca60fd5c', 3,10,'avatar1.jpg','致し方なくPythonを書いています。よろしくおねがいします。','trip123', 50, 3, '["spam", "baduser"]'),
-    ('user2', '1b7e47c2-67e8-475f-a90a-47b40daca56b', 10, 3, 'avatar2.jpg', '１年以上前の圧迫骨折のあとがまだ痛いんだが。。。','trip456', 75, 1, NULL),
+    ('user2', '1b7e47c2-67e8-475f-a90a-47b40daca56b', 10, 3, 'avatar2.jpg', '暑くて寝れるかな','trip456', 75, 1, NULL),
     ('user3', 'sub3', 10, 3, 'avatar3.jpg',  'エペ募集','trip789', 90, 5, '["block", "report"]'),
     ('user4', 'sub4', 10, 3, 'avatar4.jpg',  '旅行好きなひと〜','tripabc', 30, 8, NULL),
     ('user5', 'sub5', 10, 3, 'avatar5.jpg',  '使いこなせないけどコスメ買い漁りたい','tripxyz', 20, 2, '["spam", "annoying"]'),
