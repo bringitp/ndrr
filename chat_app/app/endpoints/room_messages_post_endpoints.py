@@ -35,9 +35,9 @@ response = requests.get(jwks_url)
 jwks_data = response.json()
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
 
+
 # Janomeのトークナイザーの初期化
 t = Tokenizer()
-
 router = APIRouter()
 
 class UserToken:
@@ -49,12 +49,29 @@ class LoginUser(UserToken):
     username: str
     avatar: str
 
-# 前回の投稿時刻を記録するための辞書
-last_post_times = defaultdict(lambda: None)
+# 前回の投稿時刻と投稿回数を記録するための辞書
+user_post_data = defaultdict(lambda: {"last_post_time": None, "post_count": 0})
 
 # 最大投稿回数
-MAX_POST_COUNT = 3
+MAX_POST_COUNT = 5  # 5回までとする
 
+def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: timedelta, max_post_count: int):
+    now = datetime.now()
+    user_data = user_post_data[user_sub]
+
+    if user_data["last_post_time"]:
+        elapsed_time = now - user_data["last_post_time"]
+        if elapsed_time <= time_interval and user_data["post_count"] >= max_post_count:
+            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests")
+
+    # Reset the post count if the elapsed time exceeds the interval
+    if elapsed_time > time_interval:
+        user_data["post_count"] = 0
+
+    user_data["last_post_time"] = now
+    user_data["post_count"] += 1
+
+    
 def get_db():
     db = SessionLocal()
     try:
@@ -147,16 +164,9 @@ async def create_room_message(
 
     check_post_frequency_within_15_seconds(login_user.id, db)
     check_ng_words(message_content, ng_words)
+    # Check post frequency within 180 seconds and 5 post count
+    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=180), MAX_POST_COUNT)
 
-    same_content_count = (
-        db.query(Message)
-        .filter(Message.sender_id == login_user.id, Message.content == message_content)
-        .count()
-    )
-    if same_content_count >= MAX_POST_COUNT:
-        raise HTTPException(status_code=406, detail="Repeated content")
-
-    last_post_times[login_user.sub] = datetime.now()
 
     new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
     db.add(new_message)
