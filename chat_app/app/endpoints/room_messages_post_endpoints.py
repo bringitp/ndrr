@@ -64,9 +64,11 @@ def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: 
         if elapsed_time <= time_interval and user_data["post_count"] >= max_post_count:
             raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests")
 
-    # Reset the post count if the elapsed time exceeds the interval
-    if elapsed_time > time_interval:
-        user_data["post_count"] = 0
+        # Reset the post count if the elapsed time exceeds the interval
+        if elapsed_time > time_interval:
+            user_data["post_count"] = 0
+    else:
+        elapsed_time = time_interval + timedelta(seconds=1)  # Initialize elapsed_time with a value larger than time_interval
 
     user_data["last_post_time"] = now
     user_data["post_count"] += 1
