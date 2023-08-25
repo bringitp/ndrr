@@ -75,6 +75,16 @@ server {
     proxy_set_header Connection "Upgrade";
   }
 
+ location ~ ^/ndrr/static {
+  rewrite ^/ndrr(.*) $1 break;
+  proxy_pass http://localhost:7777;
+  proxy_set_header Host $host;
+  proxy_set_header X-Real-IP $remote_addr;
+  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto $scheme;
+  proxy_set_header Upgrade $http_upgrade;
+  proxy_set_header Connection "Upgrade";
+}
 
     location /maintenance.html {
         root /var/www/ron-the-rocker.net;
@@ -105,4 +115,3 @@ sudo systemctl start nginx
 sudo systemctl reload nginx
 
 echo "Nginx installed, configured, and running."
-
