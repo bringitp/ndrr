@@ -1,13 +1,21 @@
 ## プロジェクト進捗
 
-| ファイル名                      | 概要                                | 進捗状況           |
+| ファイル名                      | 残課題概要                                | 進捗状況           |
 |---------------------------------|-------------------------------------|--------------------|
 | `room_messages_get_endpoints.py` | NGユーザを表示しない機能               | 完了               |
 | `room_messages_post_endpoints.py`| 極性解析の辞書作成                    | 途中               |
 | `rooms_get_endpoints.py`         | 部屋一覧取得機能                      | 完了               |
 | `rooms_post_endpoints.py`        | 部屋の作成、削除、入室、蹴る、オーナー変更 | 途中               |
 | `root_endpoints.py`              | ルートエンドポイント                  | 完了               |
-| `user_post_endpoints.py`         | ユーザ名変更、新規登録                | 途中               |
+| `user_post_endpoints.py`         | ユーザ名変更、新規登録、退会                | 途中               |
+
+## SPAM判定
+
+| 機能名                      | 残課題概要                                | 進捗状況           |
+|---------------------------------|-------------------------------------|--------------------|
+| `check_post_frequency_within_15_seconds` | 15秒以上で3回投稿すると Too many requests within 15 seconds              | 完了               |
+| `check_ng_words`| 極性解析の辞書作成                    | 途中               |
+| `check_post_frequency_within_time`         | 180秒で5回投稿すりとSpam                      | 完了               |
 
 ### 進捗状況の説明
 
