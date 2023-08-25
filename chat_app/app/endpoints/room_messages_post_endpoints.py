@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User
+from chat_app.app.database.models import Message, Room, User,RoomMember
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -129,6 +129,11 @@ async def create_room_message(
     if len(message_content) > 255:
         raise HTTPException(status_code=406, detail="message_content is too long")
 
+    # Check if the user is a member of the room
+    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
+    if not room_member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
+
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
@@ -138,6 +143,7 @@ async def create_room_message(
 
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+        
 
     check_post_frequency_within_15_seconds(login_user.id, db)
     check_ng_words(message_content, ng_words)
