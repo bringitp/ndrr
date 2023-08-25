@@ -22,7 +22,7 @@
     </div>
 
     <script>
-const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTI5OTM4NDUsImlhdCI6MTY5Mjk1Nzg0NSwianRpIjoiNzAzNTk5OGEtOTUzNy00MjM1LWFlMjQtOTE2NDRmMDU1YjJjIiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiZThmNjc4ZjMtOWJmZC00NTc1LWE3ZDAtYWFjM2Q5OWFkMGRjIiwic2NvcGUiOiIiLCJzaWQiOiJlOGY2NzhmMy05YmZkLTQ1NzUtYTdkMC1hYWMzZDk5YWQwZGMifQ.lwukER2nQLzF6aa6x7JTssD42xtQcRo6OR-iQFZ-rPbFIPyDDAH0Fx9K25ee07ZBy9kiOEXvIYKtD6m_gD3dSWV0np4X7t_l4ePnucLHfgp5xABpXEy7NBFuTuKgCc6yZwccbszre9SHEZl7LVj__4H5ydWfYGUObzWP6kXPkoiZTrwYJK4v-usTCxS1AzZdMH-Ug3Eq9zDRqFPub-m_wuCGNpYH9BS2xxAhhysNziL9UbFc_FiY5RTgFpNMMF2CFiQVtA8HfSMMm1AA_Ma94GQzlpetmHVc2Iq-24rb3VE-Lqd5O_A5lHKtAn-OVmZmDtW5P5Ea7-19oe2g5kSgTw"; // Replace with your actual token
+const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTMwMzYxOTUsImlhdCI6MTY5MzAwMDE5NSwianRpIjoiZmFkZmYxMGItMjJhOS00MTk3LTllZGYtNjQ5ZDliOWVlNTQ3IiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiMjNmNDA4MmUtYmFjZi00ZGJmLThiZmUtNTVhOTE3YTgwYmU5Iiwic2NvcGUiOiIiLCJzaWQiOiIyM2Y0MDgyZS1iYWNmLTRkYmYtOGJmZS01NWE5MTdhODBiZTkifQ.NiaUvdGLAeyFFh7ik4RF7Guy5qcEd0uVC25ElCkm8PakupvilBVByjgmgEn7Qfru6CXavw1BkCCybV5JdafdFqtz06gRozvY-twHsdhsV_5ct46wr0tRzwE2hQmb1QXQ9-DZCAYRQ7ZmxDhBzp27aX_qrH-BuiK4bug-pPAe6zSmazZCgfXaDwDf05ixkj1P2KGnfglKvUtqfArDjoU9jm2XoDGWVR4gmvGHjCiRajR0pOiXPzCxKN15ATpG3Jg1ZxDAfEqihd_0lKoSyEz6CFTis030x8m9BV1Hvu4cMr8DZOESirLEC6RtrukBDltouhDAID-mFAVaWPTZT0xB_g"; // Replace with your actual token
 const urlParams = new URLSearchParams(window.location.search);
 const roomId = urlParams.get('room_id');
 const apiUrl = window.location.pathname.startsWith('/ndrr')
@@ -31,6 +31,16 @@ const apiUrl = window.location.pathname.startsWith('/ndrr')
 
 const headers = new Headers();
 headers.append("Authorization", `Bearer ${TOKEN}`);
+
+
+
+function handleInvalidTokenError() {
+    clearInterval(fetchInterval); // Stop the interval for fetching data
+
+    const errorDiv = document.createElement("div");
+    errorDiv.textContent = "Error: Token is invalid";
+    document.body.appendChild(errorDiv);
+}
 
 
 function populateRoomInfo(room) {
@@ -48,7 +58,13 @@ function populateRoomInfo(room) {
 
 function fetchData() {
     fetch(apiUrl, { headers })
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 401) {
+                handleInvalidTokenError();
+                throw new Error("Token is invalid");
+            }
+            return response.json();
+        })
         .then(data => {
             populateRoomInfo(data.room);
             const messagesDiv = document.getElementById("messages");
@@ -99,7 +115,13 @@ messageForm.addEventListener("submit", function(event) {
     };
 
     fetch(apiUrl, postData)
-        .then(response => response.json())
+        .then(response => {
+            if (response.status === 401) {
+                handleInvalidTokenError();
+                throw new Error("Token is invalid");
+            }
+            return response.json();
+        })
         .then(data => {
             messageContentInput.value = "";
         })
