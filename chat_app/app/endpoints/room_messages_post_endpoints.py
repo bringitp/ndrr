@@ -114,19 +114,6 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
-def check_post_frequency_within_15_seconds(user_id: int, db: Session) -> None:
-    now = datetime.now()
-    recent_messages = (
-        db.query(Message)
-        .filter(Message.sender_id == user_id)
-        .order_by(Message.sent_at.desc())
-        .limit(3)
-        .all()
-    )
-    post_count_within_15_seconds = sum(1 for message in recent_messages if (now - message.sent_at) <= timedelta(seconds=15))
-    if post_count_within_15_seconds >= 3:
-        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests within 15 seconds")
-
 def check_ng_words(message_content: str, ng_words: set) -> None:
     tokens = t.tokenize(message_content)
     if any(token.surface in ng_words for token in tokens):
@@ -164,10 +151,9 @@ async def create_room_message(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
         
 
-    check_post_frequency_within_15_seconds(login_user.id, db)
     check_ng_words(message_content, ng_words)
     # Check post frequency within 180 seconds and 5 post count
-    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=180), MAX_POST_COUNT)
+    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
 
 
     new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())

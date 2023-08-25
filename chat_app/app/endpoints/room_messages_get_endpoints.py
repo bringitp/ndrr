@@ -8,6 +8,9 @@ import requests
 import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
+import html
+def escape_html(text):
+    return html.escape(text, quote=True)
 
 app = FastAPI()
 
@@ -169,16 +172,16 @@ async def get_room_messages(
         message_data = {
             "id": message.id,
             "room_id": message.room_id,
-            "content": message.content,
+            "content": escape_html(message.content),
             "toxicity": message.toxicity,
             "sentiment": message.sentiment,
             "fluence": message.fluence,            
             "sent_at": message.sent_at,
             "sender": {
-                "username": sender.username,
-                "avatar": sender.avatar,
+                "username": escape_html(sender.username),
+                "avatar": escape_html(sender.avatar),
                 "karma": sender.karma,
-                "profile": sender.profile
+                "profile": escape_html(sender.profile)
             },
         }
         response_data["messages"].append(message_data)

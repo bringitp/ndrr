@@ -4,20 +4,27 @@
     <title>Chat Room</title>
 </head>
 <body>
+
     <div id="room-info">
         <!-- Room info will be populated here -->
     </div>
+
+    <div>
+        <h2>Post a Message</h2>
+        <form id="message-form">
+            <textarea id="message-content" placeholder="Enter your message"></textarea>
+            <button type="submit">Post</button>
+        </form>
+    </div>
+
     <div id="messages">
         <!-- Messages will be populated here -->
     </div>
+
     <script>
-const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTI5NTUxNTUsImlhdCI6MTY5MjkxOTE1NSwianRpIjoiOTE1OWM2NTctOGMzNy00MGNjLWJlY2MtMDBlZGEzMWIzNzczIiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiNTEyMmMyNTMtNDdiNi00YTZhLTk1NTktODdhMWU0YjgyZGFhIiwic2NvcGUiOiIiLCJzaWQiOiI1MTIyYzI1My00N2I2LTRhNmEtOTU1OS04N2ExZTRiODJkYWEifQ.V0wdmaf_jWtdceoL7q2nR7NPd1M_lQvQhsiCSprVfqUSOFTBDsErKcTQGfkkycyJtU7DUmKhIbOZhIX0N6feYQqPr2GNaA27prsu-KqtzRCS5jKF1LaUY7Rrqo9MeIkP-TWQgmBW266PMp9QUEFGWKTMHQEsNnmdYrWfLGLEHUVivzrhti6rSfW2EiLpHaOmehr7fT3-vHQKhJp4w80p6_S-wsVFrVDaOMN_MzbA2mdnLUZi3CjpYi3xKJF54MAPjiQQdfI0AGLSuguGnmYa9jgjD5CDB3fhWFcq2IE9qyF2OyWy2BxPWL8eZnmw5e28mIKXBXxeDRrYqUgK1jtVJg"
-// Add Authorization header to fetch request
-// Get room_id from query parameter
+const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTI5OTM4NDUsImlhdCI6MTY5Mjk1Nzg0NSwianRpIjoiNzAzNTk5OGEtOTUzNy00MjM1LWFlMjQtOTE2NDRmMDU1YjJjIiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiZThmNjc4ZjMtOWJmZC00NTc1LWE3ZDAtYWFjM2Q5OWFkMGRjIiwic2NvcGUiOiIiLCJzaWQiOiJlOGY2NzhmMy05YmZkLTQ1NzUtYTdkMC1hYWMzZDk5YWQwZGMifQ.lwukER2nQLzF6aa6x7JTssD42xtQcRo6OR-iQFZ-rPbFIPyDDAH0Fx9K25ee07ZBy9kiOEXvIYKtD6m_gD3dSWV0np4X7t_l4ePnucLHfgp5xABpXEy7NBFuTuKgCc6yZwccbszre9SHEZl7LVj__4H5ydWfYGUObzWP6kXPkoiZTrwYJK4v-usTCxS1AzZdMH-Ug3Eq9zDRqFPub-m_wuCGNpYH9BS2xxAhhysNziL9UbFc_FiY5RTgFpNMMF2CFiQVtA8HfSMMm1AA_Ma94GQzlpetmHVc2Iq-24rb3VE-Lqd5O_A5lHKtAn-OVmZmDtW5P5Ea7-19oe2g5kSgTw"; // Replace with your actual token
 const urlParams = new URLSearchParams(window.location.search);
 const roomId = urlParams.get('room_id');
-
-// Construct the API URL
 const apiUrl = window.location.pathname.startsWith('/ndrr')
     ? `/ndrr/api/rooms/${roomId}/messages`
     : `/rooms/${roomId}/messages`;
@@ -25,60 +32,66 @@ const apiUrl = window.location.pathname.startsWith('/ndrr')
 const headers = new Headers();
 headers.append("Authorization", `Bearer ${TOKEN}`);
 
-// Fetch room data
-fetch(apiUrl, { headers })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`Request failed with status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        const jsonData = data; // Store fetched data in jsonData
+function fetchData() {
+    fetch(apiUrl, { headers })
+        .then(response => response.json())
+        .then(data => {
+            const messagesDiv = document.getElementById("messages");
+            messagesDiv.innerHTML = ""; // Clear previous messages
 
-        // Populate room info
-        const roomInfoDiv = document.getElementById("room-info");
-        const roomInfoHeading = document.createElement("h2");
-        roomInfoHeading.textContent = "Room Info";
-        roomInfoDiv.appendChild(roomInfoHeading);
-
-        const roomInfoList = document.createElement("ul");
-        roomInfoList.innerHTML = `
-            <li><strong>Room Label:</strong> ${jsonData.room.room_label}</li>
-            <li><strong>Room Name:</strong> ${jsonData.room.room_name}</li>
-            <li><strong>Owner:</strong> user${jsonData.room.room_owner_id}</li>
-            <li><strong>Max Capacity:</strong> ${jsonData.room.room_max_capacity}</li>
-        `;
-        roomInfoDiv.appendChild(roomInfoList);
-
-        // Populate messages
-        const messagesDiv = document.getElementById("messages");
-        const messagesHeading = document.createElement("h2");
-        messagesHeading.textContent = "Messages";
-        messagesDiv.appendChild(messagesHeading);
-
-        const messageList = document.createElement("ul");
-        jsonData.messages.forEach(message => {
-            const listItem = document.createElement("li");
-            listItem.innerHTML = `
-                <div>id: ${message.id}</div>
-                <div>Sender: ${message.sender.username}</div>
-                <div>Avator: ${message.sender.avatar}</div>
-                <div>Karma: ${message.sender.karma}</div>
-                <div><strong>Content:</strong> ${message.content}</div>
-                <div>Profile: ${message.sender.profile}</div>
-            `;
-            messageList.appendChild(listItem);
+            const messageList = document.createElement("ul");
+            data.messages.forEach(message => {
+                const listItem = document.createElement("li");
+                listItem.innerHTML = `
+                    <div>id: ${message.id}</div>
+                    <div>Sender: ${message.sender.username}</div>
+                    <div>Avatar: ${message.sender.avatar}</div>
+                    <div>Karma: ${message.sender.karma}</div>
+                    <div><strong>Content:</strong> ${message.content}</div>
+                    <div>Profile: ${message.sender.profile}</div>
+                `;
+                messageList.appendChild(listItem);
+            });
+            messagesDiv.appendChild(messageList);
+        })
+        .catch(error => {
+            console.error("Error fetching data:", error);
+            const errorDiv = document.createElement("div");
+            errorDiv.textContent = `Error fetching data: ${error.message}`;
+            document.body.appendChild(errorDiv);
         });
-        messagesDiv.appendChild(messageList);
-    })
-    .catch(error => {
-        console.error("Error fetching data:", error);
-        // Display error message to the user
-        const errorMessageDiv = document.createElement("div");
-        errorMessageDiv.textContent = `Error: ${error.message}`;
-        document.body.appendChild(errorMessageDiv);
-    });
+}
+
+// Fetch data initially and set interval for regular updates
+fetchData();
+const fetchInterval = setInterval(fetchData, 1250);
+
+const messageForm = document.getElementById("message-form");
+const messageContentInput = document.getElementById("message-content");
+
+messageForm.addEventListener("submit", function(event) {
+    event.preventDefault();
+
+    const messageContent = messageContentInput.value;
+
+    const postData = {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${TOKEN}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message_content: messageContent })
+    };
+
+    fetch(apiUrl, postData)
+        .then(response => response.json())
+        .then(data => {
+            messageContentInput.value = "";
+        })
+        .catch(error => {
+            console.error("Error posting message:", error);
+        });
+});
     </script>
 </body>
 </html>

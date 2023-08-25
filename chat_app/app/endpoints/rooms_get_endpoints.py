@@ -4,11 +4,15 @@ from typing import List
 from chat_app.app.database.models import Message, Room, User,RoomMember
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
+import html
 
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()
+
+def escape_html(text):
+    return html.escape(text, quote=True)
 
 def get_db():
     db = SessionLocal()
@@ -27,8 +31,8 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
     for room in reversed(rooms):  # Display new messages at the top
         room_data = {
             "id": room.id,
-            "name": room.name,
-            "label": room.label,
+            "name": escape_html(room.name),
+            "label": escape_html(room.label),
             "owner_id": room.owner_id,
             "max_capacity": room.max_capacity,
             "over_karma_limit": room.over_karma_limit,
@@ -40,7 +44,7 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
             "room_members": [
                 {
                     "id": member.user.id,
-                    "username": member.user.username,
+                    "username": escape_html(member.user.username),
                 }
                 for member in room.room_members
             ],
