@@ -12,7 +12,7 @@
     <div>
         <h2>Post a Message</h2>
         <form id="message-form">
-            <textarea id="message-content" placeholder="Enter your message"></textarea>
+            <textarea id="message-content" placeholder="Enter your message" style="width: 350px; height: 120px;"></textarea>
             <button type="submit">Post</button>
         </form>
     </div>
@@ -32,10 +32,25 @@ const apiUrl = window.location.pathname.startsWith('/ndrr')
 const headers = new Headers();
 headers.append("Authorization", `Bearer ${TOKEN}`);
 
+
+function populateRoomInfo(room) {
+    const roomInfoDiv = document.getElementById("room-info");
+    roomInfoDiv.innerHTML = `
+        <h3>Room Info</h3>
+        <div>Room ID: ${room.room_id}</div>
+        <div>Room Label: ${room.room_label}</div>
+        <div>Room Name: ${room.room_name}</div>
+        <div>Room Owner ID: ${room.room_owner_id}</div>
+        <div>Room Max Capacity: ${room.room_max_capacity}</div>
+        <div>Room Lux: ${room.room_lux}</div>
+    `;
+}
+
 function fetchData() {
     fetch(apiUrl, { headers })
         .then(response => response.json())
         .then(data => {
+            populateRoomInfo(data.room);
             const messagesDiv = document.getElementById("messages");
             messagesDiv.innerHTML = ""; // Clear previous messages
 
