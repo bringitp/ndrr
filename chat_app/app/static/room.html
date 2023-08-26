@@ -43,6 +43,14 @@ function handleInvalidTokenError() {
     alert("Token is invalid");
 }
 
+function handleYOUAreNotAMemberOfThisRoom() {
+    clearInterval(fetchInterval); // Stop the interval for fetching data
+
+    const errorDiv = document.createElement("div");
+    errorDiv.textContent = "Error: You are not a member of this room";
+    document.body.appendChild(errorDiv);
+    alert("You are not a member of this room");
+}
 
 function populateRoomInfo(room) {
     const roomInfoDiv = document.getElementById("room-info");
@@ -64,6 +72,12 @@ function fetchData() {
                 handleInvalidTokenError();
                 throw new Error("Token is invalid");
             }
+
+            if (response.status === 403) { 
+                handleYOUAreNotAMemberOfThisRoom();
+                throw new Error("You are not a member of this room");
+            }
+
             return response.json();
         })
         .then(data => {
