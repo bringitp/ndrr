@@ -9,7 +9,7 @@ print (client_secret)
 keycloak_base_url = "https://ron-the-rocker.net/auth"
 realm = "ndrr"
 client_id = "python-client"
-username = "test1"
+username = "test0"
 password = "testtest"
 
 # トークンエンドポイントにリクエストを送信してトークンを取得
