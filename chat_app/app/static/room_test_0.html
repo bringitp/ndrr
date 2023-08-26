@@ -40,6 +40,7 @@ function handleInvalidTokenError() {
     const errorDiv = document.createElement("div");
     errorDiv.textContent = "Error: Token is invalid";
     document.body.appendChild(errorDiv);
+       alert("Token is invalid"); 
 }
 
 
@@ -59,7 +60,7 @@ function populateRoomInfo(room) {
 function fetchData() {
     fetch(apiUrl, { headers })
         .then(response => {
-            if (response.status === 401) {
+            if (response.status === 401  || response.status === 406) {
                 handleInvalidTokenError();
                 throw new Error("Token is invalid");
             }

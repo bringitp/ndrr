@@ -22,7 +22,7 @@
     </div>
 
     <script>
-const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTMwMzYxOTUsImlhdCI6MTY5MzAwMDE5NSwianRpIjoiZmFkZmYxMGItMjJhOS00MTk3LTllZGYtNjQ5ZDliOWVlNTQ3IiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjFiN2U0N2MyLTY3ZTgtNDc1Zi1hOTBhLTQ3YjQwZGFjYTU2YiIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiMjNmNDA4MmUtYmFjZi00ZGJmLThiZmUtNTVhOTE3YTgwYmU5Iiwic2NvcGUiOiIiLCJzaWQiOiIyM2Y0MDgyZS1iYWNmLTRkYmYtOGJmZS01NWE5MTdhODBiZTkifQ.NiaUvdGLAeyFFh7ik4RF7Guy5qcEd0uVC25ElCkm8PakupvilBVByjgmgEn7Qfru6CXavw1BkCCybV5JdafdFqtz06gRozvY-twHsdhsV_5ct46wr0tRzwE2hQmb1QXQ9-DZCAYRQ7ZmxDhBzp27aX_qrH-BuiK4bug-pPAe6zSmazZCgfXaDwDf05ixkj1P2KGnfglKvUtqfArDjoU9jm2XoDGWVR4gmvGHjCiRajR0pOiXPzCxKN15ATpG3Jg1ZxDAfEqihd_0lKoSyEz6CFTis030x8m9BV1Hvu4cMr8DZOESirLEC6RtrukBDltouhDAID-mFAVaWPTZT0xB_g"; // Replace with your actual token
+const TOKEN = "eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI0QU1vTTBIa3JWaDBfalV0VHRLZjc5VlBXcTFQQVdlS3BwaWlySVpUSWdjIn0.eyJleHAiOjE2OTMwNTQyMzcsImlhdCI6MTY5MzAxODIzNywianRpIjoiZDFjNWZiZmEtZTUxYS00YTM4LTk4NGItOGQyMTc0NTcyNTMzIiwiaXNzIjoiaHR0cHM6Ly9yb24tdGhlLXJvY2tlci5uZXQvYXV0aC9yZWFsbXMvbmRyciIsInN1YiI6IjJkNDk4ZTg0LWYzNjYtNGQ2OS1iZjU0LTVmOTJjYTYwZmQ1YyIsInR5cCI6IkJlYXJlciIsImF6cCI6InB5dGhvbi1jbGllbnQiLCJzZXNzaW9uX3N0YXRlIjoiYzk4ZjBmMDgtNjI3Yi00NDFlLWJhODQtMzUwMDM2Y2UyOTI5Iiwic2NvcGUiOiIiLCJzaWQiOiJjOThmMGYwOC02MjdiLTQ0MWUtYmE4NC0zNTAwMzZjZTI5MjkifQ.Ju_qF1neNBLaZMCjK7nqf82XNcOwO42EJxleh8YAMvU_xLAt8gIKmgyZdzObTQ8cgUx0Ms2BzohcqPizTv9dBXe51_wZtvDuEWD7ehc61875_wBmYqswcu6k__0datp6gb6sk5rZNo8EjXGuH-f7QzSllH756QDw70qtaXe-gfpxmlcoHG-8wIFtBbKIk2A1Tuts1a_ZU5dyhaRE9hf3TpI_qkig1FFR_BpeIRft7UNlX-q7KjX7gzaS8cLNaAVwEVuPHb4JPHv6rZvcklMYaAyRuzcQwf3HM8gT-PXYK1Hc8N_E97fZVXQgZfZAtvY4q1NMTeVZsuiXyDD"; // Replace with your actual token
 const urlParams = new URLSearchParams(window.location.search);
 const roomId = urlParams.get('room_id');
 const apiUrl = window.location.pathname.startsWith('/ndrr')
@@ -40,7 +40,7 @@ function handleInvalidTokenError() {
     const errorDiv = document.createElement("div");
     errorDiv.textContent = "Error: Token is invalid";
     document.body.appendChild(errorDiv);
-    alert("Token is invalid");
+        alert("Token is invalid");
 }
 
 
@@ -60,7 +60,7 @@ function populateRoomInfo(room) {
 function fetchData() {
     fetch(apiUrl, { headers })
         .then(response => {
-            if (response.status === 401  || response.status === 406) { 
+            if (response.status === 401  || response.status === 406) {
                 handleInvalidTokenError();
                 throw new Error("Token is invalid");
             }
