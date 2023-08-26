@@ -13,9 +13,8 @@
 
 | 機能名                      | 残課題概要                                | 進捗状況           |
 |---------------------------------|-------------------------------------|--------------------|
-| `check_post_frequency_within_15_seconds` | 15秒以上で3回投稿すると Too many requests within 15 seconds              | 完了               |
 | `check_ng_words`| 極性解析の辞書作成                    | 途中               |
-| `check_post_frequency_within_time`         | 180秒で5回投稿するとSpam                      | 完了               |
+| `check_post_frequency_within_time`         | 10秒で3回投稿するとSpam                      | 完了               |
 
 ### 進捗状況の説明
 
