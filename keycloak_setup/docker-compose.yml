@@ -14,7 +14,7 @@ services:
     networks:
       - keycloak-network
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.0
+    image: quay.io/keycloak/keycloak:18.0.0
     depends_on:
       - mysql
     environment:
