@@ -13,23 +13,22 @@ const bull = (
 
 function RoomInfo({ room }) {
   return (
-    <Card sx={{ maxWidth: 970 }}>
-      <CardContent>
-        <Grid container spacing={3}>
-          <Grid item xs={4}>
-            <Typography>{room.room_name} (/{room.room_max_capacity})  🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} </Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography>{room.room_label}</Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <Typography>{room.room_owner_id}</Typography>
-          </Grid>
+<Card sx={{ maxWidth: 970 }}>
+  <CardContent>
+    <Grid container spacing={3}>
+      <Grid item xs={4}>
+        <Typography>{room.room_name} (/{room.room_max_capacity}) 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit}</Typography>
+      </Grid>
+      <Grid item xs={4}>
+        <Typography>{room.room_label}</Typography>
+      </Grid>
+      <Grid item xs={4}>
+        <Typography>{room.room_owner_id}</Typography>
+      </Grid>
+    </Grid>
+  </CardContent>
+</Card>
 
-        </Grid>
-      </CardContent>
-
-    </Card>
   );
 }
 

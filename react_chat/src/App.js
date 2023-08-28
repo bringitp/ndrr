@@ -152,39 +152,60 @@ function MainComponent() {
       {jsonData ? (
 
 
-    <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <RoomInfo room={jsonData.room} />
-        <p></p>
-        {jsonData.messages.map((message) => (
-          <div
-            key={message.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between', // 左右の要素を均等に配置
-              marginBottom: '10px',
-              width: '720px', // メッセージバルーンの横幅を設定
-            }}
-          >
-            <img src="http://flat-icon-design.com/f/f_event_98/s128_f_event_98_0bg.png" alt="Icon" width="60" height="60" />
-            <div
-              style={{
-                marginLeft: '10px',
-                backgroundColor: '#e0e0e0',
-                borderRadius: '8px',
-                padding: '8px',
-                width: 'calc(100% - 60px)', // バルーン内のコンテンツを親要素に合わせる
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant="subtitle1">{message.sender.username}</Typography>
-                <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} )</Typography>
-              </div>
-              <Typography variant="body1">{message.content}</Typography>
-            </div>
-          </div>
-        ))}
-      </Paper>
+<Paper elevation={9} style={{ padding: '20px', marginTop: '20px', height: '900px' }}>
+  <RoomInfo room={jsonData.room} />
+ 
+ <div style={{ marginTop: '20px' }}>
+ </div>
+   
+ <div style={{ marginTop: '20px' }}>
+  <TextareaAutosize
+    rowsMin={3}
+    placeholder="Type your message..."
+    value={newMessage}
+    onChange={handleNewMessageChange}
+    style={{ width: '89%', height: '100px' }}
+  />
+  <br /> {/* 改行要素を追加 */}
+  <Button variant="contained" color="primary" onClick={handleSendMessage}>
+    Send Message
+  </Button>
+</div>
+
+ <div style={{ marginTop: '20px' }}>
+ </div>
+
+
+  {jsonData.messages.map((message) => (
+    <div
+      key={message.id}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between', // 左右の要素を均等に配置
+        marginBottom: '10px',
+        width: '89%', // メッセージバルーンの横幅を設定
+      }}
+    >
+      <img src="http://flat-icon-design.com/f/f_event_98/s128_f_event_98_0bg.png" alt="Icon" width="60" height="60" />
+      <div
+        style={{
+          marginLeft: '10px',
+          backgroundColor: '#e0e0e0',
+          borderRadius: '8px',
+          padding: '8px',
+          width: 'calc(100% - 60px)', // バルーン内のコンテンツを親要素に合わせる
+        }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="subtitle1">{message.sender.username}</Typography>
+          <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} )</Typography>
+        </div>
+        <Typography variant="body1">{message.content}</Typography>
+      </div>
+    </div>
+  ))}
+</Paper>
 
 
 
@@ -193,18 +214,7 @@ function MainComponent() {
         <CircularProgress />
       )}
 
-      <div style={{ marginTop: '20px' }}>
-        <TextareaAutosize
-          rowsMin={3}
-          placeholder="Type your message..."
-          value={newMessage}
-          onChange={handleNewMessageChange}
-          style={{ width: '100%' }}
-        />
-        <Button variant="contained" color="primary" onClick={handleSendMessage} style={{ marginTop: '10px' }}>
-          Send Message
-        </Button>
-      </div>
+
     </Container>
   );
 }
