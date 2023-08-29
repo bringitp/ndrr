@@ -1,6 +1,7 @@
 {
   "name": "react_chat",
   "version": "0.1.0",
+  "homepage": "https://ron-the-rocker.net/",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.11.1",
