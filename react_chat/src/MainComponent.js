@@ -108,17 +108,6 @@ function MainComponent() {
         </Button>
       </div>
 
-      {jsonData ? (
-        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px', maxHeight: '300px', overflowY: 'auto' }} ref={messageContainerRef}>
-          <RoomInfo room={jsonData.room} />
-          <p></p>
-          {jsonData.messages.map((message) => (
-            <ChatMessage key={message.id} message={message} isMyMessage={message.sender.id === keycloak.subject} />
-          ))}
-        </Paper>
-      ) : (
-        <CircularProgress />
-      )}
 
       <div style={{ marginTop: '20px' }}>
         <TextareaAutosize

@@ -192,7 +192,7 @@ if (error) {
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="subtitle1"><strong>{message.sender.username}</strong> <Typography variant="caption">{message.sender.trip}</Typography></Typography>
-                    <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} - {message.sender.privilege} )</Typography>
+                    <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} - {message.sender.privilege} : login {message.sender.lastlogin_at} )</Typography>
                   </div>
                   <Typography variant="body1">{message.content}</Typography>
                 </div>
