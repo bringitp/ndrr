@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { ReactKeycloakProvider, useKeycloak } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 import Alert from '@mui/material/Alert';
@@ -22,8 +22,9 @@ const keycloakConfigLocal = {
 };
 
 function Room() {
+  const { roomId } = useParams(); // URLパラメータからroomIdを取得
+
   const location = useLocation();
-  const [roomId, setRoomId] = useState(null);
   const [jsonData, setJsonData] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const messageContainerRef = useRef(null);
@@ -33,8 +34,8 @@ function Room() {
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/ndrr/static')
-        ? 'https://ron-the-rocker.net/ndrr/api/rooms/1/messages'
-        : 'http://localhost:7777/rooms/1/messages';
+        ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
+        : `http://localhost:7777/rooms/${roomId}/messages`;
 
       const headers = new Headers();
       headers.append('Authorization', `Bearer ${keycloak.token}`);
@@ -79,8 +80,8 @@ const fetchData = async () => {
 
   const handleSendMessage = async () => {
     const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/ndrr/static')
-      ? 'https://ron-the-rocker.net/ndrr/api/rooms/1/messages'
-      : 'http://localhost:7777/rooms/1/messages';
+      ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
+      : `http://localhost:7777/rooms/${roomId}/messages`;
 
     const headers = new Headers();
     headers.append('Authorization', `Bearer ${keycloak.token}`);

@@ -20,7 +20,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/room" element={<Room />} />
+          <Route path="/room/:roomId" element={<Room />} />
           {/* 他のルートをここに追加 */}
         </Routes>
       </Router>
