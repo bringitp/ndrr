@@ -40,6 +40,25 @@ class AvatarList(Base):
     avatar_id = Column(Integer, primary_key=True)
     avatar_url = Column(String(255), nullable=False)
 
+
+class PrivateMessage(Base):
+    __tablename__ = 'private_messages'
+    
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    content = Column(Text, nullable=False)
+    toxicity = Column(Float(precision=6), nullable=True)  
+    sentiment = Column(Float(precision=6), nullable=True)
+    constructive = Column(Float(precision=6), nullable=True)
+    incendiary = Column(Float(precision=6), nullable=True)
+    foxy = Column(Float(precision=6), nullable=True)
+    fluence = Column(Float(precision=6), nullable=True)
+    sent_at = Column(TIMESTAMP, nullable=False)
+    
+    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
+    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -68,17 +87,17 @@ class User(Base):
     # 新しいカラム：プライベートメッセージのNGリスト
     private_message_ng_list = Column(Text)
     # プライベートメッセージの関連性
-    received_private_messages = relationship("PrivateMessage", back_populates="receiver")
-    sent_private_messages = relationship("PrivateMessage", back_populates="sender")
-
+    received_private_messages = relationship("PrivateMessage", back_populates="receiver", foreign_keys=[PrivateMessage.receiver_id])
+    sent_private_messages = relationship("PrivateMessage", back_populates="sender", foreign_keys=[PrivateMessage.sender_id])
     sessions = relationship("UserSession", back_populates="user")
     sent_messages = relationship("Message", back_populates="sender")
+
     blocked_by_users = relationship("BlockedUser", back_populates="blocking_user", foreign_keys="[BlockedUser.blocking_user_id]")
     room_memberships = relationship("RoomMember", back_populates="user")
     images = relationship("Image", back_populates="sender")
     spam_users = relationship("SpamUser", back_populates="user")
     # blocked_usersの関連定義にforeign_keys引数を追加
-    blocked_users = relationship("BlockedUser", back_populates="blocked_user", foreign_keys="[BlockedUser.blocked_user_id]")    
+    blocked_users = relationship("BlockedUser", back_populates="blocked_user", foreign_keys="[BlockedUser.blocked_user_id]")
     banned_users = relationship("BannedUser", back_populates="user")
     spam_messages = relationship("SpamMessage", back_populates="user")
     suspicious_messages = relationship("SuspiciousMessage", back_populates="user")  # ここに関連性を追加
@@ -123,23 +142,6 @@ class Message(Base):
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_messages")
 
-class PrivateMessage(Base):
-    __tablename__ = 'private_messages'
-    
-    id = Column(Integer, primary_key=True)
-    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    content = Column(Text, nullable=False)
-    toxicity      =  Column(Float(precision=6), nullable=True)  
-    sentiment     =  Column(Float(precision=6), nullable=True)
-    constructive  =  Column(Float(precision=6), nullable=True)
-    incendiary    =  Column(Float(precision=6), nullable=True)
-    foxy           =  Column(Float(precision=6), nullable=True)
-    fluence       =  Column(Float(precision=6), nullable=True)
-    sent_at = Column(TIMESTAMP, nullable=False)
-    
-    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
-    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
 
 class Image(Base):
@@ -199,4 +201,3 @@ class SuspiciousMessage(Base):
     
     user = relationship("User", back_populates="suspicious_messages")
 
-# SQLAlchemyのエンジンを作成してデータベースに接続

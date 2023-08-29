@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember
+from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -95,7 +95,7 @@ def validate_token(token_string: str) -> str:
 def get_user_by_sub(sub: str, db: Session) -> User:
     user = db.query(User).filter(User.sub == sub).first()
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
     return user
 
 def check_post_frequency_within_15_seconds(user_id: int, db: Session) -> None:
@@ -167,8 +167,15 @@ async def get_room_messages(
         "messages": []
     }
 
+
     for message in reversed(messages):  # Display new messages at the top
         sender = db.query(User).filter(User.id == message.sender_id).first()
+        avatar_url = None
+        if sender.avatar_id:
+            avatar = db.query(AvatarList).filter(AvatarList.avatar_id == sender.avatar_id).first()
+            if avatar:
+                avatar_url = avatar.avatar_url
+
         message_data = {
             "id": message.id,
             "room_id": message.room_id,
@@ -179,8 +186,12 @@ async def get_room_messages(
             "sent_at": message.sent_at,
             "sender": {
                 "username": escape_html(sender.username),
-                "avatar": escape_html(sender.avatar),
+                "avatar_url": avatar_url,  # Use the avatar_url here
+                "trip": escape_html(sender.trip),
                 "karma": sender.karma,
+                "privilege": sender.privilege,
+                "lastlogin_at": sender.lastlogin_at,
+                "penalty_points": sender.penalty_points,
                 "profile": escape_html(sender.profile)
             },
         }
