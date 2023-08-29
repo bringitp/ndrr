@@ -11,7 +11,17 @@ const keycloakConfigLocal = {
   resource: 'test',
 };
 
-const useKeycloakConfig = keycloakConfigLocal;
+
+const keycloakConfigServer = {
+  url: 'https://ron-the-rocker.net/auth',
+  realm: 'ndrr',
+  clientId: 'react-server',
+  resource: 'test',
+};
+
+const useKeycloakConfig =
+  process.env.NODE_ENV === 'development' ?   keycloakConfigLocal : keycloakConfigServer;
+
 const keycloak = new Keycloak(useKeycloakConfig);
 
 function App() {

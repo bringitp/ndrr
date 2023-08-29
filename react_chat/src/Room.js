@@ -14,12 +14,6 @@ import {
 } from '@mui/material';
 import RoomInfo from './RoomInfo';
 
-const keycloakConfigLocal = {
-  url: 'https://ron-the-rocker.net/auth',
-  realm: 'ndrr',
-  clientId: 'react-local',
-  resource: 'test',
-};
 
 function Room() {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得

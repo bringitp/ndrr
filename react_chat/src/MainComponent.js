@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useKeycloak } from '@react-keycloak/web'; // 追加
 
-
 import {
   Button,
   CircularProgress,
