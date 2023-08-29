@@ -27,7 +27,7 @@ function Room() {
 
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
-      const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/ndrr/static')
+      const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
         ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
         : `http://localhost:7777/rooms/${roomId}/messages`;
 
@@ -73,7 +73,7 @@ const fetchData = async () => {
   };
 
   const handleSendMessage = async () => {
-    const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/ndrr/static')
+    const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
       ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
       : `http://localhost:7777/rooms/${roomId}/messages`;
 
