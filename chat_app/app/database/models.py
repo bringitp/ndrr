@@ -35,6 +35,11 @@ class Room(Base):
     messages = relationship("Message", back_populates="room")
     images = relationship("Image", back_populates="room")
 
+class AvatarList(Base):
+    __tablename__ = 'avatar_list'
+    avatar_id = Column(Integer, primary_key=True)
+    avatar_url = Column(String(255), nullable=False)
+
 class User(Base):
     __tablename__ = 'users'
 
@@ -42,21 +47,29 @@ class User(Base):
     username = Column(String(50), unique=True, nullable=False)
     allowed_name_changes = Column(Integer, nullable=False)
     sub = Column(String(100), unique=True, nullable=False)
-    avatar = Column(String(100))
+    avatar_id = Column(Integer, ForeignKey('avatar_list.avatar_id'), nullable=True)
     profile = Column(String(200))
     trip = Column(String(32), nullable=False)
     life = Column(Integer, nullable=False)
-    spam_activity_score = Column(Float(precision=6), nullable=False)  # 小数型に変更
-    karma = Column(Float(precision=6), nullable=False)  # 小数型に変更
 
+    # 新しいカラム：ペナルティポイント
+    penalty_points = Column(Integer, default=0, nullable=False)
+    spam_activity_score = Column(Float(precision=6), nullable=False)
+    karma = Column(Float(precision=6), nullable=False)
+    
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogin_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogout_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
-    privilege = Column(Enum('user', 'premium', name='privilege_enum'), nullable=False, default='user')
+    privilege = Column(Enum('guest','user', 'premium', name='privilege_enum'), nullable=False, default='user')
     ng_user_list = Column(Text)
-
     owned_rooms = relationship("Room", back_populates="owner", foreign_keys=[Room.owner_id])
     room_memberships = relationship("RoomMember", back_populates="user")
+
+    # 新しいカラム：プライベートメッセージのNGリスト
+    private_message_ng_list = Column(Text)
+    # プライベートメッセージの関連性
+    received_private_messages = relationship("PrivateMessage", back_populates="receiver")
+    sent_private_messages = relationship("PrivateMessage", back_populates="sender")
 
     sessions = relationship("UserSession", back_populates="user")
     sent_messages = relationship("Message", back_populates="sender")
@@ -109,6 +122,24 @@ class Message(Base):
     
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_messages")
+
+class PrivateMessage(Base):
+    __tablename__ = 'private_messages'
+    
+    id = Column(Integer, primary_key=True)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    content = Column(Text, nullable=False)
+    toxicity      =  Column(Float(precision=6), nullable=True)  
+    sentiment     =  Column(Float(precision=6), nullable=True)
+    constructive  =  Column(Float(precision=6), nullable=True)
+    incendiary    =  Column(Float(precision=6), nullable=True)
+    foxy           =  Column(Float(precision=6), nullable=True)
+    fluence       =  Column(Float(precision=6), nullable=True)
+    sent_at = Column(TIMESTAMP, nullable=False)
+    
+    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
+    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
 
 class Image(Base):

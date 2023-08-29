@@ -7,7 +7,7 @@ import {
   Container,
   Paper,
   Typography,
-  TextareaAutosize, // Import Textarea component from Material-UI
+  TextareaAutosize,
 } from '@mui/material';
 import RoomInfo from './RoomInfo';
 
@@ -55,7 +55,7 @@ function formatDate(timestamp) {
 function MainComponent() {
   const { keycloak, initialized } = useKeycloak();
   const [jsonData, setJsonData] = useState(null);
-  const [newMessage, setNewMessage] = useState(''); // State to store the new message
+  const [newMessage, setNewMessage] = useState('');
   const messageContainerRef = useRef(null);
 
   useEffect(() => {
@@ -73,7 +73,6 @@ function MainComponent() {
           if (response.ok) {
             const data = await response.json();
             setJsonData(data);
-            // Scroll to the bottom of the message container when new messages arrive
             if (messageContainerRef.current) {
               messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
             }
@@ -110,11 +109,10 @@ function MainComponent() {
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify({  message_content: newMessage }), // Send the new message content
+        body: JSON.stringify({ message_content: newMessage }),
       });
 
       if (response.ok) {
-        // Clear the input field
         setNewMessage('');
       } else {
         console.error('Error sending message:', response.status);
@@ -150,71 +148,57 @@ function MainComponent() {
       </div>
 
       {jsonData ? (
+        <Paper elevation={9} style={{ padding: '20px', marginTop: '20px', height: '900px' }}>
+          <RoomInfo room={jsonData.room} />
+          <div style={{ marginTop: '20px' }}>
+            <TextareaAutosize
+              rowsMin={3}
+              placeholder="Type your message..."
+              value={newMessage}
+              onChange={handleNewMessageChange}
+              style={{ width: '89%', height: '100px' }}
+            />
+            <br />
+            <Button variant="contained" color="primary" onClick={handleSendMessage}>
+              Send Message
+            </Button>
+          </div>
 
-
-<Paper elevation={9} style={{ padding: '20px', marginTop: '20px', height: '900px' }}>
-  <RoomInfo room={jsonData.room} />
- 
- <div style={{ marginTop: '20px' }}>
- </div>
-   
- <div style={{ marginTop: '20px' }}>
-  <TextareaAutosize
-    rowsMin={3}
-    placeholder="Type your message..."
-    value={newMessage}
-    onChange={handleNewMessageChange}
-    style={{ width: '89%', height: '100px' }}
-  />
-  <br /> {/* 改行要素を追加 */}
-  <Button variant="contained" color="primary" onClick={handleSendMessage}>
-    Send Message
-  </Button>
-</div>
-
- <div style={{ marginTop: '20px' }}>
- </div>
-
-
-  {jsonData.messages.map((message) => (
-    <div
-      key={message.id}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between', // 左右の要素を均等に配置
-        marginBottom: '10px',
-        width: '89%', // メッセージバルーンの横幅を設定
-      }}
-    >
-      <img src="http://flat-icon-design.com/f/f_event_98/s128_f_event_98_0bg.png" alt="Icon" width="60" height="60" />
-      <div
-        style={{
-          marginLeft: '10px',
-          backgroundColor: '#e0e0e0',
-          borderRadius: '8px',
-          padding: '8px',
-          width: 'calc(100% - 60px)', // バルーン内のコンテンツを親要素に合わせる
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="subtitle1">{message.sender.username}</Typography>
-          <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} )</Typography>
-        </div>
-        <Typography variant="body1">{message.content}</Typography>
-      </div>
-    </div>
-  ))}
-</Paper>
-
-
-
-
+          <div style={{ marginTop: '20px' }}>
+            {jsonData.messages.map((message) => (
+              <div
+                key={message.id}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '10px',
+                  width: '89%',
+                }}
+              >
+                <img src="http://flat-icon-design.com/f/f_event_98/s128_f_event_98_0bg.png" alt="Icon" width="60" height="60" />
+                <div
+                  style={{
+                    marginLeft: '10px',
+                    backgroundColor: '#e0e0e0',
+                    borderRadius: '8px',
+                    padding: '8px',
+                    width: 'calc(100% - 60px)',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="subtitle1">{message.sender.username}</Typography>
+                    <Typography variant="caption">{message.sent_at}  ( karma {message.sender.karma} )</Typography>
+                  </div>
+                  <Typography variant="body1">{message.content}</Typography>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Paper>
       ) : (
         <CircularProgress />
       )}
-
-
     </Container>
   );
 }
@@ -225,7 +209,6 @@ const styles = {
     justifyContent: 'flex-start',
     alignItems: 'flex-start',
   },
-
   myMessage: {
     backgroundColor: '#007bff',
     color: '#fff',
@@ -234,7 +217,6 @@ const styles = {
     position: 'relative',
     maxWidth: '60%',
   },
-
   otherMessage: {
     backgroundColor: '#eee',
     color: '#333',
