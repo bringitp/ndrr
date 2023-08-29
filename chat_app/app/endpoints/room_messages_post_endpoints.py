@@ -168,9 +168,7 @@ async def create_room_message(
         "sent_at": new_message.sent_at,
         "sender": {
             "username": login_user.username,
-            "avatar": login_user.avatar,
-            "karma": login_user.karma,
-            "profile": login_user.profile
+            "karma": login_user.karma
         },
     }
 

@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useKeycloak } from '@react-keycloak/web'; // 追加
+
+
 import {
   Button,
   CircularProgress,
@@ -10,7 +13,7 @@ import {
 import RoomInfo from './RoomInfo';
 
 function MainComponent() {
-  const { keycloak, initialized } = useKeycloak();
+  const { keycloak, initialized } = useKeycloak(); // useKeycloakを使用
   const [jsonData, setJsonData] = useState(null);
   const [newMessage, setNewMessage] = useState('');
   const messageContainerRef = useRef(null);
