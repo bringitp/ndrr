@@ -171,14 +171,16 @@ async def create_room_message(
     # Check post frequency within 180 seconds and 5 post count
     check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
 
-    new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
- 
+
     # htmlをエスケープする
-    new_message = escape_html(new_message)
+    sanitizing_content = escape_html(message_content)
  
-    #pattern = r"```(.*?)```"  # 正規表現パターンで```...```に囲まれた部分を抽出
-    #output_text = re.sub(pattern, replace_markdown_with_html, input_text, flags=re.DOTALL)
-    #output_text = output_text.replace(r"```(.*?)```", replacement_text)
+    pattern = r"```(.*?)```"  # 正規表現パターンで```...```に囲まれた部分を抽出
+    output_text = re.sub(pattern, replace_markdown_with_html, sanitizing_content, flags=re.DOTALL)
+    markdown_build_text = output_text.replace(r"```(.*?)```", sanitizing_content)
+
+    new_message = Message(content=markdown_build_text, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
+
 
     db.add(new_message)
     db.commit()
