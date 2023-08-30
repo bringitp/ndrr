@@ -11,7 +11,6 @@ const keycloakConfigLocal = {
   resource: 'test',
 };
 
-
 const keycloakConfigServer = {
   url: 'https://ron-the-rocker.net/auth',
   realm: 'ndrr',
@@ -20,13 +19,15 @@ const keycloakConfigServer = {
 };
 
 const useKeycloakConfig =
-  process.env.NODE_ENV === 'development' ?   keycloakConfigLocal : keycloakConfigServer;
+  process.env.NODE_ENV === 'development' ? keycloakConfigLocal : keycloakConfigServer;
 
 const keycloak = new Keycloak(useKeycloakConfig);
 
 function App() {
   return (
-   <ReactKeycloakProvider authClient={keycloak}>
+ <ReactKeycloakProvider authClient={keycloak} initOptions={{
+          checkLoginIframe: false,
+            }}>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -37,6 +38,7 @@ function App() {
     </ReactKeycloakProvider>
   );
 }
+
 function Home() {
   return <div>Hello</div>;
 }

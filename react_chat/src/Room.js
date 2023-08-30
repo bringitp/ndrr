@@ -1,46 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
-import UserProfilePopup from "./UserProfilePopup";
 
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import Keycloak from "keycloak-js";
 import Alert from "@mui/material/Alert";
-import MainComponent from "./MainComponent";
-import {
-  Button,
-  CircularProgress,
-  Container,
-  Paper,
-  Typography,
-  TextareaAutosize,
-} from "@mui/material";
+import {Button,CircularProgress,Container,Paper,Typography,TextareaAutosize} from "@mui/material";
 import RoomInfo from "./RoomInfo";
 
 function Room() {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
-
   const location = useLocation();
   const [jsonData, setJsonData] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const messageContainerRef = useRef(null);
-  
-
   const [selectedUser, setSelectedUser] = useState(null);
-  const handleUserIconClick = (user) => {
-    setSelectedUser(user);
-  };
-
-  const handleProfilePopupClose = () => {
-    setSelectedUser(null);
-  };
-
-
-
   const [error, setError] = useState(null);
-
-
-
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
 
   useEffect(() => {
@@ -50,7 +25,6 @@ function Room() {
       )
         ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/messages`
         : `http://localhost:7777/room/${roomId}/messages`;
-
       const headers = new Headers();
       headers.append("Authorization", `Bearer ${keycloak.token}`);
 
@@ -246,8 +220,7 @@ function Room() {
                     alt="Icon"
                     width="60"
                     height="60"
-                    style={{ borderRadius: '15%' }} // 丸くする
-                    onClick={() => handleUserIconClick(message.sender)}
+                    style={{ borderRadius: '15%' }} // 丸くする         
                   />
 
                   <div
