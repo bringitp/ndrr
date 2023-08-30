@@ -174,9 +174,9 @@ async def create_room_message(
     # htmlをエスケープする
     sanitizing_content = escape_html(message_content)
  
-    pattern = r"--(.*?)--"  # 正規表現パターンで```...```に囲まれた部分を抽出
+    pattern = r"##(.*?)##"  # 正規表現パターンで```...```に囲まれた部分を抽出
     output_text = re.sub(pattern, replace_markdown_with_html, sanitizing_content, flags=re.DOTALL)
-    markdown_build_text = output_text.replace(r"--(.*?)--", sanitizing_content)
+    markdown_build_text = output_text.replace(r"##(.*?)##", sanitizing_content)
 
     new_message = Message(content=markdown_build_text, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
 
