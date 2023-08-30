@@ -176,9 +176,9 @@ async def create_room_message(
     # htmlをエスケープする
     new_message = escape_html(new_message)
  
-    pattern = r"```(.*?)```"  # 正規表現パターンで```...```に囲まれた部分を抽出
-    output_text = re.sub(pattern, replace_markdown_with_html, input_text, flags=re.DOTALL)
-    output_text = output_text.replace(r"```(.*?)```", replacement_text)
+    #pattern = r"```(.*?)```"  # 正規表現パターンで```...```に囲まれた部分を抽出
+    #output_text = re.sub(pattern, replace_markdown_with_html, input_text, flags=re.DOTALL)
+    #output_text = output_text.replace(r"```(.*?)```", replacement_text)
 
     db.add(new_message)
     db.commit()
