@@ -169,7 +169,7 @@ if (error) {
                 <img src={
                   process.env.NODE_ENV === 'development'
                     ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
-                    : `https://ron-the-rocker.net/ndrr/static/img/${message.sender.avatar_url}`
+                    : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
                 }
                   alt="Icon"
                   width="60"
