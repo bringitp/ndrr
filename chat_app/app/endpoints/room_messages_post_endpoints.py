@@ -8,6 +8,22 @@ import requests
 import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
+import html
+def escape_html(text):
+    return html.escape(text, quote=True)
+
+import markdown
+
+def markdown_to_html(markdown_text):
+    html = markdown.markdown(markdown_text)
+    return html
+
+def replace_markdown_with_html(match): # md形式
+    markdown_text = match.group(1)
+    html_output = markdown_to_html(markdown_text)
+    return html_output
+
+
 
 app = FastAPI()
 
@@ -132,7 +148,7 @@ async def create_room_message(
     message_content = data.get("message_content")
     if not message_content:
         raise HTTPException(status_code=422, detail="message_content is required")
-    if len(message_content) > 255:
+    if len(message_content) > 350:
         raise HTTPException(status_code=406, detail="message_content is too long")
 
     # Check if the user is a member of the room
@@ -155,8 +171,15 @@ async def create_room_message(
     # Check post frequency within 180 seconds and 5 post count
     check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
 
-
     new_message = Message(content=message_content, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
+ 
+    # htmlをエスケープする
+    new_message = escape_html(new_message)
+ 
+    pattern = r"```(.*?)```"  # 正規表現パターンで```...```に囲まれた部分を抽出
+    output_text = re.sub(pattern, replace_markdown_with_html, input_text, flags=re.DOTALL)
+    output_text = output_text.replace(r"```(.*?)```", replacement_text)
+
     db.add(new_message)
     db.commit()
     db.refresh(new_message)

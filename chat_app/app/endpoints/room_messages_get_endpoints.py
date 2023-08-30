@@ -179,7 +179,7 @@ async def get_room_messages(
         message_data = {
             "id": message.id,
             "room_id": message.room_id,
-            "content": escape_html(message.content),
+            "content": message.content,
             "toxicity": message.toxicity,
             "sentiment": message.sentiment,
             "fluence": message.fluence,            
