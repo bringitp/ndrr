@@ -116,7 +116,7 @@ def check_ng_words(message_content: str, ng_words: set) -> None:
     if any(token.surface in ng_words for token in tokens):
         raise HTTPException(status_code=406, detail="NG words found in the message")
 
-@router.get("/rooms/{room_id}/messages", response_model=Dict[str, Any])
+@router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 10,
     login_user: LoginUser = Depends(get_current_user),

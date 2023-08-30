@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { Send as SendIcon } from '@mui/icons-material'; // SendIconをインポート
+
+
 import { ReactKeycloakProvider, useKeycloak } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 import Alert from '@mui/material/Alert';
@@ -28,8 +31,8 @@ function Room() {
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
-        ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
-        : `http://localhost:7777/rooms/${roomId}/messages`;
+        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/messages`
+        : `http://localhost:7777/room/${roomId}/messages`;
 
       const headers = new Headers();
       headers.append('Authorization', `Bearer ${keycloak.token}`);
@@ -74,8 +77,8 @@ const fetchData = async () => {
 
   const handleSendMessage = async () => {
     const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
-      ? `https://ron-the-rocker.net/ndrr/api/rooms/${roomId}/messages`
-      : `http://localhost:7777/rooms/${roomId}/messages`;
+      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/messages`
+      : `http://localhost:7777/room/${roomId}/messages`;
 
     const headers = new Headers();
     headers.append('Authorization', `Bearer ${keycloak.token}`);
@@ -124,7 +127,7 @@ if (error) {
     <Container>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h4" gutterBottom>
-          Welcome!
+ 
         </Typography>
         <Button variant="contained" color="secondary" onClick={() => keycloak.logout()}>
           Logout
@@ -134,25 +137,38 @@ if (error) {
       {jsonData ? (
         <Paper elevation={9} style={{ padding: '20px', marginTop: '20px', height: '900px' }}>
           <RoomInfo room={jsonData.room} />
-          <div style={{ marginTop: '20px' }}>
-            <TextareaAutosize
-              rowsMin={3}
-              placeholder="Type your message..."
-              value={newMessage}
-              onChange={handleNewMessageChange}
-              style={{ width: '89%', height: '100px' }}
-
-              onKeyDown={e => {
-                if (e.key === 'Enter') {
-                  handleSendMessage();
-                }
-              }}
-            />
-            <br />
-            <Button variant="contained" color="primary" onClick={handleSendMessage}>
-              Send Message
-            </Button>
-          </div>
+    <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' ,width: 'calc(89% - 10px)' }}>
+      <TextareaAutosize
+        rowsMin={1}
+        placeholder="Type your message..."
+        value={newMessage}
+        onChange={handleNewMessageChange}
+        style={{
+          flexGrow: 1,
+          marginRight: '10px',
+          border: 'none',
+          resize: 'none',
+          padding: '0',
+          width: '45%', // 幅を45%に設定
+          backgroundColor: '#fcfcfc', // 明るい緑色の背景色
+          outline: 'none', // フォーカス時の枠線を無効にする
+                    width: 'calc(89% - 10px)', // 幅を10%狭くする
+        }}
+        onKeyDown={e => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSendMessage();
+          }
+        }}
+      />
+      <Button
+        variant="contained"
+        color="success" // 明るい緑色に
+        onClick={handleSendMessage}
+        endIcon={<SendIcon style={{ color: 'white' }} />}
+        style={{ minWidth: '30px', backgroundColor: '#61c051' }} // 明るい緑色に
+      />
+    </div>
 
           <div style={{ marginTop: '20px' }}>
             {jsonData.messages.map((message) => (
