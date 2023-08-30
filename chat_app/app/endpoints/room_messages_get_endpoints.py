@@ -151,6 +151,10 @@ async def get_room_messages(
         .limit(min(limit, 30))  # 30件以下に制限
         .all()
     )
+
+    room_owner = db.query(User).filter(User.id==room.owner_id).first()
+    count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
+
     messages = list(reversed(messages))  # メッセージの順番を逆にする
 
     response_data = {
@@ -158,7 +162,9 @@ async def get_room_messages(
             "room_id": room.id,
             "room_label": room.label,
             "room_name": room.name,
+            "room_count": count,
             "room_owner_id": room.owner_id,
+            "room_owner_name": room_owner.username ,
             "room_max_capacity": room.max_capacity,
             "room_restricted_karma_over_limit": room.over_karma_limit,
             "room_restricted_karma_under_limit": room.under_karma_limit,

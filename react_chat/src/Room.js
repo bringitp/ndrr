@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
+import UserProfilePopup from "./UserProfilePopup";
 
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import Keycloak from "keycloak-js";
@@ -23,7 +24,23 @@ function Room() {
   const [jsonData, setJsonData] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const messageContainerRef = useRef(null);
+  
+
+  const [selectedUser, setSelectedUser] = useState(null);
+  const handleUserIconClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleProfilePopupClose = () => {
+    setSelectedUser(null);
+  };
+
+
+
   const [error, setError] = useState(null);
+
+
+
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
 
   useEffect(() => {
@@ -151,6 +168,8 @@ function Room() {
         </Button>
       </div>
 
+      <p></p>
+
       {jsonData ? (
         <Paper
           elevation={9}
@@ -176,8 +195,7 @@ function Room() {
               }}
             >
               <TextareaAutosize
-                rowsMin={1}
-                placeholder="Type your message..."
+                placeholder="..."
                 value={newMessage}
                 onChange={handleNewMessageChange}
                 style={{
@@ -229,6 +247,7 @@ function Room() {
                     width="60"
                     height="60"
                     style={{ borderRadius: '15%' }} // 丸くする
+                    onClick={() => handleUserIconClick(message.sender)}
                   />
 
                   <div

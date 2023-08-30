@@ -167,11 +167,9 @@ async def create_room_message(
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
         
-
     check_ng_words(message_content, ng_words)
     # Check post frequency within 180 seconds and 5 post count
     check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
-
 
     # htmlをエスケープする
     sanitizing_content = escape_html(message_content)
@@ -181,7 +179,6 @@ async def create_room_message(
     markdown_build_text = output_text.replace(r"```(.*?)```", sanitizing_content)
 
     new_message = Message(content=markdown_build_text, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
-
 
     db.add(new_message)
     db.commit()
