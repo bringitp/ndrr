@@ -135,9 +135,14 @@ if (error) {
       </div>
 
       {jsonData ? (
-        <Paper elevation={9} style={{ padding: '20px', marginTop: '20px', height: '900px' }}>
-          <RoomInfo room={jsonData.room} />
-    <div style={{ display: 'flex', alignItems: 'center', marginTop: '20px', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' ,width: 'calc(89% - 10px)' }}>
+        <Paper elevation={9} style={{ padding: '20px', marginTop: '20px', display: 'flex', flexDirection: 'column' }}>
+        <RoomInfo room={jsonData.room} />
+   
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', alignItems: 'center', padding: '8px', borderRadius: '4px', border: '1px solid #ccc', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', width: 'calc(89% - 10px)' }}>
+ 
+
+
       <TextareaAutosize
         rowsMin={1}
         placeholder="Type your message..."
@@ -170,7 +175,7 @@ if (error) {
       />
     </div>
 
-          <div style={{ marginTop: '20px' }}>
+              <div style={{ marginTop: '20px', overflowY: 'auto' }}>
             {jsonData.messages.map((message) => (
               <div
                 key={message.id}
@@ -209,6 +214,7 @@ if (error) {
               </div>
             ))}
           </div>
+          </div> 
         </Paper>
       ) : (
         <CircularProgress />
