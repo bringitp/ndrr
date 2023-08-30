@@ -9,6 +9,10 @@ import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
+
+from sqlalchemy.orm import aliased
+
+
 def escape_html(text):
     return html.escape(text, quote=True)
 
@@ -123,11 +127,15 @@ async def get_room_messages(
     db: Session = Depends(get_db)
 ):
     # Check if the user is a member of the room
-    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
+    room_member = (
+        db.query(RoomMember)
+        .filter_by(room_id=room_id, user_id=login_user.id)
+        .first()
+    )
     if not room_member:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
 
-    room = db.query(Room).filter(Room.id == room_id).first()
+    room = db.query(Room).get(room_id)  # Room.idで直接取得可能
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
@@ -137,25 +145,27 @@ async def get_room_messages(
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
-    total_messages = (
-        db.query(Message)
-        .filter(Message.room_id == room_id)
-        .count()
-    )
+    sender_alias = aliased(User)
+    avatar_alias = aliased(AvatarList)
 
     messages = (
-        db.query(Message)
+        db.query(Message, sender_alias, avatar_alias)
+        .join(sender_alias, Message.sender_id == sender_alias.id)
+        .outerjoin(avatar_alias, sender_alias.avatar_id == avatar_alias.avatar_id)
         .filter(Message.room_id == room_id)
-        .order_by(Message.id.desc())  # IDを降順に並び替える
+        .order_by(Message.id.desc())
         .offset(skip)
-        .limit(min(limit, 30))  # 30件以下に制限
+        .limit(min(limit, 30))
         .all()
     )
 
-    room_owner = db.query(User).filter(User.id==room.owner_id).first()
-    count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
+    room_owner = (
+        db.query(User.username)
+        .filter(User.id == room.owner_id)
+        .first()
+    )
 
-    messages = list(reversed(messages))  # メッセージの順番を逆にする
+    count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
 
     response_data = {
         "room": {
@@ -164,7 +174,7 @@ async def get_room_messages(
             "room_name": room.name,
             "room_count": count,
             "room_owner_id": room.owner_id,
-            "room_owner_name": room_owner.username ,
+            "room_owner_name": room_owner.username,
             "room_max_capacity": room.max_capacity,
             "room_restricted_karma_over_limit": room.over_karma_limit,
             "room_restricted_karma_under_limit": room.under_karma_limit,
@@ -173,14 +183,24 @@ async def get_room_messages(
         "messages": []
     }
 
+    sender_ids = [message.sender_id for message, _, _ in messages]
+    senders = (
+        db.query(User)
+        .filter(User.id.in_(sender_ids))
+        .all()
+    )
 
-    for message in reversed(messages):  # Display new messages at the top
-        sender = db.query(User).filter(User.id == message.sender_id).first()
+    avatar_ids = [sender.avatar_id for sender in senders if sender.avatar_id]
+    avatars = (
+        db.query(AvatarList)
+        .filter(AvatarList.avatar_id.in_(avatar_ids))
+        .all()
+    )
+
+    for message, sender, avatar in messages:
         avatar_url = None
-        if sender.avatar_id:
-            avatar = db.query(AvatarList).filter(AvatarList.avatar_id == sender.avatar_id).first()
-            if avatar:
-                avatar_url = avatar.avatar_url
+        if avatar:
+            avatar_url = avatar.avatar_url
 
         message_data = {
             "id": message.id,
@@ -188,11 +208,11 @@ async def get_room_messages(
             "content": message.content,
             "toxicity": message.toxicity,
             "sentiment": message.sentiment,
-            "fluence": message.fluence,            
+            "fluence": message.fluence,
             "sent_at": message.sent_at,
             "sender": {
                 "username": escape_html(sender.username),
-                "avatar_url": avatar_url,  # Use the avatar_url here
+                "avatar_url": avatar_url,
                 "trip": escape_html(sender.trip),
                 "karma": sender.karma,
                 "privilege": sender.privilege,
@@ -203,7 +223,4 @@ async def get_room_messages(
         }
         response_data["messages"].append(message_data)
 
-    response_data["total_messages"] = total_messages  # Include total message count
-
     return response_data
-
