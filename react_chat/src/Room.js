@@ -212,61 +212,65 @@ function Room() {
 
             <div style={{ marginTop: '20px', overflowY: 'auto' }}>
               {jsonData.messages.map((message) => (
-                <div
-                  key={message.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '10px',
-                    width: '89%',
-                  }}
-                >
-                  <img
-                    src={
-                      process.env.NODE_ENV === 'development'
-                        ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
-                        : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
-                    }
-                    alt="Icon"
-                    width="60"
-                    height="60"
-                    style={{ borderRadius: '15%' }} // 丸くする         
-                    onClick={(event) =>  handleUserClick(message.sender, event)}
-                  />
+<div
+  key={message.id}
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '10px',
+    width: '89%',
+  }}
+>
+  <img
+    src={
+      process.env.NODE_ENV === 'development'
+        ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
+        : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
+    }
+    alt="Icon"
+    width="60"
+    height="60"
+    style={{ borderRadius: '15%' }}
+    onClick={(event) =>  handleUserClick(message.sender, event)}
+  />
 
-                  <div
-                    style={{
-                      marginLeft: '10px',
-                      backgroundColor: '#e0e0e0',
-                      borderRadius: '8px',
-                      padding: '8px',
-                      width: 'calc(100% - 60px)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Typography variant="subtitle1">
-                        <strong>{message.sender.username}</strong>{' '}
-                        <Typography variant="caption">
-                          {message.sender.trip}
-                        </Typography>
-                      </Typography>
-                      <Typography variant="caption">
-                        {message.sent_at} ( karma {message.sender.karma} -{' '}
-                        {message.sender.privilege} : login{' '}
-                        {message.sender.lastlogin_at} )
-                      </Typography>
-                    </div>
-                   <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
-<UserProfilePopup user={selectedUser} onClose={handleClosePopup} />
-                  </div>
-                </div>
+  <div
+    style={{
+      marginLeft: '10px',
+      backgroundColor: '#e0e0e0',
+      borderRadius: '8px',
+      padding: '8px',
+      width: 'calc(100% - 60px)',
+    }}
+  >
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <Typography variant="subtitle1">
+        <strong>{message.sender.username}</strong>{' '}
+        <Typography variant="caption">
+          {message.sender.trip}
+        </Typography>
+      </Typography>
+      <Typography variant="caption">
+        {message.sent_at} ( karma {message.sender.karma} -{' '}
+        {message.sender.privilege} : login{' '}
+        {message.sender.lastlogin_at} )
+      </Typography>
+    </div>
+    <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
+  {selectedUser && (
+    <UserProfilePopup user={selectedUser} onClose={handleClosePopup} anchorEl={messageContainerRef.current} />
+  )}
+  </div>
+</div>
+
+
               ))}
             </div>
           </div>
