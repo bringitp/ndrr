@@ -7,6 +7,7 @@ import Keycloak from "keycloak-js";
 import Alert from "@mui/material/Alert";
 import {Button,CircularProgress,Container,Paper,Typography,TextareaAutosize} from "@mui/material";
 import RoomInfo from "./RoomInfo";
+import UserProfilePopup from "./UserProfilePopup";
 
 function Room() {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
@@ -17,6 +18,16 @@ function Room() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState(null);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
+
+
+  const handleUserClick = (user) => {
+    setSelectedUser(user);
+  };
+
+  const handleClosePopup = () => {
+    setSelectedUser(null);
+  };
+
 
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
@@ -143,7 +154,7 @@ function Room() {
       </div>
 
       <p></p>
-
+      
       {jsonData ? (
         <Paper
           elevation={9}
@@ -221,6 +232,7 @@ function Room() {
                     width="60"
                     height="60"
                     style={{ borderRadius: '15%' }} // 丸くする         
+                    onClick={(event) =>  handleUserClick(message.sender, event)}
                   />
 
                   <div
@@ -251,7 +263,8 @@ function Room() {
                         {message.sender.lastlogin_at} )
                       </Typography>
                     </div>
-                    <Typography variant="body1">{message.content}</Typography>
+                   <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
+<UserProfilePopup user={selectedUser} onClose={handleClosePopup} />
                   </div>
                 </div>
               ))}
