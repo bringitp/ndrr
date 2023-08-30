@@ -118,7 +118,7 @@ def check_ng_words(message_content: str, ng_words: set) -> None:
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
-    room_id: int, skip: int = 0, limit: int = 10,
+    room_id: int, skip: int = 0, limit: int = 50,
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
