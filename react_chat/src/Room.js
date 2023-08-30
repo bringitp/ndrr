@@ -1,6 +1,3 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
 
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import Keycloak from "keycloak-js";
