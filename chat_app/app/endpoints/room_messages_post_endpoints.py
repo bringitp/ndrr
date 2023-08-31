@@ -72,6 +72,13 @@ user_post_data = defaultdict(lambda: {"last_post_time": None, "post_count": 0})
 # 最大投稿回数
 MAX_POST_COUNT = 5  # 5回までとする
 
+# YouTubeのアドレスを検出して置き換える関数
+def replace_youtube_links(match):
+    video_id = match.group(5)
+    iframe_tag = f'<p>https://www.youtube.com/embed/{video_id}</p><iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+    return iframe_tag
+
+
 def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: timedelta, max_post_count: int):
     now = datetime.now()
     user_data = user_post_data[user_sub]
@@ -173,12 +180,13 @@ async def create_room_message(
 
     # htmlをエスケープする
     sanitizing_content = escape_html(message_content)
- 
-    pattern = r"##(.*?)##"  # 正規表現パターンで```...```に囲まれた部分を抽出
-    output_text = re.sub(pattern, replace_markdown_with_html, sanitizing_content, flags=re.DOTALL)
-    markdown_build_text = output_text.replace(r"##(.*?)##", sanitizing_content)
 
-    new_message = Message(content=markdown_build_text, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
+# 正規表現パターン
+    youtube_url_regex = re.compile(r'^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?([a-zA-Z0-9_-]{11})')
+
+# YouTubeのアドレスを<iframe>タグに置き換える
+    new_contents = youtube_url_regex.sub(replace_youtube_links, sanitizing_content)
+    new_message = Message(content=new_contents, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
 
     db.add(new_message)
     db.commit()
