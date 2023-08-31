@@ -165,6 +165,7 @@ async def get_room_messages(
         .first()
     )
 
+
     count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
 
     response_data = {
@@ -174,6 +175,7 @@ async def get_room_messages(
             "room_name": room.name,
             "room_count": count,
             "room_owner_id": room.owner_id,
+            "room_login_user_name": login_user.username,
             "room_owner_name": room_owner.username,
             "room_max_capacity": room.max_capacity,
             "room_restricted_karma_over_limit": room.over_karma_limit,

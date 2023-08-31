@@ -17,7 +17,8 @@ function RoomInfo({ room }) {
   <CardContent>
     <Grid container spacing={3}>
       <Grid item xs={3}>
-        <Typography><strong>host : {room.room_owner_name}</strong></Typography>
+        <Typography><strong>Login : {room.room_login_user_name}</strong></Typography>
+        <Typography><strong>Host : {room.room_owner_name}</strong></Typography>
       </Grid>
 
       <Grid item xs={3}>
