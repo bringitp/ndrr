@@ -127,7 +127,7 @@ function RoomComponent(props) {
                             backgroundColor: '#e0e0e0',
                             borderRadius: '8px',
                             padding: '8px',
-                            width: 'calc(100% - 60px)',
+                            width: 'calc(100%)',
                           }}
                         >
                           <div
