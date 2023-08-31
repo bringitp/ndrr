@@ -145,7 +145,7 @@ function RoomComponent(props) {
                             </Typography>
                                    <Typography variant="caption">
                                      
-                                     {window.innerWidth > 530 ? `${message.sent_at} ( ★ ${message.sender.karma} : login ${message.sender.lastlogin_at} )` : `${message.short_sent_at} ★ ${message.sender.karma}`} 
+                                     {window.innerWidth > 1100 ? `${message.sent_at} ( ★ ${message.sender.karma} : login ${message.sender.lastlogin_at} )` : `${message.short_sent_at} ★ ${message.sender.karma}`} 
                                    </Typography>
                           </div>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
