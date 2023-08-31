@@ -1,4 +1,9 @@
 
+
+import React, { useState, useEffect, useRef } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
+
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import Keycloak from "keycloak-js";
 import Alert from "@mui/material/Alert";
@@ -14,9 +19,9 @@ function Room() {
   const messageContainerRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState(null);
+   const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
+
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
-
-
   const handleUserClick = (user) => {
     setSelectedUser(user);
   };
@@ -73,9 +78,30 @@ function Room() {
     }
   }, [initialized, keycloak.authenticated]);
 
+
   const handleNewMessageChange = (event) => {
     setNewMessage(event.target.value);
   };
+
+
+    const handleUserIconClick = (user) => {
+     setSelectedUser(user);
+
+     const input = messageInputRef.current;
+     const startPos = input.selectionStart;
+     const endPos = input.selectionEnd;
+
+     const beforeText = newMessage.substring(0, startPos);
+     const afterText = newMessage.substring(endPos);
+
+     const insertedText = `@${user.username} `;
+
+     setNewMessage(beforeText + insertedText + afterText);
+
+     // カーソル位置を更新
+     const newCursorPos = startPos + insertedText.length;
+     input.setSelectionRange(newCursorPos, newCursorPos);
+    };
 
   const handleSendMessage = async () => {
     const apiUrl = window.location.href.startsWith(
@@ -177,6 +203,7 @@ function Room() {
               }}
             >
               <TextareaAutosize
+                ref={messageInputRef}
                 placeholder="..."
                 value={newMessage}
                 onChange={handleNewMessageChange}
@@ -219,18 +246,18 @@ function Room() {
     width: '89%',
   }}
 >
-  <img
-    src={
-      process.env.NODE_ENV === 'development'
-        ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
-        : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
-    }
-    alt="Icon"
-    width="60"
-    height="60"
-    style={{ borderRadius: '15%' }}
-    onClick={(event) =>  handleUserClick(message.sender, event)}
-  />
+<img
+  src={
+    process.env.NODE_ENV === 'development'
+      ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
+      : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
+  }
+  alt="Icon"
+  width="60"
+  height="60"
+  style={{ borderRadius: '15%' }}
+  onClick={(event) => handleUserIconClick(message.sender, event)}
+/>
 
   <div
     style={{
@@ -248,16 +275,14 @@ function Room() {
         alignItems: "center",
       }}
     >
-      <Typography variant="subtitle1">
+      <Typography variant="subtitle1"  onClick={(event) =>  handleUserClick(message.sender, event)}>
         <strong>{message.sender.username}</strong>{' '}
         <Typography variant="caption">
           {message.sender.trip}
         </Typography>
       </Typography>
       <Typography variant="caption">
-        {message.sent_at} ( karma {message.sender.karma} -{' '}
-        {message.sender.privilege} : login{' '}
-        {message.sender.lastlogin_at} )
+        {message.sent_at} ( karma {message.sender.karma} -{' '} : login{' '} {message.sender.lastlogin_at} )
       </Typography>
     </div>
     <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
