@@ -23,6 +23,27 @@ function RoomComponent(props) {
 
   return (
     <Container>
+
+
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <Typography variant="h4" gutterBottom></Typography>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => keycloak.logout()}
+        >
+          Logout
+        </Button>
+      </div>
+
+
+    
       {jsonData ? (
         <Paper
           elevation={9}
