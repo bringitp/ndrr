@@ -75,7 +75,7 @@ MAX_POST_COUNT = 5  # 5回までとする
 # YouTubeのアドレスを検出して置き換える関数
 def replace_youtube_links(match):
     video_id = match.group(5)
-    iframe_tag = f'<p>https://www.youtube.com/embed/{video_id}</p><iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
+    iframe_tag = f'<p>https://www.youtube.com/embed/{video_id}</p><iframe width="" height="" src="https://www.youtube.com/embed/{video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
     return iframe_tag
 
 

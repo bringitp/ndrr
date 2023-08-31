@@ -9,6 +9,7 @@ import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
+from datetime import datetime
 
 from sqlalchemy.orm import aliased
 
@@ -211,14 +212,14 @@ async def get_room_messages(
             "toxicity": message.toxicity,
             "sentiment": message.sentiment,
             "fluence": message.fluence,
-            "sent_at": message.sent_at,
+            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
             "sender": {
                 "username": escape_html(sender.username),
                 "avatar_url": avatar_url,
                 "trip": escape_html(sender.trip),
                 "karma": sender.karma,
                 "privilege": sender.privilege,
-                "lastlogin_at": sender.lastlogin_at,
+                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),  # 西暦下2桁の年に変換
                 "penalty_points": sender.penalty_points,
                 "profile": escape_html(sender.profile)
             },

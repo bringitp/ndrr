@@ -127,7 +127,7 @@ function RoomComponent(props) {
                               </Typography>
                             </Typography>
                             <Typography variant="caption">
-                              {message.sent_at} ( karma {message.sender.karma} -{' '} : login{' '} {message.sender.lastlogin_at} )
+                              {message.sent_at} ( ★ {message.sender.karma} : in{' '} {message.sender.lastlogin_at} )
                             </Typography>
                           </div>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
