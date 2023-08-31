@@ -213,6 +213,7 @@ async def get_room_messages(
             "sentiment": message.sentiment,
             "fluence": message.fluence,
             "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
+            "short_sent_at": message.sent_at.strftime("%H:%M"),
             "sender": {
                 "username": escape_html(sender.username),
                 "avatar_url": avatar_url,

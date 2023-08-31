@@ -23,8 +23,6 @@ function RoomComponent(props) {
 
   return (
     <Container>
-
-
       <div
         style={{
           display: "flex",
@@ -42,8 +40,6 @@ function RoomComponent(props) {
         </Button>
       </div>
 
-
-    
       {jsonData ? (
         <Paper
           elevation={9}
@@ -79,10 +75,10 @@ function RoomComponent(props) {
                   border: 'none',
                   resize: 'none',
                   padding: '0',
-                  width: '45%', // 幅を45%に設定
+                  width: '100%', // 幅を30%に設定
                   backgroundColor: '#fcfcfc', // 明るい緑色の背景色
                   outline: 'none', // フォーカス時の枠線を無効にする
-                  width: 'calc(89% - 10px)', // 幅を10%狭くする
+                  width: 'calc(100% - 10px)', // 幅を10%狭くする
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -141,15 +137,16 @@ function RoomComponent(props) {
                               alignItems: "center",
                             }}
                           >
-                            <Typography variant="subtitle1"  onClick={(event) =>  handleUserClick(message.sender, event)}>
+                            <Typography variant="subtitle1"  onClick={(event) =>  handleUserClick(message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
                               <strong>{message.sender.username}</strong>{' '}
                               <Typography variant="caption">
                                 {message.sender.trip}
                               </Typography>
                             </Typography>
-                            <Typography variant="caption">
-                              {message.sent_at} ( ★ {message.sender.karma} : in{' '} {message.sender.lastlogin_at} )
-                            </Typography>
+                                   <Typography variant="caption">
+                                     
+                                     {window.innerWidth > 530 ? `${message.sent_at} ( ★ ${message.sender.karma} : login ${message.sender.lastlogin_at} )` : `${message.short_sent_at} ★ ${message.sender.karma}`} 
+                                   </Typography>
                           </div>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
                       {selectedUser && (
