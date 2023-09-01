@@ -121,7 +121,7 @@ def check_ng_words(message_content: str, ng_words: set) -> None:
     if any(token.surface in ng_words for token in tokens):
         raise HTTPException(status_code=406, detail="NG words found in the message")
 
-@router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
+@router.get("/room/{room_id}/condition", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 50,
     login_user: LoginUser = Depends(get_current_user),
@@ -130,8 +130,8 @@ async def get_room_messages(
     # Check if the user is a member of the room
     room_member = (
         db.query(RoomMember)
-        .filter_by(room_id=room_id, user_id=login_user.id)
-        .first()
+        .filter_by(room_id=room_id)
+        .all()
     )
     if not room_member:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
@@ -149,82 +149,24 @@ async def get_room_messages(
     sender_alias = aliased(User)
     avatar_alias = aliased(AvatarList)
 
-    messages = (
-        db.query(Message, sender_alias, avatar_alias)
-        .join(sender_alias, Message.sender_id == sender_alias.id)
-        .outerjoin(avatar_alias, sender_alias.avatar_id == avatar_alias.avatar_id)
-        .filter(Message.room_id == room_id)
-        .order_by(Message.id.desc())
-        .offset(skip)
-        .limit(min(limit, 30))
-        .all()
-    )
+    # Get user IDs, usernames, and avatar URLs of room members
+    room_member_info = []
+    for member in room_member:
+        user = member.user
+        avatar_url = None
+        if user.avatar_id:
+            avatar = db.query(AvatarList).filter_by(avatar_id=user.avatar_id).first()
+            if avatar:
+                avatar_url = avatar.avatar_url
 
-    room_owner = (
-        db.query(User.username)
-        .filter(User.id == room.owner_id)
-        .first()
-    )
-
-
-    member_count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
+        room_member_info.append({
+            "user_id": user.id,
+            "username": user.username,
+            "avatar_url": avatar_url
+        })
 
     response_data = {
-        "room": {
-            "room_id": room.id,
-            "room_label": room.label,
-            "room_name": room.name,
-            "room_member_count": member_count,
-            "room_owner_id": room.owner_id,
-            "room_login_user_name": login_user.username,
-            "room_owner_name": room_owner.username,
-            "room_max_capacity": room.max_capacity,
-            "room_restricted_karma_over_limit": room.over_karma_limit,
-            "room_restricted_karma_under_limit": room.under_karma_limit,
-            "room_lux": room.lux,
-        },
-        "messages": []
+        "room_member": room_member_info,  # ユーザID、ユーザ名、アバターURLの情報を含むリストを返す
     }
-
-    sender_ids = [message.sender_id for message, _, _ in messages]
-    senders = (
-        db.query(User)
-        .filter(User.id.in_(sender_ids))
-        .all()
-    )
-
-    avatar_ids = [sender.avatar_id for sender in senders if sender.avatar_id]
-    avatars = (
-        db.query(AvatarList)
-        .filter(AvatarList.avatar_id.in_(avatar_ids))
-        .all()
-    )
-
-    for message, sender, avatar in messages:
-        avatar_url = None
-        if avatar:
-            avatar_url = avatar.avatar_url
-
-        message_data = {
-            "id": message.id,
-            "room_id": message.room_id,
-            "content": message.content,
-            "toxicity": message.toxicity,
-            "sentiment": message.sentiment,
-            "fluence": message.fluence,
-            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-            "short_sent_at": message.sent_at.strftime("%H:%M"),
-            "sender": {
-                "username": escape_html(sender.username),
-                "avatar_url": avatar_url,
-                "trip": escape_html(sender.trip),
-                "karma": sender.karma,
-                "privilege": sender.privilege,
-                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),  # 西暦下2桁の年に変換
-                "penalty_points": sender.penalty_points,
-                "profile": escape_html(sender.profile)
-            },
-        }
-        response_data["messages"].append(message_data)
 
     return response_data

@@ -43,12 +43,13 @@ function RoomComponent(props) {
       {jsonData ? (
         <Paper
           elevation={9}
-          style={{
-            padding: "20px",
-            marginTop: "20px",
-            display: "flex",
-            flexDirection: "column",
-          }}
+  sx={{
+    padding: "11px",
+    marginTop: "20px",
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "#bce2e8", // ここに背景色を設定
+  }}
         >
           <RoomInfo room={jsonData.room} />
 
@@ -61,7 +62,7 @@ function RoomComponent(props) {
                 borderRadius: '4px',
                 border: '1px solid #ccc',
                 boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-                width: 'calc(89% - 10px)',
+                width: 'calc(96%)',
               }}
             >
               <TextareaAutosize
@@ -71,14 +72,14 @@ function RoomComponent(props) {
                 onChange={handleNewMessageChange}
                 style={{
                   flexGrow: 1,
-                  marginRight: '10px',
+                  marginTop: '10px',
+                  marginBottom: '10px',
                   border: 'none',
                   resize: 'none',
                   padding: '0',
                   width: '100%', // 幅を30%に設定
                   backgroundColor: '#fcfcfc', // 明るい緑色の背景色
                   outline: 'none', // フォーカス時の枠線を無効にする
-                  width: 'calc(100% - 10px)', // 幅を10%狭くする
                 }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
@@ -105,7 +106,7 @@ function RoomComponent(props) {
                           alignItems: 'center',
                           justifyContent: 'space-between',
                           marginBottom: '10px',
-                          width: '89%',
+                          width: '98%',
                         }}
                       >
                       <img
@@ -117,7 +118,7 @@ function RoomComponent(props) {
                         alt="Icon"
                         width="60"
                         height="60"
-                        style={{ borderRadius: '15%' }}
+                        style={{ borderRadius: '15%' , borderRadius: '15%', marginLeft: '0px' }} 
                         onClick={(event) => handleUserIconClick(message.sender, event)}
                       />
                       

@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from chat_app.app.endpoints.root_endpoints import router as root_router
 from chat_app.app.endpoints.room_messages_post_endpoints import router as room_message_post_router
 from chat_app.app.endpoints.room_messages_get_endpoints import router as room_message_get_router
+from chat_app.app.endpoints.room_condition_get_endpoints import router as room_condition_get_router
+
 from chat_app.app.endpoints.rooms_get_endpoints import router as rooms_get_router
 from fastapi.staticfiles import StaticFiles
 import os
@@ -27,5 +29,8 @@ app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")),
 app.include_router(root_router)
 app.include_router(rooms_get_router)
 #app.include_router(rooms_post_router)
+
+
+app.include_router(room_condition_get_router)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
