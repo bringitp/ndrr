@@ -153,6 +153,42 @@ useEffect(() => {
 </TableContainer>
 
 
+{isChatWindowOpen && (
+  <div
+    style={{
+      position: 'fixed',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: '40%', // Adjust the width as needed
+      bgcolor: 'background.paper',
+      boxShadow: 24,
+      p: 4,
+    }}
+  >
+    <Typography variant="h6" component="h2" gutterBottom>
+      Chat Window
+    </Typography>
+    {/* Chat form */}
+    <form>
+      <textarea
+        rows="4"
+        cols="50"
+        placeholder="Type your message..."
+        style={{ marginBottom: '10px' }}
+      ></textarea>
+      <Button variant="contained" color="primary" type="submit">
+        Send
+      </Button>
+    </form>
+    <Button onClick={closeChatWindow}>Close</Button>
+  </div>
+)}
+
+
+
+
+
 
 
           <Button onClick={handleModalClose}>Close</Button>
