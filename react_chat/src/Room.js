@@ -1,3 +1,5 @@
+
+
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
@@ -18,9 +20,9 @@ function Room() {
   const messageContainerRef = useRef(null);
   const [selectedUser, setSelectedUser] = useState(null);
   const [error, setError] = useState(null);
-  const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
+   const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
+
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
-  
   const handleUserClick = (user) => {
     setSelectedUser(user);
   };

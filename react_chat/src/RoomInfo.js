@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation, useParams } from "react-router-dom";
 import { Card, CardContent, Typography, Grid, Modal, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 
 function RoomInfo({ room }) {
+    const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomMembers, setRoomMembers] = useState([]);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
@@ -15,16 +17,20 @@ function RoomInfo({ room }) {
     setIsModalOpen(false);
   };
 
-  useEffect(() => {
-    fetch('http://localhost:7777/room/1/condition', {
-      headers: {
-        'Authorization':  `Bearer ${keycloak.token}`
-      }
-    })
+ const apiUrl = window.location.href.startsWith(
+  "https://ron-the-rocker.net/"
+)
+  ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
+  : `http://localhost:7777/room/${roomId}/condition`;
+const headers = new Headers();
+headers.append("Authorization", `Bearer ${keycloak.token}`);
+
+useEffect(() => {
+  fetch(apiUrl, { headers })
     .then(response => response.json())
     .then(data => setRoomMembers(data.room_member))
     .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-  }, []);
+}, [apiUrl]); // Dependency array with apiUrl
 
  const handleStartChat = (userId) => {
   // Simulate starting a chat with the selected user
@@ -58,7 +64,7 @@ function RoomInfo({ room }) {
         <Box
           sx={{
             position: 'absolute',
-            top: '50%',
+            top: '90%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             width: '40%', // Set width to 40% of the screen size
