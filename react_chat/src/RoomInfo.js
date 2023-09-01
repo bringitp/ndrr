@@ -64,10 +64,10 @@ useEffect(() => {
         <Box
           sx={{
             position: 'absolute',
-            top: '90%',
+            top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '40%', // Set width to 40% of the screen size
+            width: '95%', // Set width to 95% of the screen size
             bgcolor: 'background.paper',
             boxShadow: 24,
             p: 4,
