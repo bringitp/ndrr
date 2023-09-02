@@ -226,7 +226,7 @@ const handleUserIconMouseUp = (user) => {
         borderRadius: '8px',
         padding: '8px',
         width: 'calc(100%)',
-        backgroundColor: message.is_private ? '#0074D9' :'#e0e0e0'  ,
+        backgroundColor: message.is_private ? '#83A4D9' :'#d0d0d0'  ,
 
       }}
     >
