@@ -10,6 +10,7 @@ from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
 import re
+
 def escape_html(text):
     return html.escape(text, quote=True)
 
@@ -206,9 +207,6 @@ async def create_room_message(
     return response_data
 
 app.include_router(router)
-
-
-
 
 
 

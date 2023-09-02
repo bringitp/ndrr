@@ -60,6 +60,8 @@ function Room() {
             setError(`その他のエラーが発生しました ${error.message}`);
             console.error('Error fetching data:', error);
           }
+          clearInterval(fetchInterval); // エラーが発生したらintervalを解除する
+
         }
       };
       fetchData();

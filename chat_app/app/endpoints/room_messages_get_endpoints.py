@@ -1,7 +1,25 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
-from sqlalchemy.orm import Session
-from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList,PrivateMessage
+from fastapi import (
+    FastAPI,
+    Depends,
+    Header,
+    HTTPException,
+    status,
+    APIRouter,
+)
+from sqlalchemy.orm import Session, aliased
+from chat_app.app.utils import (
+    create_db_engine_and_session,
+    load_ng_words
+)
+from chat_app.app.database.models import (
+    Message,
+    Room,
+    User,
+    RoomMember,
+    AvatarList,
+    PrivateMessage,
+)
+from sqlalchemy.orm import joinedload
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -9,10 +27,6 @@ import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
-from datetime import datetime
-
-from sqlalchemy.orm import aliased
-
 
 def escape_html(text):
     return html.escape(text, quote=True)
@@ -127,16 +141,11 @@ async def get_room_messages(
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Check if the user is a member of the room
-    room_member = (
-        db.query(RoomMember)
-        .filter_by(room_id=room_id, user_id=login_user.id)
-        .first()
-    )
+    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
     if not room_member:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
 
-    room = db.query(Room).get(room_id)  # Room.idで直接取得可能
+    room = db.query(Room).get(room_id)
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
@@ -146,15 +155,7 @@ async def get_room_messages(
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
 
-    sender_alias = aliased(User)
-    avatar_alias = aliased(AvatarList)
-
-    room_owner = (
-        db.query(User.username)
-        .filter(User.id == room.owner_id)
-        .first()
-    )
-
+    room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
     member_count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
 
     response_data = {
@@ -174,49 +175,49 @@ async def get_room_messages(
         "messages": []
     }
 
+    # UserとAvatarListのEager Loadingを追加
     private_messages = (
-    db.query(PrivateMessage)
-    .filter(
-        (PrivateMessage.receiver_id == login_user.id) |  # ここに or 条件を追加
-        (PrivateMessage.sender_id == login_user.id),    # ここに or 条件を追加
-        Message.room_id == room_id
+        db.query(PrivateMessage)
+        .options(joinedload(PrivateMessage.sender).load_only('avatar_id'))
+        .filter(
+            (PrivateMessage.receiver_id == login_user.id) |
+            (PrivateMessage.sender_id == login_user.id),
+            Message.room_id == room_id
+        )
+        .order_by(PrivateMessage.sent_at.desc())
+        .limit(min(limit, 30))
+        .all()
     )
-    .order_by(PrivateMessage.sent_at.desc())
-    .limit(min(limit, 30))
-    .all()
-    )
-    # プライベートメッセージのIDに100億を加算
+
+
     for message in private_messages:
         message.id += 10000000000
 
-    # 通常のメッセージも取得する
     normal_messages = (
         db.query(Message)
+        .options(joinedload(Message.sender).load_only('avatar_id'))
         .filter(Message.room_id == room_id)
         .order_by(Message.sent_at.desc())
         .offset(skip)
         .limit(min(limit, 30))
         .all()
     )
-    # プライベートメッセージと通常のメッセージを時刻順に統合する
+
     all_messages = sorted(
         private_messages + normal_messages,
         key=lambda message: message.sent_at,
         reverse=True
     )
 
-    # メッセージデータを結果に追加
     for message in all_messages:
-        # プライベートメッセージかどうかを示すフラグを追加
         is_private = isinstance(message, PrivateMessage)
         sender = db.query(User).filter(User.id == message.sender_id).first()
         if sender:
             avatar_id = sender.avatar_id
-        # avatar_id を avatar_url に変換
             avatar_url = (
-                    db.query(AvatarList.avatar_url)
-                    .filter(AvatarList.avatar_id == avatar_id)
-                    .scalar()  # 単一の値を取得
+                db.query(AvatarList.avatar_url)
+                .filter(AvatarList.avatar_id == avatar_id)
+                .scalar()
             )
 
         message_data = {
@@ -229,23 +230,22 @@ async def get_room_messages(
             "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
             "short_sent_at": message.sent_at.strftime("%H:%M"),
             "sender": {
-                "username": escape_html(sender.username) ,
-                "user_id": sender.id ,
+                "username": escape_html(sender.username),
+                "user_id": sender.id,
                 "avatar_url": avatar_url,
-                "trip": escape_html(sender.trip), 
-                "karma": sender.karma ,
-                "privilege": sender.privilege ,
-                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M") ,
-                "penalty_points": sender.penalty_points ,
-                "profile": escape_html(sender.profile) ,
-                "sender_id"      :   message.sender_id if is_private else None,
-                "receiver_id"    :   message.receiver_id if is_private else None,
-                "sender_username": None,  # 初期値を設定
+                "trip": escape_html(sender.trip),
+                "karma": sender.karma,
+                "privilege": sender.privilege,
+                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
+                "penalty_points": sender.penalty_points,
+                "profile": escape_html(sender.profile),
+                "sender_id": message.sender_id if is_private else None,
+                "receiver_id": message.receiver_id if is_private else None,
+                "sender_username": None,
             },
             "is_private": is_private
         }
 
-        # プライベートメッセージの場合、senderとreceiverのusernameを設定
         if is_private:
             receiver_user = db.query(User).filter(User.id == message.receiver_id).first()
             if receiver_user:
