@@ -59,6 +59,7 @@ const handleNameMouseDown        = (user) => {
     };
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
+  const [privateMessage, setPrivateMessage] = useState("");
 
   const handleSendMessage = async () => {
     const apiUrl = window.location.href.startsWith(
@@ -245,6 +246,7 @@ const handleUserIconMouseUp = (user) => {
                       {selectedUser && isSelectedName && (
                           <UserProfilePopup user={selectedUser} onClose={handleIconMouseUP} anchorEl={messageContainerRef.current} />
                       )}
+
                         </div>
                       </div>
               ))}
@@ -270,15 +272,29 @@ const handleUserIconMouseUp = (user) => {
     {/* Display the chat message */}
     <p>{chatMessage}</p>
     {/* Chat form */}
-    <form>
-      <textarea
-        rows="4"
-        cols="50"
-        placeholder="Type your message..."
-        value={chatMessage}
-        onChange={(e) => setChatMessage(e.target.value)}
-        style={{ marginBottom: '10px' }}
-      ></textarea>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSendMessage(); // フォームのサブミット時にメッセージを送信
+        handleCloseChatModal(); // ウィンドウを閉じる
+      }}
+    >
+              <TextareaAutosize
+                ref={messageInputRef}
+                placeholder="..."
+                value={privateMessage}
+                onChange={handleNewMessageChange}
+                style={{
+                  width: '100%', // 幅を30%に設定
+                  outline: 'none', // フォーカス時の枠線を無効にする
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+              />
       <Button variant="contained" color="primary" type="submit">
         Send
       </Button>
@@ -286,6 +302,8 @@ const handleUserIconMouseUp = (user) => {
     <Button onClick={handleCloseChatModal}>Close</Button>
   </div>
 )}
+
+
 
         </Paper>
       ) : (

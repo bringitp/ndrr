@@ -50,9 +50,6 @@ useEffect(() => {
   // Simulate starting a chat with the selected user
   console.log(`Starting chat with user ${userId}`);
   
-  // You can implement your actual chat logic here, such as opening a chat window or navigating to a chat page
-
-  // Set the initial chat message
   setChatMessage(`Hello, ${userId}!`); // Replace with your own message
   openChatWindow();
 };
