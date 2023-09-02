@@ -238,8 +238,10 @@ const handleUserIconMouseUp = (user) => {
       }}
    > 
                             <Typography variant="subtitle1"  onClick={(event) =>   handleNameMouseDown (message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
-                              <strong>{message.is_private ? '📧 ' : ' '}</strong> 
-                              <strong>{message.sender.username}</strong>{' '}
+                              <strong>{message.is_private ? ' 📧 ' : ' '}</strong> 
+                              <strong>{message.sender.username}</strong>
+                              <strong>{message.is_private ? ' ⇒ ' + message.sender.sender_username + " "  : ' '}</strong> 
+   
                               <Typography variant="caption">
                                 {message.sender.trip}
                               </Typography>
@@ -259,59 +261,107 @@ const handleUserIconMouseUp = (user) => {
             </div>
           </div>
 
-{isDirectChatWindowOpen && selectedUser && (
+                       {isDirectChatWindowOpen && selectedUser && (
+                        <div
+                          style={{
+                            position: 'fixed',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            width: '80%', // Adjust the width as needed
+                            backgroundColor: 'lightgreen', // 白色の背景色
+                            boxShadow: 24,
+                            p: 4,
+                            cursor: 'move', // カーソルを移動アイコンに変更
+                          }}
+                        >
+                          <Typography variant="h6" component="h2" gutterBottom>
+                            @{selectedUser.username}
+                          </Typography>
+                          {/* Display the chat message */}
+                          <p>{chatMessage}</p>
+                          {/* Chat form */}
+                          <form
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              try {
+                                // プライベートメッセージを送信
+                                const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
+                                  ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/private_messages`
+                                  : `http://localhost:7777/room/${roomId}/private_messages`;
 
+                                const headers = new Headers();
+                                headers.append('Authorization', `Bearer ${keycloak.token}`);
+                                headers.append('Content-Type', 'application/json');
 
-  <div
-    style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '80%', // Adjust the width as needed
-      backgroundColor: 'lightgreen', // 白色の背景色
-      boxShadow: 24,
-      p: 4,
-      cursor: 'move', // カーソルを移動アイコンに変更
-    }}
-  >
-    <Typography variant="h6" component="h2" gutterBottom>
-      @{selectedUser.username}
-    </Typography>
-    {/* Display the chat message */}
-    <p>{chatMessage}</p>
-    {/* Chat form */}
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleSendMessage({message_content: privateMessage}) // フォームのサブミット時にメッセージを送信
-        handleCloseChatModal(); // ウィンドウを閉じる
-      }}
-    >
-<TextareaAutosize
-  placeholder="..."
-  value={privateMessage}
-  onChange={(e) => {
-    setPrivateMessage(e.target.value);
-  }}
-  style={{
-    width: '95%', // 幅を30%に設定
-    outline: 'none', // フォーカス時の枠線を無効にする
-  }}
-  onKeyDown={(e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage({ message_content: privateMessage });
-      handleCloseChatModal();
-    }
-  }}
-/>
-               <Button variant="contained" color="primary" type="submit">
-                 Send
-               </Button>
-             </form>
-            <Button onClick={() => handleCloseChatModal()}>Close</Button>
-           </div>
+                                const messageData = { message_content: privateMessage, receiver_id: selectedUser.user_id }; // メッセージと受信者IDをセット
+                                const response = await fetch(apiUrl, {
+                                  method: 'POST',
+                                  headers,
+                                  body: JSON.stringify(messageData),
+                                });
+
+                                if (response.ok) {
+                                  setPrivateMessage('');
+                                  handleCloseChatModal(); // ウィンドウを閉じる
+                                } else {
+                                  console.error('Error sending private message:', response.status);
+                                }
+                              } catch (error) {
+                                console.error('Error sending private message:', error);
+                              }
+                            }}
+                          >
+                            <TextareaAutosize
+                              placeholder="..."
+                              value={privateMessage}
+                              onChange={(e) => {
+                                setPrivateMessage(e.target.value);
+                              }}
+                              style={{
+                                width: '95%', // 幅を30%に設定
+                                outline: 'none', // フォーカス時の枠線を無効にする
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey) {
+                                  e.preventDefault();
+                                  // フォームのサブミット時にAPIを呼び出してメッセージを送信
+                                  const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
+                                    ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/private_messages`
+                                    : `http://localhost:7777/room/${roomId}/private_messages`;
+
+                                  const headers = new Headers();
+                                  headers.append('Authorization', `Bearer ${keycloak.token}`);
+                                  headers.append('Content-Type', 'application/json');
+  
+                                  const messageData = { message_content: privateMessage, receiver_id: selectedUser.id }; // メッセージと受信者IDをセット
+
+                                  fetch(apiUrl, {
+                                    method: 'POST',
+                                    headers,
+                                    body: JSON.stringify(messageData),
+                                  })
+                                    .then((response) => {
+                                      if (response.ok) {
+                                        setPrivateMessage('');
+                                        handleCloseChatModal(); // ウィンドウを閉じる
+                                      } else {
+                                        console.error('Error sending private message:', response.status);
+                                      }
+                                    })
+                                    .catch((error) => {
+                                      console.error('Error sending private message:', error);
+                                    });
+                                }
+                              }}
+                            />
+                            <Button variant="contained" color="primary" type="submit">
+                              Send
+                            </Button>
+                          </form>
+                          <Button onClick={() => handleCloseChatModal()}>Close</Button>
+                        </div>
+                    
           )}
         </Paper>
       ) : (

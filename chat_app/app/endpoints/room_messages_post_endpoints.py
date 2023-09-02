@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember
+from chat_app.app.database.models import Message, Room, User,RoomMember,PrivateMessage
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -206,3 +206,72 @@ async def create_room_message(
     return response_data
 
 app.include_router(router)
+
+
+
+
+
+
+@router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
+async def create_private_message(
+    room_id: int, 
+    request: Request,
+    login_user: LoginUser = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+):
+
+    data = await request.json()
+    message_content = data.get("message_content")
+    receiver_id = data.get("receiver_id")  # 新しく追加した行
+    if not message_content:
+        raise HTTPException(status_code=422, detail="message_content is required")
+    if len(message_content) > 350:
+        raise HTTPException(status_code=406, detail="message_content is too long")
+
+
+    # Check if the user is a member of the room
+    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
+    if not room_member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
+
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+
+    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+
+    if receiver_id is None:
+        raise HTTPException(status_code=422, detail="receiver_id is required")
+
+        
+    check_ng_words(message_content, ng_words)
+    # Check post frequency within 180 seconds and 5 post count
+    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
+
+    # htmlをエスケープする
+    sanitizing_content = escape_html(message_content)
+    # プライベートメッセージを作成
+    new_private_message = PrivateMessage(content=sanitizing_content, room_id=room_id, sender_id=login_user.id, receiver_id=receiver_id, sent_at=datetime.now())
+
+    db.add(new_private_message)
+    db.commit()
+    db.refresh(new_private_message)
+
+    response_data = {
+        "room_id": room.id,
+        "private_message_id": new_private_message.id,
+        "content": new_private_message.content,
+        "sent_at": new_private_message.sent_at,
+        "sender": {
+            "username": login_user.username,
+            "karma": login_user.karma
+        },
+        "receiver_id": receiver_id  # プライベートメッセージの受信者IDを含めることが重要です
+    }
+
+    return response_data

@@ -174,15 +174,17 @@ async def get_room_messages(
         "messages": []
     }
 
-    # プライベートメッセージを取得する
     private_messages = (
-        db.query(PrivateMessage)
-        .filter(PrivateMessage.receiver_id == login_user.id,Message.room_id == room_id)
-        .order_by(PrivateMessage.sent_at.desc())
-        .limit(min(limit, 30))
-        .all()
+    db.query(PrivateMessage)
+    .filter(
+        (PrivateMessage.receiver_id == login_user.id) |  # ここに or 条件を追加
+        (PrivateMessage.sender_id == login_user.id),    # ここに or 条件を追加
+        Message.room_id == room_id
     )
-
+    .order_by(PrivateMessage.sent_at.desc())
+    .limit(min(limit, 30))
+    .all()
+    )
     # プライベートメッセージのIDに100億を加算
     for message in private_messages:
         message.id += 10000000000
@@ -196,7 +198,6 @@ async def get_room_messages(
         .limit(min(limit, 30))
         .all()
     )
-
     # プライベートメッセージと通常のメッセージを時刻順に統合する
     all_messages = sorted(
         private_messages + normal_messages,
@@ -218,8 +219,6 @@ async def get_room_messages(
                     .scalar()  # 単一の値を取得
             )
 
-
-
         message_data = {
             "id": message.id,
             "room_id": message.room_id,
@@ -230,17 +229,28 @@ async def get_room_messages(
             "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
             "short_sent_at": message.sent_at.strftime("%H:%M"),
             "sender": {
-                "username": escape_html(sender.username) if is_private else escape_html(login_user.username),
+                "username": escape_html(sender.username) ,
+                "user_id": sender.id ,
                 "avatar_url": avatar_url,
-                "trip": escape_html(sender.trip) if is_private else None,
-                "karma": sender.karma if is_private else login_user.karma,
-                "privilege": sender.privilege if is_private else login_user.privilege,
-                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M") if is_private else None,
-                "penalty_points": sender.penalty_points if is_private else None,
-                "profile": escape_html(sender.profile) if is_private else None
+                "trip": escape_html(sender.trip), 
+                "karma": sender.karma ,
+                "privilege": sender.privilege ,
+                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M") ,
+                "penalty_points": sender.penalty_points ,
+                "profile": escape_html(sender.profile) ,
+                "sender_id"      :   message.sender_id if is_private else None,
+                "receiver_id"    :   message.receiver_id if is_private else None,
+                "sender_username": None,  # 初期値を設定
             },
             "is_private": is_private
         }
+
+        # プライベートメッセージの場合、senderとreceiverのusernameを設定
+        if is_private:
+            receiver_user = db.query(User).filter(User.id == message.receiver_id).first()
+            if receiver_user:
+                message_data["sender"]["sender_username"] = escape_html(receiver_user.username)
+
         response_data["messages"].append(message_data)
 
     return response_data
