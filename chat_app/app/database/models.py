@@ -45,6 +45,7 @@ class PrivateMessage(Base):
     __tablename__ = 'private_messages'
     
     id = Column(Integer, primary_key=True)
+    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
     sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     content = Column(Text, nullable=False)

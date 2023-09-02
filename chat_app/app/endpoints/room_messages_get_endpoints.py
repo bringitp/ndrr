@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
+from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList,PrivateMessage
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -149,23 +149,11 @@ async def get_room_messages(
     sender_alias = aliased(User)
     avatar_alias = aliased(AvatarList)
 
-    messages = (
-        db.query(Message, sender_alias, avatar_alias)
-        .join(sender_alias, Message.sender_id == sender_alias.id)
-        .outerjoin(avatar_alias, sender_alias.avatar_id == avatar_alias.avatar_id)
-        .filter(Message.room_id == room_id)
-        .order_by(Message.id.desc())
-        .offset(skip)
-        .limit(min(limit, 30))
-        .all()
-    )
-
     room_owner = (
         db.query(User.username)
         .filter(User.id == room.owner_id)
         .first()
     )
-
 
     member_count = db.query(RoomMember).filter(RoomMember.room_id == room_id).count()
 
@@ -186,24 +174,51 @@ async def get_room_messages(
         "messages": []
     }
 
-    sender_ids = [message.sender_id for message, _, _ in messages]
-    senders = (
-        db.query(User)
-        .filter(User.id.in_(sender_ids))
+    # プライベートメッセージを取得する
+    private_messages = (
+        db.query(PrivateMessage)
+        .filter(PrivateMessage.receiver_id == login_user.id,Message.room_id == room_id)
+        .order_by(PrivateMessage.sent_at.desc())
+        .limit(min(limit, 30))
         .all()
     )
 
-    avatar_ids = [sender.avatar_id for sender in senders if sender.avatar_id]
-    avatars = (
-        db.query(AvatarList)
-        .filter(AvatarList.avatar_id.in_(avatar_ids))
+    # プライベートメッセージのIDに100億を加算
+    for message in private_messages:
+        message.id += 10000000000
+
+    # 通常のメッセージも取得する
+    normal_messages = (
+        db.query(Message)
+        .filter(Message.room_id == room_id)
+        .order_by(Message.sent_at.desc())
+        .offset(skip)
+        .limit(min(limit, 30))
         .all()
     )
 
-    for message, sender, avatar in messages:
-        avatar_url = None
-        if avatar:
-            avatar_url = avatar.avatar_url
+    # プライベートメッセージと通常のメッセージを時刻順に統合する
+    all_messages = sorted(
+        private_messages + normal_messages,
+        key=lambda message: message.sent_at,
+        reverse=True
+    )
+
+    # メッセージデータを結果に追加
+    for message in all_messages:
+        # プライベートメッセージかどうかを示すフラグを追加
+        is_private = isinstance(message, PrivateMessage)
+        sender = db.query(User).filter(User.id == message.sender_id).first()
+        if sender:
+            avatar_id = sender.avatar_id
+        # avatar_id を avatar_url に変換
+            avatar_url = (
+                    db.query(AvatarList.avatar_url)
+                    .filter(AvatarList.avatar_id == avatar_id)
+                    .scalar()  # 単一の値を取得
+            )
+
+
 
         message_data = {
             "id": message.id,
@@ -215,15 +230,16 @@ async def get_room_messages(
             "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
             "short_sent_at": message.sent_at.strftime("%H:%M"),
             "sender": {
-                "username": escape_html(sender.username),
+                "username": escape_html(sender.username) if is_private else escape_html(login_user.username),
                 "avatar_url": avatar_url,
-                "trip": escape_html(sender.trip),
-                "karma": sender.karma,
-                "privilege": sender.privilege,
-                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),  # 西暦下2桁の年に変換
-                "penalty_points": sender.penalty_points,
-                "profile": escape_html(sender.profile)
+                "trip": escape_html(sender.trip) if is_private else None,
+                "karma": sender.karma if is_private else login_user.karma,
+                "privilege": sender.privilege if is_private else login_user.privilege,
+                "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M") if is_private else None,
+                "penalty_points": sender.penalty_points if is_private else None,
+                "profile": escape_html(sender.profile) if is_private else None
             },
+            "is_private": is_private
         }
         response_data["messages"].append(message_data)
 
