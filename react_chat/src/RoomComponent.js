@@ -17,20 +17,40 @@ const {
   } = props;
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [pressTimer, setPressTimer] = useState(null);
-  const [isChatModalOpen, setChatModalOpen] = useState(false);
+  const [isDirectChatWindowOpen, setDirectChatWindowOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState(null);
   const [eventUserIconMouseEvent, setEventUserIconMouseEvent] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isSelectedName, setisSelectedName] = useState(false);
+  const [isSelectedName, setSelectedName] = useState(false);
 
- const handleNameMouseDown= (user) => {
+ const handleIconMouseDown        = (user) => {
     setSelectedUser(user);
-    setisSelectedName(true);
+    setSelectedName(true);
   };
 
- const handleNameMouseUP = (user) => {
+ const handleIconMouseUP           = (user) => {
     setSelectedUser(user);
-    setisSelectedName(false);
+    setSelectedName(false);
+  };
+
+const handleNameMouseDown        = (user) => {
+    setSelectedUser(user);
+    setSelectedName(true);
+  };
+
+ const handleNameMouseUP           = (user) => {
+    setSelectedUser(user);
+     setSelectedName(false);
+  };
+
+  const handleLabelTailMouseDown  = (user) => {
+    setSelectedUser(user);
+    setDirectChatWindowOpen(true);
+  };
+
+ const handleLabelTailMouseUP     = (user) => {
+    setSelectedUser(user);
+    setDirectChatWindowOpen(false);
   };
 
   const [newMessage, setNewMessage] = useState("");
@@ -68,29 +88,17 @@ const {
   };
   // モーダルを閉じる関数
   const handleCloseChatModal = () => {
-    setChatModalOpen(false);
+    setDirectChatWindowOpen(false);
     setSelectedChatUser(null);
     setIsChatWindowOpen(false);
   };
 
 const handleUserIconMouseDown = (user, event) => {
-  if (isChatModalOpen===true ){
-    handleCloseChatModal();
-  }
 
-    setSelectedUser(user);
-    setEventUserIconMouseEvent("shortEvent");
-    setPressTimer(
-      setTimeout(() => {
-        setEventUserIconMouseEvent("longEvent");
-      }, 1300)
-    );
 };
 
 const handleUserIconMouseUp = (user) => {
 
-    clearTimeout(pressTimer);
-    if (eventUserIconMouseEvent === "shortEvent") {
      setIsChatWindowOpen(false);
      const input = messageInputRef.current;
      const startPos = input.selectionStart;
@@ -100,14 +108,8 @@ const handleUserIconMouseUp = (user) => {
      const insertedText = `@${user.username} `;
      setNewMessage(beforeText + insertedText + afterText);
     // カーソル位置を更新
-      const newCursorPos = startPos + insertedText.length;
-    input.setSelectionRange(newCursorPos, newCursorPos);
-
-    } else if (eventUserIconMouseEvent === "longEvent") {
-     setIsChatWindowOpen(true);
-    }
-    setSelectedUser(null);
- 
+     const newCursorPos = startPos + insertedText.length;
+     input.setSelectionRange(newCursorPos, newCursorPos); 
 };
 
   return (
@@ -229,20 +231,19 @@ const handleUserIconMouseUp = (user) => {
                               alignItems: "center",
                             }}
                           >
-                            <Typography variant="subtitle1"  onClick={(event) =>  handleNameMouseDown(message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
+                            <Typography variant="subtitle1"  onClick={(event) =>   handleNameMouseDown (message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
                               <strong>{message.sender.username}</strong>{' '}
                               <Typography variant="caption">
                                 {message.sender.trip}
                               </Typography>
                             </Typography>
-                                   <Typography variant="caption">
-                                     
+                                   <Typography variant="caption" onClick={(event) => handleLabelTailMouseDown(message.sender, event)}>
                                      {window.innerWidth > 1100 ? `${message.sent_at} ( ★ ${message.sender.karma} : login ${message.sender.lastlogin_at} )` : `${message.short_sent_at} ★ ${message.sender.karma}`} 
                                    </Typography>
                           </div>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
                       {selectedUser && isSelectedName && (
-                          <UserProfilePopup user={selectedUser} onClose={handleNameMouseUP} anchorEl={messageContainerRef.current} />
+                          <UserProfilePopup user={selectedUser} onClose={handleIconMouseUP} anchorEl={messageContainerRef.current} />
                       )}
                         </div>
                       </div>
@@ -250,7 +251,7 @@ const handleUserIconMouseUp = (user) => {
             </div>
           </div>
 
-{isChatWindowOpen && selectedUser && (
+{isDirectChatWindowOpen && selectedUser && (
   <div
     style={{
       position: 'fixed',
