@@ -14,20 +14,14 @@ function Room() {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const location = useLocation();
   const [jsonData, setJsonData] = useState(null);
-  const [newMessage, setNewMessage] = useState("");
+
   const messageContainerRef = useRef(null);
-  const [selectedUser, setSelectedUser] = useState(null);
+
   const [error, setError] = useState(null);
    const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
 
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
-  const handleUserClick = (user) => {
-    setSelectedUser(user);
-  };
-
-  const handleClosePopup = () => {
-    setSelectedUser(null);
-  };
+ 
 
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
@@ -76,52 +70,6 @@ function Room() {
     }
   }, [initialized, keycloak.authenticated]);
 
-    const handleNewMessageChange = (event) => {
-       setNewMessage(event.target.value);
-    };
-
-    const handleUserIconClick = (user) => {
-
-     const input = messageInputRef.current;
-     const startPos = input.selectionStart;
-     const endPos = input.selectionEnd;
-     const beforeText = newMessage.substring(0, startPos);
-     const afterText = newMessage.substring(endPos);
-     const insertedText = `@${user.username} `;
-     setNewMessage(beforeText + insertedText + afterText);
-
-     // カーソル位置を更新
-     const newCursorPos = startPos + insertedText.length;
-     input.setSelectionRange(newCursorPos, newCursorPos);
-    };
-
-  const handleSendMessage = async () => {
-    const apiUrl = window.location.href.startsWith(
-      "https://ron-the-rocker.net/",
-    )
-      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/messages`
-      : `http://localhost:7777/room/${roomId}/messages`;
-
-    const headers = new Headers();
-    headers.append("Authorization", `Bearer ${keycloak.token}`);
-    headers.append("Content-Type", "application/json");
-
-    try {
-      const response = await fetch(apiUrl, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ message_content: newMessage }),
-      });
-      if (response.ok) {
-        setNewMessage("");
-      } else {
-        console.error("Error sending message:", response.status);
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-
   if (!initialized) {
     return <CircularProgress />;
   }
@@ -152,14 +100,7 @@ function Room() {
    return (
     <RoomComponent
       jsonData={jsonData}
-      newMessage={newMessage}
       messageInputRef={messageInputRef}
-      handleNewMessageChange={handleNewMessageChange}
-      handleSendMessage={handleSendMessage}
-      handleUserIconClick={handleUserIconClick}
-      handleUserClick={handleUserClick}
-      handleClosePopup={handleClosePopup}
-      selectedUser={selectedUser}
       messageContainerRef={messageContainerRef}
       error={error}
       keycloak={keycloak}

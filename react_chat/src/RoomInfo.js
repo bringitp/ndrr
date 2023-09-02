@@ -5,10 +5,16 @@ import Box from '@mui/material/Box';
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 
 function RoomInfo({ room }) {
-    const { roomId } = useParams(); // URLパラメータからroomIdを取得
+  const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomMembers, setRoomMembers] = useState([]);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
+
+  const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
+
+
+const [chatMessage, setChatMessage] = useState('');
+
   const handleModalOpen = () => {
     setIsModalOpen(true);
   };
@@ -25,6 +31,14 @@ function RoomInfo({ room }) {
 const headers = new Headers();
 headers.append("Authorization", `Bearer ${keycloak.token}`);
 
+
+const openChatWindow = () => {
+  setIsChatWindowOpen(true);
+};
+const closeChatWindow = () => {
+  setIsChatWindowOpen(false);
+};
+
 useEffect(() => {
   fetch(apiUrl, { headers })
     .then(response => response.json())
@@ -37,6 +51,10 @@ useEffect(() => {
   console.log(`Starting chat with user ${userId}`);
   
   // You can implement your actual chat logic here, such as opening a chat window or navigating to a chat page
+
+  // Set the initial chat message
+  setChatMessage(`Hello, ${userId}!`); // Replace with your own message
+  openChatWindow();
 };
 
   return (
@@ -67,7 +85,7 @@ useEffect(() => {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
-            width: '95%', // Set width to 95% of the screen size
+            width: '90%', // Set width to 95% of the screen size
             bgcolor: 'background.paper',
             boxShadow: 24,
             p: 4,
@@ -86,7 +104,6 @@ useEffect(() => {
         <TableCell>Avatar</TableCell>
         <TableCell>Username</TableCell>
         <TableCell>Ignore</TableCell>
-        <TableCell>Start Chat</TableCell> {/* Add a new column for the chat button */}
       </TableRow>
     </TableHead>
     <TableBody>
@@ -137,59 +154,12 @@ useEffect(() => {
           <TableCell>
             <input type="checkbox" />
           </TableCell>
-          <TableCell>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => handleStartChat(member.user_id)} // Call your start chat function here
-            >
-              Start Chat
-            </Button>
-          </TableCell>
+
         </TableRow>
       ))}
     </TableBody>
   </Table>
 </TableContainer>
-
-
-{isChatWindowOpen && (
-  <div
-    style={{
-      position: 'fixed',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)',
-      width: '40%', // Adjust the width as needed
-      bgcolor: 'background.paper',
-      boxShadow: 24,
-      p: 4,
-    }}
-  >
-    <Typography variant="h6" component="h2" gutterBottom>
-      Chat Window
-    </Typography>
-    {/* Chat form */}
-    <form>
-      <textarea
-        rows="4"
-        cols="50"
-        placeholder="Type your message..."
-        style={{ marginBottom: '10px' }}
-      ></textarea>
-      <Button variant="contained" color="primary" type="submit">
-        Send
-      </Button>
-    </form>
-    <Button onClick={closeChatWindow}>Close</Button>
-  </div>
-)}
-
-
-
-
-
-
 
           <Button onClick={handleModalClose}>Close</Button>
         </Box>
