@@ -60,9 +60,6 @@ class PrivateMessage(Base):
     sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
-
-
-
 class UserNGList(Base):
     __tablename__ = 'user_ng_lists'
 
