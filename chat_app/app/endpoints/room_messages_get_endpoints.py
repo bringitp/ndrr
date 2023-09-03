@@ -18,6 +18,7 @@ from chat_app.app.database.models import (
     RoomMember,
     AvatarList,
     PrivateMessage,
+    UserNGList
 )
 from sqlalchemy.orm import joinedload
 from typing import Dict, Any
@@ -83,6 +84,12 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# ブロックリストを取得する関数
+def get_block_list(user_id: int, db: Session):
+    block_list = db.query(UserNGList.blocked_user_id).filter(UserNGList.user_id == user_id).all()
+    return [item[0] for item in block_list]
 
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     if not Authorization:
@@ -175,28 +182,39 @@ async def get_room_messages(
         "messages": []
     }
 
+    block_list = get_block_list(login_user.id, db)
+
     # UserとAvatarListのEager Loadingを追加
     private_messages = (
         db.query(PrivateMessage)
-        .options(joinedload(PrivateMessage.sender).load_only('avatar_id'))
+        .options(
+            joinedload(PrivateMessage.sender).load_only('avatar_id'),
+            joinedload(PrivateMessage.receiver).load_only('avatar_id')
+        )
         .filter(
-            (PrivateMessage.receiver_id == login_user.id) |
-            (PrivateMessage.sender_id == login_user.id),
-            Message.room_id == room_id
+            (
+                ((PrivateMessage.receiver_id == login_user.id) & (PrivateMessage.sender_id == room_member.user_id)) |
+                ((PrivateMessage.sender_id == login_user.id) & (PrivateMessage.receiver_id == room_member.user_id))
+            ) &
+            (~PrivateMessage.sender_id.in_(block_list))  # 送信者がブロックリストに含まれていないことを確認
         )
         .order_by(PrivateMessage.sent_at.desc())
         .limit(min(limit, 30))
         .all()
     )
 
-
     for message in private_messages:
         message.id += 10000000000
 
     normal_messages = (
         db.query(Message)
-        .options(joinedload(Message.sender).load_only('avatar_id'))
-        .filter(Message.room_id == room_id)
+        .options(
+             joinedload(Message.sender).load_only('avatar_id')
+        )
+        .filter(
+             (Message.room_id == room_id) &
+             (~Message.sender_id.in_(block_list))
+        )
         .order_by(Message.sent_at.desc())
         .offset(skip)
         .limit(min(limit, 30))

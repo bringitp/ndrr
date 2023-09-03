@@ -8,8 +8,9 @@ headers = {
 }
 
 data = {
-    "blocked_user_id": 8  # ここに追加するユーザーのIDを指定
+    "blocked_user_id": 2  # ここに追加するユーザーのIDを指定
 }
+
 
 response = requests.post(url, json=data, headers=headers)
 

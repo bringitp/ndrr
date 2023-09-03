@@ -85,8 +85,6 @@ VALUES
   (1, 7),
   (1, 9);
 
-    
-
 -- user_sessions テーブルのダミーデータ
 INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expiration_date)
 VALUES

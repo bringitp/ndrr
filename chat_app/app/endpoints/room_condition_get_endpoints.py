@@ -1,7 +1,23 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
+from fastapi import (
+    FastAPI,
+    Depends,
+    Header,
+    HTTPException,
+    status,
+    APIRouter,
+    Request,
+    BackgroundTasks,
+)
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
+from chat_app.app.database.models import (
+    Message,
+    Room,
+    User,
+    RoomMember,
+    AvatarList,
+    UserNGList,
+)
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -9,8 +25,8 @@ import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
-from datetime import datetime
 
+from sqlalchemy import and_
 from sqlalchemy.orm import aliased
 
 
@@ -130,9 +146,10 @@ async def get_room_messages(
     # Check if the user is a member of the room
     room_member = (
         db.query(RoomMember)
-        .filter_by(room_id=room_id)
+        .filter(and_(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id))
         .all()
     )
+
     if not room_member:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
 
@@ -159,11 +176,16 @@ async def get_room_messages(
             if avatar:
                 avatar_url = avatar.avatar_url
 
+    # ユーザーがblocked_user_idに含まれているかどうかを確認
+        blocked = db.query(UserNGList).filter_by(user_id=login_user.id, blocked_user_id=user.id).first() is not None
+
         room_member_info.append({
             "user_id": user.id,
             "username": user.username,
-            "avatar_url": avatar_url
+            "avatar_url": avatar_url,
+            "blocked": blocked  # blockedフィールドを追加
         })
+
 
     response_data = {
         "room_member": room_member_info,  # ユーザID、ユーザ名、アバターURLの情報を含むリストを返す

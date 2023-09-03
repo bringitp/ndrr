@@ -8,7 +8,7 @@ headers = {
 }
 
 data = {
-    "blocked_user_id": 7  # ここに追加するユーザーのIDを指定
+    "blocked_user_id": 2  # ここに追加するユーザーのIDを指定
 }
 
 # DELETEリクエストを送信するためにrequests.deleteを使用

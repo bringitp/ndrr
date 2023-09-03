@@ -9,11 +9,8 @@ function RoomInfo({ room }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomMembers, setRoomMembers] = useState([]);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
-
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
-
-
-const [chatMessage, setChatMessage] = useState('');
+  const [chatMessage, setChatMessage] = useState('');
 
   const handleModalOpen = () => {
     setIsModalOpen(true);
@@ -23,14 +20,78 @@ const [chatMessage, setChatMessage] = useState('');
     setIsModalOpen(false);
   };
 
+ const headers = new Headers();
+headers.append("Authorization", `Bearer ${keycloak.token}`);
+
+  const addToBlockList = (userId) => {
+  const apiUrl = window.location.href.startsWith(
+  "https://ron-the-rocker.net/"
+   )
+     ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
+     : `http://localhost:7777/users/ng-list`;
+
+  const headers = new Headers({
+    'Authorization': `Bearer ${keycloak.token}`,
+    'Content-Type': 'application/json',
+  });
+
+  const data = {
+    "blocked_user_id": userId,
+  };
+
+  fetch(apiUrl, {
+    method: 'POST',
+    headers: headers,
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (response.ok) {
+        // ブロックが成功した場合の処理
+        console.log(`User ${userId} has been blocked.`);
+      } else {
+        // エラーハンドリング
+        console.error('ブロック中にエラーが発生しました。');
+      }
+    })
+    .catch(error => {
+      console.error('ブロック中にエラーが発生しました:', error);
+    });
+};
+
+const removeFromBlockList = (userId) => {
  const apiUrl = window.location.href.startsWith(
   "https://ron-the-rocker.net/"
 )
-  ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-  : `http://localhost:7777/room/${roomId}/condition`;
-const headers = new Headers();
-headers.append("Authorization", `Bearer ${keycloak.token}`);
+  ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
+  : `http://localhost:7777/users/ng-list`;
 
+  const headers = new Headers({
+    'Authorization': `Bearer ${keycloak.token}`,
+    'Content-Type': 'application/json',
+  });
+
+  const data = {
+    "blocked_user_id": userId,
+  };
+
+  fetch(apiUrl, {
+    method: 'DELETE',
+    headers: headers,
+    body: JSON.stringify(data),
+  })
+    .then(response => {
+      if (response.ok) {
+        // 削除が成功した場合の処理
+        console.log(`User ${userId} has been unblocked.`);
+      } else {
+        // エラーハンドリング
+        console.error('ブロック解除中にエラーが発生しました。');
+      }
+    })
+    .catch(error => {
+      console.error('ブロック解除中にエラーが発生しました:', error);
+    });
+};
 
 const openChatWindow = () => {
   setIsChatWindowOpen(true);
@@ -39,17 +100,29 @@ const closeChatWindow = () => {
   setIsChatWindowOpen(false);
 };
 
+const apiUrl = window.location.href.startsWith(
+    "https://ron-the-rocker.net/"
+   )
+     ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
+     : `http://localhost:7777/room/${roomId}/condition`;
+
 useEffect(() => {
   fetch(apiUrl, { headers })
     .then(response => response.json())
-    .then(data => setRoomMembers(data.room_member))
+    .then(data => {
+      // チェックボックスの初期状態を設定
+      const membersWithCheckbox = data.room_member.map(member => ({
+        ...member,
+        checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+      }));
+      setRoomMembers(membersWithCheckbox);
+    })
     .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-}, [apiUrl]); // Dependency array with apiUrl
+}, [apiUrl]);
 
  const handleStartChat = (userId) => {
   // Simulate starting a chat with the selected user
-  console.log(`Starting chat with user ${userId}`);
-  
+  console.log(`Starting chat with user ${userId}`);  
   setChatMessage(`Hello, ${userId}!`); // Replace with your own message
   openChatWindow();
 };
@@ -128,30 +201,52 @@ useEffect(() => {
                   style={{ borderRadius: '15%' }}
                 />
                 {/* Cross symbol */}
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    fontSize: '4em', // Increase font size for a larger cross
-                    color: 'red',
-                  }}
-                >
-                  &#10060; {/* Unicode for the cross symbol */}
-                </div>
+                {member.checked && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      fontSize: '4em', // Increase font size for a larger cross
+                      color: 'red',
+                    }}
+                  >
+                    &#10060; {/* Unicode for the cross symbol */}
+                  </div>
+                )}
               </div>
             )}
           </TableCell>
           <TableCell>{member.username}</TableCell>
           <TableCell>
-            <input type="checkbox" />
-          </TableCell>
+            <input
+              type="checkbox"
+              checked={member.checked}
+              onChange={() => {
+                // チェックボックスの状態をトグル
+                const updatedMembers = roomMembers.map(m => {
+                  if (m.user_id === member.user_id) {
+                    return { ...m, checked: !m.checked };
+                  }
+                  return m;
+                });
+                setRoomMembers(updatedMembers);
 
+                if (member.checked) { // 注意。イベントが逆になってる
+                  // チェックを外した場合にブロックリスト解除
+                   removeFromBlockList(member.user_id);
+                } else {
+                  // チェックを付けた場合にブロックリストに追
+                   addToBlockList(member.user_id);
+                }
+              }}
+            />
+          </TableCell>
         </TableRow>
       ))}
     </TableBody>
