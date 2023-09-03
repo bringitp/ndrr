@@ -40,7 +40,6 @@ class AvatarList(Base):
     avatar_id = Column(Integer, primary_key=True)
     avatar_url = Column(String(255), nullable=False)
 
-
 class PrivateMessage(Base):
     __tablename__ = 'private_messages'
     
@@ -60,7 +59,18 @@ class PrivateMessage(Base):
     sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
-class User(Base):
+
+class UserNGList(Base):
+    __tablename__ = 'user_ng_lists'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    blocked_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+
+    user = relationship("User", back_populates="ng_lists")
+    blocked_user = relationship("User", foreign_keys=[blocked_user_id])
+
+class User(Base): 
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -86,14 +96,13 @@ class User(Base):
     room_memberships = relationship("RoomMember", back_populates="user")
 
     # 新しいカラム：プライベートメッセージのNGリスト
-    private_message_ng_list = Column(Text)
     # プライベートメッセージの関連性
     received_private_messages = relationship("PrivateMessage", back_populates="receiver", foreign_keys=[PrivateMessage.receiver_id])
     sent_private_messages = relationship("PrivateMessage", back_populates="sender", foreign_keys=[PrivateMessage.sender_id])
     sessions = relationship("UserSession", back_populates="user")
     sent_messages = relationship("Message", back_populates="sender")
+    ng_lists =  relationship("UserNGList", back_populates="user")
 
-    blocked_by_users = relationship("BlockedUser", back_populates="blocking_user", foreign_keys="[BlockedUser.blocking_user_id]")
     room_memberships = relationship("RoomMember", back_populates="user")
     images = relationship("Image", back_populates="sender")
     spam_users = relationship("SpamUser", back_populates="user")
