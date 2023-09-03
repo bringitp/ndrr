@@ -1,3 +1,5 @@
+
+
 -- users テーブルのダミーデータ
 
 INSERT INTO avatar_list (avatar_url)
@@ -65,21 +67,25 @@ INSERT INTO avatar_list (avatar_url)
 ('s128_f_traffic_6_1bg.png'),
 ('s128_f_traffic_6_2bg.png');
 
-
-
-INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar_id, profile ,trip,  penalty_points,karma, spam_activity_score, ng_user_list)
+INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar_id, profile ,trip,  penalty_points,karma, spam_activity_score)
 VALUES
-    ('user_zero', 'c01dd252-82bf-4c05-92ee-74ea89c89b10', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3, '["spam", "baduser"]'),
-    ('user2', '71251b8b-f2e3-4261-a8a9-67f04265c5e6', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1, NULL),
-    ('user3', 'c4561c8e-6fdd-4e93-b073-51c310358203', 10, 3, '3',  'エペ募集','trip789',0, 90, 5, '["block", "report"]'),
-    ('user4', 'sub4', 10, 3, '4',  '旅行好きなひと〜','tripabc',0, 30, 8, NULL),
-    ('user5', 'sub5', 10, 3, '5',  '使いこなせないけどコスメ買い漁りたい','tripxyz',0, 20, 2, '["spam", "annoying"]'),
-    ('user6', 'sub6', 10, 3, '6',  '頭痛い。。。','trip123',0, 10, 4, NULL),
-    ('user7', 'sub7', 10, 3, '7',  'ねむねむ','trip456',0, 65, 6, '["block", "inappropriate"]'),
-    ('user8', 'sub8', 10, 3, '8',  '(*´ω`*)','trip789',0, 40, 7, NULL),
-    ('user9', 'sub9', 10, 3, '9',  '仕事でやらかした。ついてないな','tripabc',0, 55, 9, '["spam", "rude"]'),
-    ('user10', 'sub10', 10, 3, '10', '正しい希望は正しい絶望から','tripxyz',0, 70, 0, '["block", "annoying"]');
+    ('user_zero', 'c01dd252-82bf-4c05-92ee-74ea89c89b10', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
+    ('user2', '71251b8b-f2e3-4261-a8a9-67f04265c5e6', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1),
+    ('user3', 'c4561c8e-6fdd-4e93-b073-51c310358203', 10, 3, '3',  'エペ募集','trip789',0, 90, 5),
+    ('user4', 'sub4', 10, 3, '4',  '旅行好きなひと〜','tripabc',0, 30, 8),
+    ('user5', 'sub5', 10, 3, '5',  '使いこなせないけどコスメ買い漁りたい','tripxyz',0, 20, 2),
+    ('user6', 'sub6', 10, 3, '6',  '頭痛い。。。','trip123',0, 10, 4),
+    ('user7', 'sub7', 10, 3, '7',  'ねむねむ','trip456',0, 65, 6),
+    ('user8', 'sub8', 10, 3, '8',  '(*´ω`*)','trip789',0, 40, 7),
+    ('user9', 'sub9', 10, 3, '9',  '仕事でやらかした。ついてないな','tripabc',0, 55, 9),
+    ('user10', 'sub10', 10, 3, '10', '正しい希望は正しい絶望から','tripxyz',0, 70, 0);
 
+INSERT INTO user_ng_lists (user_id, blocked_user_id)
+VALUES
+  (1, 7),
+  (1, 9);
+
+    
 
 -- user_sessions テーブルのダミーデータ
 INSERT INTO user_sessions (session_id, user_id, access_token, refresh_token, expiration_date)

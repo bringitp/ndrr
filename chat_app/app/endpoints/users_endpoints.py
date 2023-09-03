@@ -1,7 +1,7 @@
 from fastapi import     Header,FastAPI,APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from chat_app.app.database.models import Message, Room, User,RoomMember
+from chat_app.app.database.models import Message, Room, User,RoomMember,UserNGList
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
 from fastapi import status
@@ -105,13 +105,12 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
     return user
 
-class AddUserToNGListRequest(BaseModel):
-    blocked_user_id: int
 
-# データベース関連の初期化
-engine, SessionLocal, Base = create_db_engine_and_session()
-
-router = APIRouter()
+def get_user_by_id(id: str, db: Session) -> User:
+    user = db.query(User).filter(User.sub == id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
+    return user
 
 def get_db():
     db = SessionLocal()
@@ -120,56 +119,22 @@ def get_db():
     finally:
         db.close()
 
-@router.post("/users/{user_id}/ng-list")
-async def add_user_to_ng_list(
-    user_id: int,
-    request_data: AddUserToNGListRequest,
-    db: Session = Depends(get_db)
+def db_get_user_ng_list(user_id: int, db: Session):
+    """
+    指定したユーザーのNGリスト情報をデータベースから取得します。
+    
+    :param user_id: ユーザーのID
+    :param db: データベースセッション
+    :return: ユーザーのNGリスト情報
+    """
+    user_ng_list = db.query(UserNGList).filter(UserNGList.user_id == user_id).all()
+    return user_ng_list
+
+@router.get("/users/{user_id}/ng-list",  response_model=Dict[str, Any])
+async def get_user_ng_list(
+    user_id: int, db: Session = Depends(get_db)
 ):
-    user = get_user_by_id(user_id, db)
-    blocked_user_id = request_data.blocked_user_id
-
-    # ユーザが自分自身をNGリストに追加しないようにチェック
-    if user_id == blocked_user_id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Cannot block yourself")
-
-    # 既にNGリストに追加されているか確認
-    existing_ng_list = (
-        db.query(UserNGList)
-        .filter(UserNGList.user_id == user_id, UserNGList.blocked_user_id == blocked_user_id)
-        .first()
-    )
-
-    if existing_ng_list:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already in NG list")
-
-    # NGリストにユーザを追加
-    ng_list_entry = UserNGList(user_id=user_id, blocked_user_id=blocked_user_id)
-    db.add(ng_list_entry)
-    db.commit()
-    db.refresh(ng_list_entry)
-
-    return {"message": "User added to NG list successfully"}
-
-class RemoveUserFromNGListRequest(BaseModel):
-    blocked_user_id: int
-
-@router.delete("/users/{user_id}/ng-list")
-async def remove_user_from_ng_list(
-    user_id: int,
-    request_data: RemoveUserFromNGListRequest,
-    db: Session = Depends(get_db)
-):
-    user = get_user_by_id(user_id, db)
-    blocked_user_id = request_data.blocked_user_id
-
-    # NGリストからユーザを削除
-    (
-        db.query(UserNGList)
-        .filter(UserNGList.user_id == user_id, UserNGList.blocked_user_id == blocked_user_id)
-        .delete()
-    )
-
-    db.commit()
-
-    return {"message": "User removed from NG list successfully"}
+    user_ng_list = db_get_user_ng_list(user_id, db)
+    if not user_ng_list:
+        raise HTTPException(status_code=404, detail="User NG List not found")
+    return {1:user_ng_list}

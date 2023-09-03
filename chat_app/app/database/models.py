@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Enum, ForeignKey, Text, TIMESTAMP, Float
+from sqlalchemy import create_engine, Column, Integer, String, Enum, ForeignKey, Text, TIMESTAMP, Float, Table
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
@@ -8,13 +8,14 @@ Base = declarative_base()
 
 class BlockedUser(Base):
     __tablename__ = 'blocked_users'
-    
-    block_id = Column(Integer, primary_key=True)
+
+    id = Column(Integer, primary_key=True)
     blocking_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     blocked_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    
-    blocking_user = relationship("User", back_populates="blocked_users", foreign_keys=[blocking_user_id])
-    blocked_user = relationship("User", back_populates="blocked_by_users", foreign_keys=[blocked_user_id])
+    # ブロックしているユーザーへの関連性
+    blocking_user = relationship("User", foreign_keys=[blocking_user_id], back_populates="blocked_users")
+    # ブロックされているユーザーへの関連性
+    blocked_user = relationship("User", foreign_keys=[blocked_user_id], back_populates="blocked_by_users")
 
 class Room(Base):
     __tablename__ = 'rooms'
@@ -60,6 +61,8 @@ class PrivateMessage(Base):
     receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
 
+
+
 class UserNGList(Base):
     __tablename__ = 'user_ng_lists'
 
@@ -67,7 +70,7 @@ class UserNGList(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     blocked_user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
-    user = relationship("User", back_populates="ng_lists")
+    user = relationship("User", back_populates="ng_lists", foreign_keys=[user_id])
     blocked_user = relationship("User", foreign_keys=[blocked_user_id])
 
 class User(Base): 
@@ -86,31 +89,43 @@ class User(Base):
     penalty_points = Column(Integer, default=0, nullable=False)
     spam_activity_score = Column(Float(precision=6), nullable=False)
     karma = Column(Float(precision=6), nullable=False)
-    
     created_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogin_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     lastlogout_at = Column(TIMESTAMP, nullable=False, server_default=func.current_timestamp())
     privilege = Column(Enum('guest','user', 'premium', name='privilege_enum'), nullable=False, default='user')
-    ng_user_list = Column(Text)
     owned_rooms = relationship("Room", back_populates="owner", foreign_keys=[Room.owner_id])
     room_memberships = relationship("RoomMember", back_populates="user")
-
     # 新しいカラム：プライベートメッセージのNGリスト
     # プライベートメッセージの関連性
     received_private_messages = relationship("PrivateMessage", back_populates="receiver", foreign_keys=[PrivateMessage.receiver_id])
     sent_private_messages = relationship("PrivateMessage", back_populates="sender", foreign_keys=[PrivateMessage.sender_id])
     sessions = relationship("UserSession", back_populates="user")
     sent_messages = relationship("Message", back_populates="sender")
-    ng_lists =  relationship("UserNGList", back_populates="user")
 
     room_memberships = relationship("RoomMember", back_populates="user")
     images = relationship("Image", back_populates="sender")
     spam_users = relationship("SpamUser", back_populates="user")
     # blocked_usersの関連定義にforeign_keys引数を追加
-    blocked_users = relationship("BlockedUser", back_populates="blocked_user", foreign_keys="[BlockedUser.blocked_user_id]")
     banned_users = relationship("BannedUser", back_populates="user")
     spam_messages = relationship("SpamMessage", back_populates="user")
     suspicious_messages = relationship("SuspiciousMessage", back_populates="user")  # ここに関連性を追加
+
+
+    ng_lists = relationship("UserNGList", back_populates="user", foreign_keys=[UserNGList.user_id])
+
+    # ブロックしているユーザー
+    blocked_users = relationship(
+        "BlockedUser",
+        back_populates="blocking_user",
+        foreign_keys="[BlockedUser.blocking_user_id]",
+    )
+
+    # ブロックされているユーザー
+    blocked_by_users = relationship(
+        "BlockedUser",
+        back_populates="blocked_user",
+        foreign_keys="[BlockedUser.blocked_user_id]",
+    )
 
 class UserSession(Base):
     __tablename__ = 'user_sessions'
@@ -151,8 +166,6 @@ class Message(Base):
     
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_messages")
-
-
 
 class Image(Base):
     __tablename__ = 'images'
