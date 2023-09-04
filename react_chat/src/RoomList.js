@@ -66,7 +66,7 @@ const RoomList = () => {
     justifyContent: 'space-between',
     width: '90%', // カードの幅を90%に設定
     marginLeft: '5%', // カードの左側に5%の余白を持たせる
-    padding: '2px', // 内部の余白
+    padding: '0px', // 内部の余白
     marginTop: '0px', // 上のマージンを短くする
     marginBottom: '0px', // 下のマージンを短くする
   }}
@@ -103,7 +103,7 @@ const RoomList = () => {
                   backgroundColor: 'rgba(0, 0, 0, 0.1)', // 暗い背景色
                   borderRadius: '8px', // 角丸
                   padding: '8px', // 内部の余白
-                  mt: 1, // 上の余白
+                  
                 }}
               >
                 <Typography variant="body2">
