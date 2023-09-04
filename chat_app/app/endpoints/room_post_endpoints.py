@@ -64,32 +64,6 @@ class LoginUser(UserToken):
     karma: int
     username: str
     avatar: str
-
-# 前回の投稿時刻と投稿回数を記録するための辞書
-user_post_data = defaultdict(lambda: {"last_post_time": None, "post_count": 0})
-
-# 最大投稿回数
-MAX_POST_COUNT = 5  # 5回までとする
-
-
-def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: timedelta, max_post_count: int):
-    now = datetime.now()
-    user_data = user_post_data[user_sub]
-
-    if user_data["last_post_time"]:
-        elapsed_time = now - user_data["last_post_time"]
-        if elapsed_time <= time_interval and user_data["post_count"] >= max_post_count:
-            raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests")
-
-        # Reset the post count if the elapsed time exceeds the interval
-        if elapsed_time > time_interval:
-            user_data["post_count"] = 0
-    else:
-        elapsed_time = time_interval + timedelta(seconds=1)  # Initialize elapsed_time with a value larger than time_interval
-
-    user_data["last_post_time"] = now
-    user_data["post_count"] += 1
-
     
 def get_db():
     db = SessionLocal()
@@ -146,8 +120,6 @@ async def create_room_message(
 ):
 
     data = await request.json()
-    message_content = data.get("message_content")
-
 
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
@@ -166,13 +138,11 @@ async def create_room_message(
     # ログインユーザーがルームの管理者でない場合、403エラーを返す
     if room.owner_id != login_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this room")
-        
-#    new_message = Message(content=new_contents, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
 
     # 新しい部屋名を設定
-    room.name = "超テストテスト"
-    room.max_capacity = 7
-    room.label = "aaaaaaaaaaaaaaaaaa"
+    room.name = message_content = data.get("room_name")
+    room.max_capacity  = data.get("max_capacity")
+    room.label = data.get("room_label")
     # データベースに変更をコミット
     db.commit()
 

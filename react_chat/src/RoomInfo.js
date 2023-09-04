@@ -5,25 +5,34 @@ import Box from '@mui/material/Box';
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 // UserModal.jsをインポート
 import UserModal from './UserModal';
+import EditRoomModal from './EditRoomModal';
 function RoomInfo({ room }) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
-  const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [roomMembers, setRoomMembers] = useState([]);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
   const [isChatWindowOpen, setIsChatWindowOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
+  const [isUserModalOpen, setUserModalOpen] = useState(false);
+  const [isEditRoomModalOpen, setEditRoomModalOpen] = useState(false);
 
-
-  const handleModalOpen = () => {
+  const handleUserModalOpen = () => {
     setUserModalOpen(true);
   };
 
-  const handleModalClose = () => {
+  const handleUserModalClose = () => {
     setUserModalOpen(false);
   };
 
+  const handleEditRoomModalOpen = () => {
+    setEditRoomModalOpen(true);
+  };
+
+  const handleEditRoomModalClose = () => {
+    setEditRoomModalOpen(false);
+  };
+
  const headers = new Headers();
-headers.append("Authorization", `Bearer ${keycloak.token}`);
+ headers.append("Authorization", `Bearer ${keycloak.token}`);
 
   const addToBlockList = (userId) => {
   const apiUrl = window.location.href.startsWith(
@@ -134,13 +143,17 @@ useEffect(() => {
       <CardContent>
         <Grid container spacing={1}>
           <Grid item xs={5}>
-            <Typography><strong>Login: {room.room_login_user_name}</strong></Typography>
-            <Typography><strong>Host: {room.room_owner_name}</strong></Typography>
+            <Typography>
+              <strong>Login: {room.room_login_user_name}</strong>
+            </Typography>
+            <Typography>
+              <strong>Host: {room.room_owner_name}</strong>
+            </Typography>
           </Grid>
           <Grid item xs={7}>
             <Typography>
               <strong>
-                {room.room_name}  🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
+                {room.room_name} 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
               </strong>
             </Typography>
           </Grid>
@@ -149,18 +162,28 @@ useEffect(() => {
           </Grid>
         </Grid>
       </CardContent>
-      <Button onClick={handleModalOpen}>🔨</Button>
-      <Button onClick={handleModalOpen}>⚙</Button>
+      <Button onClick={handleUserModalOpen}>🔨</Button>
+      <Button onClick={handleEditRoomModalOpen}>⚙</Button>
       {/* UserModalコンポーネントを使用 */}
       <UserModal
         isUserModalOpen={isUserModalOpen}
-        handleModalClose={handleModalClose}
+        handleModalClose={handleUserModalClose}
         roomMembers={roomMembers}
         setRoomMembers={setRoomMembers}
         removeFromBlockList={removeFromBlockList}
         addToBlockList={addToBlockList}
       />
+      {/* EditRoomModalコンポーネントを使用 */}
+      <EditRoomModal
+        isOpen={isEditRoomModalOpen}
+        onClose={handleEditRoomModalClose}
+        maxCapacity={room.room_max_capacity}
+        roomTitle={room.room_name}
+        roomLabel={room.room_label}
+        token={keycloak.token}
+      />
     </Card>
+
   );
 }
 

@@ -31,7 +31,7 @@ function UserModal({ isUserModalOpen, handleModalClose, roomMembers, setRoomMemb
         }}
       >
         <Typography variant="h6" component="h2" gutterBottom>
-          Control Menu
+          User Menu
         </Typography>
         {/* Display the room member data in a table */}
         <TableContainer component={Paper}>
