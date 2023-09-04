@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ReactKeycloakProvider } from '@react-keycloak/web';
 import Keycloak from 'keycloak-js';
 import Room from './Room';
-
+import RoomList from './RoomList';
 const keycloakConfigLocal = {
   url: 'https://ron-the-rocker.net/auth',
   realm: 'ndrr',
@@ -31,6 +31,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/rooms/" element={<RoomList />} />
           <Route path="/room/:roomId" element={<Room />} />
           {/* 他のルートをここに追加 */}
         </Routes>
