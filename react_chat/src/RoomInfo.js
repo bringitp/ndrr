@@ -45,76 +45,6 @@ function RoomInfo({ room }) {
  const headers = new Headers();
  headers.append("Authorization", `Bearer ${keycloak.token}`);
 
-  const addToBlockList = (userId) => {
-  const apiUrl = window.location.href.startsWith(
-  "https://ron-the-rocker.net/"
-   )
-     ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
-     : `http://localhost:7777/users/ng-list`;
-
-  const headers = new Headers({
-    'Authorization': `Bearer ${keycloak.token}`,
-    'Content-Type': 'application/json',
-  });
-
-  const data = {
-    "blocked_user_id": userId,
-  };
-
-  fetch(apiUrl, {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(data),
-  })
-    .then(response => {
-      if (response.ok) {
-        // ブロックが成功した場合の処理
-        console.log(`User ${userId} has been blocked.`);
-      } else {
-        // エラーハンドリング
-        console.error('ブロック中にエラーが発生しました。');
-      }
-    })
-    .catch(error => {
-      console.error('ブロック中にエラーが発生しました:', error);
-    });
-};
-
-const removeFromBlockList = (userId) => {
- const apiUrl = window.location.href.startsWith(
-  "https://ron-the-rocker.net/"
-)
-  ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
-  : `http://localhost:7777/users/ng-list`;
-
-  const headers = new Headers({
-    'Authorization': `Bearer ${keycloak.token}`,
-    'Content-Type': 'application/json',
-  });
-
-  const data = {
-    "blocked_user_id": userId,
-  };
-
-  fetch(apiUrl, {
-    method: 'DELETE',
-    headers: headers,
-    body: JSON.stringify(data),
-  })
-    .then(response => {
-      if (response.ok) {
-        // 削除が成功した場合の処理
-        console.log(`User ${userId} has been unblocked.`);
-      } else {
-        // エラーハンドリング
-        console.error('ブロック解除中にエラーが発生しました。');
-      }
-    })
-    .catch(error => {
-      console.error('ブロック解除中にエラーが発生しました:', error);
-    });
-};
-
 const openChatWindow = () => {
   setIsChatWindowOpen(true);
 };
@@ -140,7 +70,7 @@ useEffect(() => {
       setRoomMembers(membersWithCheckbox);
     })
     .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-}, [apiUrl]);
+}, [apiUrl,room ]);
 
  const handleStartChat = (userId) => {
   // Simulate starting a chat with the selected user
@@ -149,59 +79,63 @@ useEffect(() => {
   openChatWindow();
 };
 
-  return (
-    <Card sx={{ width: '98%' }}>
-      <CardContent>
-        <Grid container spacing={1}>
-          <Grid item xs={5}>
-            <Typography>
-              <strong>Login: {room.room_login_user_name}</strong>
-            </Typography>
-            <Typography>
-              <strong>Host: {room.room_owner_name}</strong>
-            </Typography>
-          </Grid>
-          <Grid item xs={7}>
-            <Typography>
-              <strong>
-                {room.room_name} 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
-              </strong>
-            </Typography>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography>{room.room_label}</Typography>
-          </Grid>
+return (
+  <Card sx={{ width: '98%' }}>
+    <CardContent>
+      <Grid container spacing={1}>
+        <Grid item xs={5}>
+          <Typography>
+            <strong>Login: {room.room_login_user_name}</strong>
+          </Typography>
+          <Typography>
+            <strong>Host: {room.room_owner_name}</strong>
+          </Typography>
         </Grid>
-      </CardContent>
-      <Button onClick={handleUserModalOpen}>🔊</Button>
+        <Grid item xs={7}>
+          <Typography>
+            <strong>
+              {room.room_name} 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
+            </strong>
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography>{room.room_label}</Typography>
+        </Grid>
+      </Grid>
+    </CardContent>
+    <Button onClick={handleUserModalOpen}>🔊</Button>
+    {/* ⚙ ボタンの表示を制御 */}
+    {room.room_owner_id === room.room_login_user_id && (
       <Button onClick={handleEditRoomModalOpen}>⚙</Button>
-　　　<Button onClick={handleEditAdminModalOpen}>🔨</Button>
-      
-      {/* UserModalコンポーネントを使用 */}
-      <UserModal
-        isUserModalOpen={isUserModalOpen}
-        handleModalClose={handleUserModalClose}
-        removeFromBlockList={removeFromBlockList}
-        addToBlockList={addToBlockList}
-        token={keycloak.token}
-      />
-      {/* EditRoomModalコンポーネントを使用 */}
-      <EditRoomModal
-        isOpen={isEditRoomModalOpen}
-        onClose={handleEditRoomModalClose}
-        maxCapacity={room.room_max_capacity}
-        roomTitle={room.room_name}
-        roomLabel={room.room_label}
-        token={keycloak.token}
-      />
-      <EditAdminModal
-        isOpen={isEditAdminModalOpen}
-        onClose={handleEditAdminModalClose}
-        roomMembers={roomMembers}
-        token={keycloak.token}
-      />
-    </Card>
-  );
+    )}
+    {/* 🔨 ボタンの表示を制御 */}
+    {room.room_owner_id === room.room_login_user_id && (
+      <Button onClick={handleEditAdminModalOpen}>🔨</Button>
+    )}
+    {/* UserModalコンポーネントを使用 */}
+    <UserModal
+      isUserModalOpen={isUserModalOpen}
+      handleModalClose={handleUserModalClose}
+      token={keycloak.token}
+    />
+    {/* EditRoomModalコンポーネントを使用 */}
+    <EditRoomModal
+      isOpen={isEditRoomModalOpen}
+      onClose={handleEditRoomModalClose}
+      maxCapacity={room.room_max_capacity}
+      roomTitle={room.room_name}
+      roomLabel={room.room_label}
+      token={keycloak.token}
+    />
+    <EditAdminModal
+      isOpen={isEditAdminModalOpen}
+      onClose={handleEditAdminModalClose}
+      roomMembers={roomMembers}
+      token={keycloak.token}
+    />
+  </Card>
+);
+
 }
 
 export default RoomInfo;

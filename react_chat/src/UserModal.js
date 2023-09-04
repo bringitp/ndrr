@@ -14,7 +14,7 @@ import {
   Button,
 } from '@mui/material';
 
-function UserModal({ isUserModalOpen, handleModalClose,  removeFromBlockList, addToBlockList,token }) {
+function UserModal({ isUserModalOpen, handleModalClose, token }) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [roomMembers, setRoomMembers] = useState([]);
   
@@ -23,29 +23,91 @@ function UserModal({ isUserModalOpen, handleModalClose,  removeFromBlockList, ad
     'Content-Type': 'application/json',
   });
 
-
-  useEffect(() => {
-  // isUserModalOpenがtrueのときにのみ実行
-  if (isUserModalOpen) {
+  // addToBlockList 関数を定義
+  const addToBlockList = (userId) => {
     const apiUrl = window.location.href.startsWith(
       "https://ron-the-rocker.net/"
     )
-      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-      : `http://localhost:7777/room/${roomId}/condition`;
+      ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
+      : `http://localhost:7777/users/ng-list`;
 
-    fetch(apiUrl, { headers })
-      .then(response => response.json())
-      .then(data => {
-        // チェックボックスの初期状態を設定
-        const membersWithCheckbox = data.room_member.map(member => ({
-          ...member,
-          checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
-        }));
-        setRoomMembers(membersWithCheckbox);
+    const data = {
+      "blocked_user_id": userId,
+    };
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        if (response.ok) {
+          // ブロックが成功した場合の処理
+          console.log(`User ${userId} has been blocked.`);
+        } else {
+          // エラーハンドリング
+          console.error('ブロック中にエラーが発生しました。');
+        }
       })
-      .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-  }
-}, [roomId, isUserModalOpen]); //
+      .catch(error => {
+        console.error('ブロック中にエラーが発生しました:', error);
+      });
+  };
+
+  // removeFromBlockList 関数を定義
+  const removeFromBlockList = (userId) => {
+    const apiUrl = window.location.href.startsWith(
+      "https://ron-the-rocker.net/"
+    )
+      ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
+      : `http://localhost:7777/users/ng-list`;
+
+    const data = {
+      "blocked_user_id": userId,
+    };
+
+    fetch(apiUrl, {
+      method: 'DELETE',
+      headers: headers,
+      body: JSON.stringify(data),
+    })
+      .then(response => {
+        if (response.ok) {
+          // 削除が成功した場合の処理
+          console.log(`User ${userId} has been unblocked.`);
+        } else {
+          // エラーハンドリング
+          console.error('ブロック解除中にエラーが発生しました。');
+        }
+      })
+      .catch(error => {
+        console.error('ブロック解除中にエラーが発生しました:', error);
+      });
+  };
+
+  useEffect(() => {
+    // isUserModalOpenがtrueのときにのみ実行
+    if (isUserModalOpen) {
+      const apiUrl = window.location.href.startsWith(
+        "https://ron-the-rocker.net/"
+      )
+        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
+        : `http://localhost:7777/room/${roomId}/condition`;
+
+      fetch(apiUrl, { headers })
+        .then(response => response.json())
+        .then(data => {
+          // チェックボックスの初期状態を設定
+          const membersWithCheckbox = data.room_member.map(member => ({
+            ...member,
+            checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+          }));
+          setRoomMembers(membersWithCheckbox);
+        })
+        .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
+    }
+  }, [roomId, isUserModalOpen]);
+
 
   return (
     <Modal open={isUserModalOpen} onClose={handleModalClose}>

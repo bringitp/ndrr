@@ -27,63 +27,62 @@ function EditAdminModal({ isOpen, onClose, token }) {
 
   useEffect(() => {
     if (isOpen) {
-    const apiUrl = window.location.href.startsWith(
-      "https://ron-the-rocker.net/"
-    )
-      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-      : `http://localhost:7777/room/${roomId}/condition`;
+      const apiUrl = window.location.href.startsWith(
+        "https://ron-the-rocker.net/"
+      )
+        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
+        : `http://localhost:7777/room/${roomId}/condition`;
 
-    fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } })
-      .then(response => response.json())
-      .then(data => {
-        // チェックボックスの初期状態を設定
-        const membersWithCheckbox = data.room_member.map(member => ({
-          ...member,
-          checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
-        }));
-        setRoomMembers(membersWithCheckbox);
-      })
-      .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
+      fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } })
+        .then(response => response.json())
+        .then(data => {
+          // チェックボックスの初期状態を設定
+          const membersWithCheckbox = data.room_member.map(member => ({
+            ...member,
+            checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+          }));
+          setRoomMembers(membersWithCheckbox);
+        })
+        .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
     }
-  }, [roomId, isOpen,token]); // roomIdまたはtokenが変更されたときだけ実行されます
+  }, [roomId, isOpen, token]); // roomIdまたはtokenが変更されたときだけ実行されます
 
+  const handleRemoveFromRoom = (user) => {
+    // ユーザーを部屋から追い出すAPI呼び出しを行います。
+    if (user) {
+      const apiUrl = window.location.href.startsWith(
+        "https://ron-the-rocker.net/"
+      )
+        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/remove_member`
+        : `http://localhost:7777/room/${roomId}/remove_member`;
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      const data = {
+        'member_id': user.user_id, // ユーザーのIDを指定します
+      };
 
-const handleRemoveFromRoom = (user) => {
-  // ユーザーを部屋から追い出すAPI呼び出しを行います。
-  if (user) {
-    const apiUrl = window.location.href.startsWith(
-      "https://ron-the-rocker.net/"
-    )
-      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/remove_member`
-      : `http://localhost:7777/room/${roomId}/remove_member`;
-    const headers = {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    };
-    const data = {
-      'member_id': user.user_id, // ユーザーのIDを指定します
-    };
-
-    fetch(apiUrl, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify(data),
-    })
-      .then(response => {
-        if (response.ok) {
-          console.log(`Successfully removed user ${user.username} from the room.`);
-          // TODO: リストからユーザーを削除するなどの処理を追加する
-        } else {
-          console.error(`Failed to remove user ${user.username} from the room.`);
-        }
+      fetch(apiUrl, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(data),
       })
-      .catch(error => {
-        console.error('Error while removing user from the room:', error);
-      });
-  }
-  setSelectedUser(null);
-  onClose();
-};
+        .then(response => {
+          if (response.ok) {
+            console.log(`Successfully removed user ${user.username} from the room.`);
+            // TODO: リストからユーザーを削除するなどの処理を追加する
+          } else {
+            console.error(`Failed to remove user ${user.username} from the room.`);
+          }
+        })
+        .catch(error => {
+          console.error('Error while removing user from the room:', error);
+        });
+    }
+    setSelectedUser(null);
+    onClose();
+  };
 
   const handleUserClick = (user) => {
     setSelectedUser(user);
@@ -92,8 +91,35 @@ const handleRemoveFromRoom = (user) => {
   const handleTransferAdmin = (user) => {
     // 選択されたユーザーを新しい管理者に設定するAPI呼び出しを行うことができます。
     if (user) {
-      // TODO: API呼び出しを実装する
-      console.log(`Transfer admin to user: ${user.username}`);
+      const apiUrl = window.location.href.startsWith(
+        "https://ron-the-rocker.net/"
+      )
+        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/change_owner`
+        : `http://localhost:7777/room/${roomId}/change_owner`;
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      };
+      const data = {
+        'new_owner_id': user.user_id, // ユーザーのIDを指定します
+      };
+
+      fetch(apiUrl, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(data),
+      })
+        .then(response => {
+          if (response.ok) {
+            console.log(`Transferred admin to user: ${user.username}`);
+            // TODO: 成功時の処理を追加する
+          } else {
+            console.error(`Failed to transfer admin to user: ${user.username}`);
+          }
+        })
+        .catch(error => {
+          console.error('Error while transferring admin:', error);
+        });
     }
     setSelectedUser(null);
     onClose();
