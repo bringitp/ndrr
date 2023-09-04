@@ -6,6 +6,8 @@ import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 // UserModal.jsをインポート
 import UserModal from './UserModal';
 import EditRoomModal from './EditRoomModal';
+import EditAdminModal from './EditAdminModal';
+
 function RoomInfo({ room }) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [roomMembers, setRoomMembers] = useState([]);
@@ -14,6 +16,15 @@ function RoomInfo({ room }) {
   const [chatMessage, setChatMessage] = useState('');
   const [isUserModalOpen, setUserModalOpen] = useState(false);
   const [isEditRoomModalOpen, setEditRoomModalOpen] = useState(false);
+  const [isEditAdminModalOpen, setEditAdminModalOpen] = useState(false); // 新しく追加
+
+  const handleEditAdminModalOpen = () => {
+    setEditAdminModalOpen(true);
+  };
+
+  const handleEditAdminModalClose = () => {
+    setEditAdminModalOpen(false);
+  };
 
   const handleUserModalOpen = () => {
     setUserModalOpen(true);
@@ -162,16 +173,17 @@ useEffect(() => {
           </Grid>
         </Grid>
       </CardContent>
-      <Button onClick={handleUserModalOpen}>🔨</Button>
+      <Button onClick={handleUserModalOpen}>🔊</Button>
       <Button onClick={handleEditRoomModalOpen}>⚙</Button>
+　　　<Button onClick={handleEditAdminModalOpen}>🔨</Button>
+      
       {/* UserModalコンポーネントを使用 */}
       <UserModal
         isUserModalOpen={isUserModalOpen}
         handleModalClose={handleUserModalClose}
-        roomMembers={roomMembers}
-        setRoomMembers={setRoomMembers}
         removeFromBlockList={removeFromBlockList}
         addToBlockList={addToBlockList}
+        token={keycloak.token}
       />
       {/* EditRoomModalコンポーネントを使用 */}
       <EditRoomModal
@@ -182,8 +194,13 @@ useEffect(() => {
         roomLabel={room.room_label}
         token={keycloak.token}
       />
+      <EditAdminModal
+        isOpen={isEditAdminModalOpen}
+        onClose={handleEditAdminModalClose}
+        roomMembers={roomMembers}
+        token={keycloak.token}
+      />
     </Card>
-
   );
 }
 

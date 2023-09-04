@@ -6,7 +6,7 @@ from chat_app.app.endpoints.room_messages_get_endpoints import router as room_me
 from chat_app.app.endpoints.room_condition_get_endpoints import router as room_condition_get_router
 from chat_app.app.endpoints.rooms_get_endpoints import router as rooms_get_router
 from chat_app.app.endpoints.users_endpoints import router as users_endpoints
-from chat_app.app.endpoints.room_post_endpoints import router as room_post_endpoints
+from chat_app.app.endpoints.room_endpoints import router as room_endpoints
 
 
 from fastapi.staticfiles import StaticFiles
@@ -35,4 +35,4 @@ app.include_router(users_endpoints)
 app.include_router(room_condition_get_router)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
-app.include_router(room_post_endpoints)
+app.include_router(room_endpoints)

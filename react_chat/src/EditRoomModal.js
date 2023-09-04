@@ -18,12 +18,9 @@ function EditRoomModal({ isOpen, onClose,  roomTitle, roomLabel, maxCapacity, to
   const [editedRoomLabel, setEditedRoomLabel] = useState(roomLabel);
   const [editedMaxCapacity, setEditedMaxCapacity] = useState(maxCapacity);
 
-
-
   const handleSave = () => {
     // 保存ボタンがクリックされたときの処理
     onClose();
-    
     // API へデータを送信
     const apiUrl = window.location.href.startsWith("https://ron-the-rocker.net/")
       ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}`
@@ -106,9 +103,9 @@ function EditRoomModal({ isOpen, onClose,  roomTitle, roomLabel, maxCapacity, to
             value={editedMaxCapacity}
             onChange={(e) => setEditedMaxCapacity(e.target.value)}
           >
-            {[...Array(20).keys()].map((num) => (
-              <MenuItem key={num + 1} value={num + 1}>
-                {num + 1}
+            {[...Array(19).keys()].map((num) => (
+              <MenuItem key={num + 2} value={num + 2}>
+                {num + 2}
               </MenuItem>
             ))}
           </Select>

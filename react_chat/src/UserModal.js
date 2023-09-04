@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useParams } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -13,7 +14,39 @@ import {
   Button,
 } from '@mui/material';
 
-function UserModal({ isUserModalOpen, handleModalClose, roomMembers, setRoomMembers, removeFromBlockList, addToBlockList }) {
+function UserModal({ isUserModalOpen, handleModalClose,  removeFromBlockList, addToBlockList,token }) {
+  const { roomId } = useParams(); // URLパラメータからroomIdを取得
+  const [roomMembers, setRoomMembers] = useState([]);
+  
+  const headers = new Headers({
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+  });
+
+
+  useEffect(() => {
+  // isUserModalOpenがtrueのときにのみ実行
+  if (isUserModalOpen) {
+    const apiUrl = window.location.href.startsWith(
+      "https://ron-the-rocker.net/"
+    )
+      ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
+      : `http://localhost:7777/room/${roomId}/condition`;
+
+    fetch(apiUrl, { headers })
+      .then(response => response.json())
+      .then(data => {
+        // チェックボックスの初期状態を設定
+        const membersWithCheckbox = data.room_member.map(member => ({
+          ...member,
+          checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+        }));
+        setRoomMembers(membersWithCheckbox);
+      })
+      .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
+  }
+}, [roomId, isUserModalOpen]); //
+
   return (
     <Modal open={isUserModalOpen} onClose={handleModalClose}>
       <Box
