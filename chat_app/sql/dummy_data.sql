@@ -196,7 +196,6 @@ VALUES
     (5, 9, 'image9.jpg', '2023-08-21 20:00:00'),
     (5, 10, 'image10.jpg', '2023-08-21 21:00:00');
 
-
 -- spam_users テーブルのダミーデータ
 INSERT INTO spam_users (user_id, spam_points, last_spam_activity)
 VALUES

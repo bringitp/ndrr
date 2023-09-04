@@ -71,12 +71,6 @@ user_post_data = defaultdict(lambda: {"last_post_time": None, "post_count": 0})
 # 最大投稿回数
 MAX_POST_COUNT = 5  # 5回までとする
 
-# YouTubeのアドレスを検出して置き換える関数
-def replace_youtube_links(match):
-    video_id = match.group(5)
-    iframe_tag = f'<iframe width="95%" src="https://www.youtube.com/embed/{video_id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>'
-    return iframe_tag
-
 
 def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: timedelta, max_post_count: int):
     now = datetime.now()
@@ -142,7 +136,7 @@ def check_ng_words(message_content: str, ng_words: set) -> None:
     if any(token.surface in ng_words for token in tokens):
         raise HTTPException(status_code=406, detail="NG words found in the message")
 
-@router.post("/room/{room_id}/messages", response_model=Dict[str, Any])
+@router.post("/room/{room_id}", response_model=Dict[str, Any])
 async def create_room_message(
     room_id: int, 
     request: Request,
@@ -153,121 +147,45 @@ async def create_room_message(
 
     data = await request.json()
     message_content = data.get("message_content")
-    if not message_content:
-        raise HTTPException(status_code=422, detail="message_content is required")
-    if len(message_content) > 350:
-        raise HTTPException(status_code=406, detail="message_content is too long")
 
-    # Check if the user is a member of the room
-    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
-    if not room_member:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
 
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
-    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+    # ユーザーがメンバーでない場合、403エラーを返す
+    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
+    if not room_member:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
 
-    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+    # ルームを取得
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+    # ログインユーザーがルームの管理者でない場合、403エラーを返す
+    if room.owner_id != login_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not the owner of this room")
         
-    check_ng_words(message_content, ng_words)
-    # Check post frequency within 180 seconds and 5 post count
-    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
+#    new_message = Message(content=new_contents, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
 
-    # htmlをエスケープする
-    sanitizing_content = escape_html(message_content)
-
-# 正規表現パターン
-    youtube_url_regex = re.compile(r'^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?([a-zA-Z0-9_-]{11})')
-
-# YouTubeのアドレスを<iframe>タグに置き換える
-    new_contents = youtube_url_regex.sub(replace_youtube_links, sanitizing_content)
-    new_message = Message(content=new_contents, room_id=room_id, sender_id=login_user.id, sent_at=datetime.now())
-
-    db.add(new_message)
+    # 新しい部屋名を設定
+    room.name = "超テストテスト"
+    room.max_capacity = 7
+    room.label = "aaaaaaaaaaaaaaaaaa"
+    # データベースに変更をコミット
     db.commit()
-    db.refresh(new_message)
 
     response_data = {
-        "room_id": room.id,
-        "message_id": new_message.id,
-        "content": new_message.content,
-        "sent_at": new_message.sent_at,
-        "sender": {
-            "username": login_user.username,
-            "karma": login_user.karma
-        },
+        "message": "Room name changed successfully"
+    }
+
+
+    response_data = {
+        1:1
     }
 
     return response_data
 
 app.include_router(router)
 
-
-
-@router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
-async def create_private_message(
-    room_id: int, 
-    request: Request,
-    login_user: LoginUser = Depends(get_current_user),
-    db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = BackgroundTasks()
-):
-
-    data = await request.json()
-    message_content = data.get("message_content")
-    receiver_id = data.get("receiver_id")  # 新しく追加した行
-    if not message_content:
-        raise HTTPException(status_code=422, detail="message_content is required")
-    if len(message_content) > 350:
-        raise HTTPException(status_code=406, detail="message_content is too long")
-
-
-    # Check if the user is a member of the room
-    room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
-    if not room_member:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
-
-    room = db.query(Room).filter(Room.id == room_id).first()
-    if not room:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
-
-    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
-
-    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
-
-    if receiver_id is None:
-        raise HTTPException(status_code=422, detail="receiver_id is required")
-
-        
-    check_ng_words(message_content, ng_words)
-    # Check post frequency within 180 seconds and 5 post count
-    check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
-
-    # htmlをエスケープする
-    sanitizing_content = escape_html(message_content)
-    # プライベートメッセージを作成
-    new_private_message = PrivateMessage(content=sanitizing_content, room_id=room_id, sender_id=login_user.id, receiver_id=receiver_id, sent_at=datetime.now())
-
-    db.add(new_private_message)
-    db.commit()
-    db.refresh(new_private_message)
-
-    response_data = {
-        "room_id": room.id,
-        "private_message_id": new_private_message.id,
-        "content": new_private_message.content,
-        "sent_at": new_private_message.sent_at,
-        "sender": {
-            "username": login_user.username,
-            "karma": login_user.karma
-        },
-        "receiver_id": receiver_id  # プライベートメッセージの受信者IDを含めることが重要です
-    }
-
-    return response_data
