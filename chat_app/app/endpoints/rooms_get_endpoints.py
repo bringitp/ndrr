@@ -1,11 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from chat_app.app.database.models import Message, Room, User,RoomMember
+from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
 import html
-
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -21,6 +20,7 @@ def get_db():
     finally:
         db.close()
 
+
 @router.get("/rooms", response_model=Dict[str, Any])
 def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
     rooms = db.query(Room).offset(skip).all()
@@ -33,18 +33,26 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
             "id": room.id,
             "name": escape_html(room.name),
             "label": escape_html(room.label),
-            "owner_id": room.owner_id,
             "max_capacity": room.max_capacity,
             "over_karma_limit": room.over_karma_limit,
             "under_karma_limit": room.under_karma_limit,
             "lux": room.lux,
             "status": room.status,
             "last_activity": room.last_activity,
-            "owner": room.owner,
+            "owner_username": room.owner.username,
+            "owner_avatar_url": (
+                        db.query(AvatarList.avatar_url)
+                        .filter(AvatarList.avatar_id == room.owner.avatar_id)
+                        .scalar()
+            ),  
             "room_members": [
                 {
-                    "id": member.user.id,
                     "username": escape_html(member.user.username),
+                    "avatar_url": (
+                        db.query(AvatarList.avatar_url)
+                        .filter(AvatarList.avatar_id == member.user.avatar_id)
+                        .scalar()
+                    ),  # avatar_urlを取得し追加
                 }
                 for member in room.room_members
             ],
@@ -52,6 +60,3 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
         response_data["rooms"].append(room_data)
 
     return response_data
-
-
-    return rooms
