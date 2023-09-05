@@ -194,10 +194,11 @@ async def get_room_messages(
         )
         .filter(
             (
-                ((PrivateMessage.receiver_id == login_user.id) ) |
-                ((PrivateMessage.sender_id == login_user.id) )
-            ) &
-            (~PrivateMessage.sender_id.in_(block_list))  # 送信者がブロックリストに含まれていないことを確認
+                (PrivateMessage.receiver_id == login_user.id ) |
+                (PrivateMessage.sender_id == login_user.id )
+            ) 
+            & (PrivateMessage.room_id == room_id)
+            & (~PrivateMessage.sender_id.in_(block_list))  # 送信者がブロックリストに含まれていないことを確認
         )
         .order_by(PrivateMessage.sent_at.desc())
         .limit(min(limit, 30))

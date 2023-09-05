@@ -17,7 +17,6 @@ const RoomList = () => {
   const [rooms, setRooms] = useState([]);
   const [navBarWidth, setNavBarWidth] = useState(null);
   const navBarRef = useRef(null); // useRefを使用してNaviBarコンポーネントに対する参照を作成
-
   const apiUrl = window.location.href.startsWith(
     'https://ron-the-rocker.net/'
   )
@@ -36,18 +35,12 @@ const RoomList = () => {
       });
   }, []);
 
-
   const { keycloak, initialized } = useKeycloak(); // useKeycloak hook
-
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       const token = keycloak.token; // Access the Keycloak token
-      // Now you can use the 'token' variable as needed.
-      alert(token); // Example: Display the token in an alert
     }
   }, [initialized, keycloak.authenticated]);
-
-
 
   // ラベルを30文字までに制限する関数
   const truncateLabel = (label) => {
@@ -57,10 +50,8 @@ const RoomList = () => {
       return label.slice(0, 30) + '...';
     }
   };
-
   // パステルカラーの配列
   const pastelColors = ['#E6E6FA', '#B0C4DE', '#FFDAB9'];
-
   // 時刻を簡略な形式に変換する関数
   const simplifyTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -77,9 +68,14 @@ const RoomList = () => {
       const data = {
         member_id: 1, // Replace with the appropriate member_id
       };
-      alert(keycloak.token);
       // Send a PUT request to join the room
-      const response = await fetch(`http://localhost:7777/room/${roomId}/join_me`, {
+    const apiUrl = window.location.href.startsWith(
+    "https://ron-the-rocker.net/"
+   )
+     ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/join_me`
+     : `http://localhost:7777/room/${roomId}/join_me`;
+
+      const response = await fetch(apiUrl, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -87,19 +83,23 @@ const RoomList = () => {
         },
         body: JSON.stringify(data),
       });
-
       if (response.ok) {
         // Redirect to the desired URL after joining
-        window.location.href = `http://localhost:3000/room/${roomId}`; // Replace with your desired redirect URL
+
+       const jumpUrl = window.location.href.startsWith(
+         "https://ron-the-rocker.net/"
+       )
+     ? `https://ron-the-rocker.net/room/${roomId}`
+     : `http://localhost:3000/room/${roomId}`;
+        window.location.href = jumpUrl; // Replace with your desired redirect URL
       } else {
         console.error("Error joining the room:", response.status);
       }
     } catch (error) {
       console.error("Error joining the room:", error);
+      alert("Error joining thr room:" + error);
     }
   };
-
-
   return (
     <Grid container spacing={1}>
       {rooms.map((room, index) => (
