@@ -60,9 +60,7 @@ public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
 
 # Janomeのトークナイザーの初期化
 t = Tokenizer()
-
 router = APIRouter()
-
 class UserToken:
     sub: str
 
@@ -74,7 +72,6 @@ class LoginUser(UserToken):
 
 # 前回の投稿時刻を記録するための辞書
 last_post_times = defaultdict(lambda: None)
-
 # 最大投稿回数
 MAX_POST_COUNT = 3
 
@@ -84,7 +81,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
 
 # ブロックリストを取得する関数
 def get_block_list(user_id: int, db: Session):
@@ -184,7 +180,6 @@ async def get_room_messages(
     }
 
     block_list = get_block_list(login_user.id, db)
-
     # UserとAvatarListのEager Loadingを追加
     private_messages = (
         db.query(PrivateMessage)

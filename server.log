@@ -1,11 +1,11 @@
 INFO:     Will watch for changes in these directories: ['/home/ussr/github4me/ndrr']
 INFO:     Uvicorn running on http://0.0.0.0:7777 (Press CTRL+C to quit)
-INFO:     Started reloader process [4768] using statreload
-INFO:     Started server process [4771]
+INFO:     Started reloader process [14950] using statreload
+INFO:     Started server process [14953]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [4771]
-INFO:     Stopping reloader process [4768]
+INFO:     Finished server process [14953]
+INFO:     Stopping reloader process [14950]

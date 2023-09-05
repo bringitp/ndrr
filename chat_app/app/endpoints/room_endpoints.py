@@ -222,16 +222,12 @@ async def add_room_member(
     db: Session = Depends(get_db)
 ):
     data = await request.json()
-    
     # ユーザーが部屋のオーナーかどうかを確認
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    #if room.owner_id == current_user.id:
-    #    raise HTTPException(status_code=403, detail="You are the owner of this room")
-
-    # すでに部屋に参加しているか確認
+    # Check if the user is already a member of the room
     existing_member = db.query(RoomMember).filter(RoomMember.room_id == room_id, RoomMember.user_id == current_user.id).first()
     if existing_member:
         raise HTTPException(status_code=400, detail="You are already a member of this room")
@@ -244,7 +240,6 @@ async def add_room_member(
     new_member = RoomMember(room_id=room_id, user_id=current_user.id, joined_at=func.now())
     db.add(new_member)
     db.commit()
-    
     return {"message": "You have successfully joined the room"}
 
 
