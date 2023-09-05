@@ -1,11 +1,11 @@
 
-
 # db_utils.py
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, Index  # Index を追加
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import configparser
+from chat_app.app.database.models  import BlockedUser, Room, PrivateMessage, UserNGList, User
 
 def get_dbserver_config():
     settings_path = find_settings_ini()
@@ -92,8 +92,30 @@ def get_db_settings():
 
 # データベースエンジンとセッションを作成する関数
 def create_db_engine_and_session():
-    #engine = create_engine(get_dbserver_config())
     engine = create_engine(get_dbserver_config(), pool_size=50, max_overflow=25)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+    # インデックスの設定
+    #with engine.connect() as connection:
+        # BlockedUser テーブルの blocking_user_id 列と blocked_user_id 列にインデックスを設定
+        #blocked_user_index = Index('idx_blocked_user_new', BlockedUser.blocking_user_id, BlockedUser.blocked_user_id)
+        #blocked_user_index.create(connection)
+
+        # Room テーブルの owner_id 列にインデックスを設定
+        #room_owner_index = Index('idx_room_owner', Room.owner_id)
+        #room_owner_index.create(connection)
+
+        # PrivateMessage テーブルの room_id 列と sent_at 列にインデックスを設定
+        #private_message_index = Index('idx_private_message', PrivateMessage.room_id, PrivateMessage.sent_at)
+        #private_message_index.create(connection)
+
+        # UserNGList テーブルの user_id 列と blocked_user_id 列にインデックスを設定
+        #user_ng_list_index = Index('idx_user_ng_list', UserNGList.user_id, UserNGList.blocked_user_id)
+        #user_ng_list_index.create(connection)
+
+        # User テーブルの sub 列に一意のインデックスを設定
+        #user_sub_index = Index('idx_user_sub', User.sub, unique=True)
+        #user_sub_index.create(connection)
+
     return engine, SessionLocal, declarative_base()
 

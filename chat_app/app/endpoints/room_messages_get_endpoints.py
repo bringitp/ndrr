@@ -34,18 +34,6 @@ def escape_html(text):
 
 app = FastAPI()
 
-# イベントハンドラの定義
-def on_startup():
-    # アプリケーション起動時の処理
-    pass
-
-def on_shutdown():
-    # アプリケーション終了時の処理
-    pass
-
-app.add_event_handler("startup", on_startup)
-app.add_event_handler("shutdown", on_shutdown)
-
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み
@@ -59,7 +47,6 @@ jwks_data = response.json()
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
 
 # Janomeのトークナイザーの初期化
-t = Tokenizer()
 router = APIRouter()
 class UserToken:
     sub: str
@@ -72,8 +59,6 @@ class LoginUser(UserToken):
 
 # 前回の投稿時刻を記録するための辞書
 last_post_times = defaultdict(lambda: None)
-# 最大投稿回数
-MAX_POST_COUNT = 3
 
 def get_db():
     db = SessionLocal()
@@ -120,10 +105,6 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
     return user
 
-def check_ng_words(message_content: str, ng_words: set) -> None:
-    tokens = t.tokenize(message_content)
-    if any(token.surface in ng_words for token in tokens):
-        raise HTTPException(status_code=406, detail="NG words found in the message")
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
@@ -171,7 +152,6 @@ async def get_room_messages(
             "avatar_url": avatar_url,
             "blocked": bool(blocked)
         })
-
         # member_info から user_id と avatar_url の対応を作成
     user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in member_info}
 
@@ -188,7 +168,6 @@ async def get_room_messages(
 
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
-    
     response_data = {
         "room": {
             "room_id": room.id,
