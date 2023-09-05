@@ -10,6 +10,8 @@ import {
   Avatar,
 } from '@mui/material';
 import NaviBar from './NaviBar'; // Naviバーのインポート
+import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
+import Keycloak from "keycloak-js";
 
 const RoomList = () => {
   const [rooms, setRooms] = useState([]);
@@ -35,6 +37,18 @@ const RoomList = () => {
   }, []);
 
 
+  const { keycloak, initialized } = useKeycloak(); // useKeycloak hook
+
+  useEffect(() => {
+    if (initialized && keycloak.authenticated) {
+      const token = keycloak.token; // Access the Keycloak token
+      // Now you can use the 'token' variable as needed.
+      alert(token); // Example: Display the token in an alert
+    }
+  }, [initialized, keycloak.authenticated]);
+
+
+
   // ラベルを30文字までに制限する関数
   const truncateLabel = (label) => {
     if (label.length <= 30) {
@@ -55,6 +69,36 @@ const RoomList = () => {
     const timeString = `${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
     return timeString;
   };
+
+  // Define the function to handle joining a room
+  const handleJoin = async (roomId) => {
+    try {
+      // Data object to send in the request
+      const data = {
+        member_id: 1, // Replace with the appropriate member_id
+      };
+      alert(keycloak.token);
+      // Send a PUT request to join the room
+      const response = await fetch(`http://localhost:7777/room/${roomId}/join_me`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${keycloak.token}`, // Include the token
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        // Redirect to the desired URL after joining
+        window.location.href = `http://localhost:3000/room/${roomId}`; // Replace with your desired redirect URL
+      } else {
+        console.error("Error joining the room:", response.status);
+      }
+    } catch (error) {
+      console.error("Error joining the room:", error);
+    }
+  };
+
 
   return (
     <Grid container spacing={1}>
@@ -165,13 +209,14 @@ const RoomList = () => {
               )}
             </CardContent>
             <Box m={1} sx={{ alignSelf: 'flex-end' }}>
-              <Button
-                variant="contained"
-                color="secondary" // ボタンのカラーを赤に設定
-                size="small" // ボタンのサイズを小さく
-              >
-                Join
-              </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            size="small"
+            onClick={() => handleJoin(room.id)} // Pass the room ID when the button is clicked
+          >
+            Join
+          </Button>
             </Box>
           </Card>
         </Grid>
