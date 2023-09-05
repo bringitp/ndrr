@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { Send as SendIcon } from "@mui/icons-material"; // SendIconをインポート
-
 import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import Keycloak from "keycloak-js";
 import Alert from "@mui/material/Alert";
 import {Button,CircularProgress,Container,Paper,Typography,TextareaAutosize} from "@mui/material";
-import RoomInfo from "./RoomInfo";
 import UserProfilePopup from "./UserProfilePopup";
 import RoomComponent from "./RoomComponent"; // 新しく作成したコンポーネントをインポート
 
@@ -14,15 +12,11 @@ function Room() {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const location = useLocation();
   const [jsonData, setJsonData] = useState(null);
-
   const messageContainerRef = useRef(null);
-
   const [error, setError] = useState(null);
-   const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
-
+  const messageInputRef = useRef(null); // useRefを使ってmessageInputRefを定義
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
  
-
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       const apiUrl = window.location.href.startsWith(
@@ -61,7 +55,6 @@ function Room() {
             console.error('Error fetching data:', error);
           }
           clearInterval(fetchInterval); // エラーが発生したらintervalを解除する
-
         }
       };
       fetchData();

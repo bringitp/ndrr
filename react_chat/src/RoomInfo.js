@@ -135,7 +135,6 @@ return (
     />
   </Card>
 );
-
 }
 
 export default RoomInfo;

@@ -10,6 +10,7 @@ from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
 import re
+from sqlalchemy.sql import func
 
 def escape_html(text):
     return html.escape(text, quote=True)
@@ -176,6 +177,76 @@ async def remove_room_member(
     db.delete(member)
     db.commit()
     return {"message": "Member removed from the room successfully"}
+
+
+@router.put("/room/{room_id}/depart_me", response_model=dict)
+async def remove_room_member(
+    room_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    data = await request.json()
+    member_id = data.get("member_id")
+
+    # ユーザーが部屋のオーナーかどうかを確認
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    #if room.owner_id != current_user.id:
+    #    raise HTTPException(status_code=403, detail="You are not the owner of this room")
+
+    # メンバーを部屋から削除
+    member = db.query(RoomMember).filter(RoomMember.room_id == room_id, RoomMember.user_id == member_id).first()
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found in the room")
+
+    # ユーザーが部屋から出る場合
+    if member_id == current_user.id:
+        db.delete(member)
+    else:
+        # ユーザーが他のユーザーにオーナー権限を移行する場合
+        room.owner_id = member_id
+        db.delete(member)
+
+    db.commit()
+    return {"message": "Member removed from the room successfully"}
+
+
+@router.put("/room/{room_id}/join_me", response_model=dict)
+async def add_room_member(
+    room_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    data = await request.json()
+    
+    # ユーザーが部屋のオーナーかどうかを確認
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    #if room.owner_id == current_user.id:
+    #    raise HTTPException(status_code=403, detail="You are the owner of this room")
+
+    # すでに部屋に参加しているか確認
+    existing_member = db.query(RoomMember).filter(RoomMember.room_id == room_id, RoomMember.user_id == current_user.id).first()
+    if existing_member:
+        raise HTTPException(status_code=400, detail="You are already a member of this room")
+
+    # 部屋の定員を確認
+    if len(room.room_members) >= room.max_capacity:
+        raise HTTPException(status_code=400, detail="Room is already full")
+
+    # 新しいメンバーを部屋に追加
+    new_member = RoomMember(room_id=room_id, user_id=current_user.id, joined_at=func.now())
+    db.add(new_member)
+    db.commit()
+    
+    return {"message": "You have successfully joined the room"}
+
 
 @router.put("/room/{room_id}/change_owner", response_model=Dict[str, Any])
 async def change_room_owner(

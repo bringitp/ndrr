@@ -16,7 +16,6 @@ const {
     initialized
   } = props;
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
-  const [pressTimer, setPressTimer] = useState(null);
   const [isDirectChatWindowOpen, setDirectChatWindowOpen] = useState(false);
   const [selectedChatUser, setSelectedChatUser] = useState(null);
   const [eventUserIconMouseEvent, setEventUserIconMouseEvent] = useState("");
@@ -116,6 +115,34 @@ const handleUserIconMouseUp = (user) => {
      input.setSelectionRange(newCursorPos, newCursorPos); 
 };
 
+const handleDepart = async () => {
+  try {
+    // データオブジェクトを作成
+    const data = {
+      member_id: jsonData.room.room_login_user_id, // current_user はログイン中のユーザーを表すオブジェクトです
+    };
+
+    // PUT リクエストを送信
+    const response = await fetch(`http://localhost:7777/room/${roomId}/depart_me`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${keycloak.token}`, // トークンを含める必要があります
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      // リクエストが成功した場合、リダイレクトを行います
+      window.location.href = "http://localhost:3000/rooms"; // リダイレクト先の URL を指定してください
+    } else {
+      console.error("Error departing from the room:", response.status);
+    }
+  } catch (error) {
+    console.error("Error departing from the room:", error);
+  }
+};
+
   return (
     <Container>
       <div
@@ -126,6 +153,14 @@ const handleUserIconMouseUp = (user) => {
         }}
       >
         <Typography variant="h4" gutterBottom></Typography>
+
+        <Button
+          variant="contained"
+          color="secondary"
+           onClick={handleDepart}
+        >
+          Depart
+        </Button>
         <Button
           variant="contained"
           color="secondary"
@@ -138,13 +173,13 @@ const handleUserIconMouseUp = (user) => {
       {jsonData ? (
         <Paper
           elevation={9}
-  sx={{
-    padding: "11px",
-    marginTop: "20px",
-    display: "flex",
-    flexDirection: "column",
-    backgroundColor: "#bce2e8", // ここに背景色を設定
-  }}
+          sx={{
+            padding: "11px",
+            marginTop: "20px",
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "#bce2e8", // ここに背景色を設定
+          }}
         >
           <RoomInfo room={jsonData.room} />
 
@@ -183,28 +218,28 @@ const handleUserIconMouseUp = (user) => {
                   }
                 }}
               />
-<Button
-  variant="contained"
-  color="success"
-  onClick={() => handleSendMessage({ message_content: newMessage })}
-  endIcon={<SendIcon style={{ color: 'white' }} />}
-  style={{ minWidth: '30px', backgroundColor: '#61c051' }}
-/>
+             <Button
+               variant="contained"
+               color="success"
+               onClick={() => handleSendMessage({ message_content: newMessage })}
+               endIcon={<SendIcon style={{ color: 'white' }} />}
+               style={{ minWidth: '30px', backgroundColor: '#61c051' }}
+             />
             </div>
 
             <div style={{ marginTop: '20px', overflowY: 'auto' }}>
               {jsonData.messages.map((message) => (
-   <div
-    key={message.id}
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: '10px',
-      width: '98%',
-      borderRadius: '8px',
-    }}
-  >
+              <div
+               key={message.id}
+               style={{
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'space-between',
+                 marginBottom: '10px',
+                 width: '98%',
+                 borderRadius: '8px',
+               }}
+             >
                       <img
                         src={
                           process.env.NODE_ENV === 'development'
@@ -219,25 +254,25 @@ const handleUserIconMouseUp = (user) => {
                         onMouseUp={() => handleUserIconMouseUp(message.sender)}
                       />
                       
-    <div
-      style={{
-        marginLeft: '10px',
-        backgroundColor:'#e0e0e0', // プライベートメッセージの場合、フォントカラーを明るい文字に設定
-        borderRadius: '8px',
-        padding: '8px',
-        width: 'calc(100%)',
-        backgroundColor: message.is_private ? '#83A4D9' :'#d0d0d0'  ,
+                       <div
+                         style={{
+                           marginLeft: '10px',
+                           backgroundColor:'#e0e0e0', // プライベートメッセージの場合、フォントカラーを明るい文字に設定
+                           borderRadius: '8px',
+                           padding: '8px',
+                           width: 'calc(100%)',
+                           backgroundColor: message.is_private ? '#83A4D9' :'#d0d0d0'  ,
 
-      }}
-    >
-   <div
-     style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-   > 
-                            <Typography variant="subtitle1"  onClick={(event) =>   handleNameMouseDown (message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
+                         }}
+                       >
+                      <div
+                        style={{
+                           display: "flex",
+                           justifyContent: "space-between",
+                           alignItems: "center",
+                         }}
+                      > 
+                              <Typography variant="subtitle1"  onClick={(event) =>   handleNameMouseDown (message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
                               <strong>{message.is_private ? ' 📧 ' : ' '}</strong> 
                               <strong>{message.sender.username}</strong>
                               <strong>{message.is_private ? ' ⇒ ' + message.sender.sender_username + " "  : ' '}</strong> 

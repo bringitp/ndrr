@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -9,9 +9,12 @@ import {
   Chip,
   Avatar,
 } from '@mui/material';
+import NaviBar from './NaviBar'; // Naviバーのインポート
 
 const RoomList = () => {
   const [rooms, setRooms] = useState([]);
+  const [navBarWidth, setNavBarWidth] = useState(null);
+  const navBarRef = useRef(null); // useRefを使用してNaviBarコンポーネントに対する参照を作成
 
   const apiUrl = window.location.href.startsWith(
     'https://ron-the-rocker.net/'
@@ -30,6 +33,7 @@ const RoomList = () => {
         console.error('部屋一覧を取得中にエラーが発生しました:', error);
       });
   }, []);
+
 
   // ラベルを30文字までに制限する関数
   const truncateLabel = (label) => {
@@ -53,24 +57,27 @@ const RoomList = () => {
   };
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={1}>
       {rooms.map((room, index) => (
-        <Grid item xs={12} sm={6} md={4} key={room.id}>
-<Card
-  sx={{
-    borderRadius: '16px', // 角丸
-    backgroundColor: pastelColors[index % pastelColors.length], // パステルカラー
-    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    width: '90%', // カードの幅を90%に設定
-    marginLeft: '5%', // カードの左側に5%の余白を持たせる
-    padding: '0px', // 内部の余白
-    marginTop: '0px', // 上のマージンを短くする
-    marginBottom: '0px', // 下のマージンを短くする
-  }}
->
+        <Grid item xs={11} sm={5} md={6} key={room.id}> {/* グリッドのサイズを調整 */}
+    <Grid item xs={1} sm={1} md={1}>
+        <NaviBar />
+    </Grid>
+          <Card
+            sx={{
+              borderRadius: '16px', // 角丸
+              backgroundColor: pastelColors[index % pastelColors.length], // パステルカラー
+              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              width:   window.innerWidth < 400 ?  '80%': '90%',
+              padding: '0px', // 内部の余白
+              marginLeft:   window.innerWidth >= 400 ? (index % 2 === 0 ?   '60px' : `35px`) : '50px',
+              marginTop: '0px', // 上のマージンを短くする
+              marginBottom: '0px', // 下のマージンを短くする
+            }}
+          >
             <CardContent>
               <Typography
                 variant="h8"
@@ -94,6 +101,10 @@ const RoomList = () => {
                      ? `http://localhost:7777/static/img/${room.owner_avatar_url}`
                      : `https://ron-the-rocker.net/ndrr/api/static/img/${room.owner_avatar_url}`
                 }
+                  style={{
+                      width: '28px', // アイコンの幅を28pxに設定 (倍のサイズ)
+                      height: '28px', // アイコンの高さを28pxに設定 (倍のサイズ)
+                }}
                />
               }
              />
@@ -141,6 +152,10 @@ const RoomList = () => {
                                 ? `http://localhost:7777/static/img/${member.avatar_url}`
                                 : `https://ron-the-rocker.net/ndrr/api/static/img/${member.avatar_url}`
                             }
+                           style={{
+                              width: '28px', // アイコンの幅を28pxに設定 (倍のサイズ)
+                              height: '28px', // アイコンの高さを28pxに設定 (倍のサイズ)
+                           }}
                           />
                         }
                       />
