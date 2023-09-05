@@ -122,8 +122,14 @@ const handleDepart = async () => {
       member_id: jsonData.room.room_login_user_id, // current_user はログイン中のユーザーを表すオブジェクトです
     };
 
+  const apiUrl = window.location.href.startsWith(
+    "https://ron-the-rocker.net/"
+  )
+    ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/depart_me`
+    : `http://localhost:7777/room/${roomId}/depart_me`;
+
     // PUT リクエストを送信
-    const response = await fetch(`http://localhost:7777/room/${roomId}/depart_me`, {
+    const response = await fetch(apiUrl, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -132,9 +138,15 @@ const handleDepart = async () => {
       body: JSON.stringify(data),
     });
 
+  const jumpUrl = window.location.href.startsWith(
+    "https://ron-the-rocker.net/"
+  )
+    ? `https://ron-the-rocker.net/rooms/`
+    : `http://localhost:3000/rooms/`;
+
     if (response.ok) {
       // リクエストが成功した場合、リダイレクトを行います
-      window.location.href = "http://localhost:3000/rooms"; // リダイレクト先の URL を指定してください
+      window.location.href = jumpUrl; // リダイレクト先の URL を指定してください
     } else {
       console.error("Error departing from the room:", response.status);
     }
