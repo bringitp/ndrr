@@ -106,10 +106,7 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
-def check_ng_words(message_content: str, ng_words: set) -> None:
-    tokens = t.tokenize(message_content)
-    if any(token.surface in ng_words for token in tokens):
-        raise HTTPException(status_code=406, detail="NG words found in the message")
+
 
 @router.post("/room/{room_id}", response_model=Dict[str, Any])
 async def create_room_message(
@@ -178,7 +175,6 @@ async def remove_room_member(
     db.commit()
     return {"message": "Member removed from the room successfully"}
 
-
 @router.put("/room/{room_id}/depart_me", response_model=dict)
 async def remove_room_member(
     room_id: int,
@@ -194,9 +190,6 @@ async def remove_room_member(
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    #if room.owner_id != current_user.id:
-    #    raise HTTPException(status_code=403, detail="You are not the owner of this room")
-
     # メンバーを部屋から削除
     member = db.query(RoomMember).filter(RoomMember.room_id == room_id, RoomMember.user_id == member_id).first()
     if not member:
@@ -207,8 +200,22 @@ async def remove_room_member(
         db.delete(member)
     else:
         # ユーザーが他のユーザーにオーナー権限を移行する場合
-        room.owner_id = member_id
         db.delete(member)
+
+    # ログアウトしたユーザーがオーナーだった場合、新しいオーナーを設定
+    if current_user.id == room.owner_id:
+        # 部屋の滞在時間が一番長いメンバーを見つける
+        longest_stay_member = db.query(RoomMember).filter(RoomMember.room_id == room_id, RoomMember.user_id != current_user.id). \
+            order_by(RoomMember.joined_at.desc()).first()
+        
+        if longest_stay_member:
+            room.owner_id = longest_stay_member.user_id
+        else:
+            # オーナーである自分以外のメンバーがいない場合は、オーナーを削除
+            room.owner_id = None
+        print (longest_stay_member.user_id)    
+        if longest_stay_member:
+            room.owner_id = longest_stay_member.user_id
 
     db.commit()
     return {"message": "Member removed from the room successfully"}
