@@ -20,6 +20,12 @@ server {
     }
 }
 
+    upstream backend {
+        server 127.0.0.1:7777;  # バックエンドサーバーのポート
+        server 127.0.0.1:7778;  # 追加のバックエンドサーバーのポート
+        # さらに必要な数だけサーバーを追加
+    }
+
 server {
     listen 443 ssl;
     server_name ron-the-rocker.net www.ron-the-rocker.net;
@@ -27,12 +33,14 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-
+   
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
-        try_files $uri $uri/ =404;
+        try_files $uri $uri/ /index.html;
     }
+
+
 
     location /auth {
         proxy_pass http://localhost:8180;
@@ -41,63 +49,71 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
+    location ~ ^/ndrr/api { 
+       rewrite ^/ndrr/api(.*)?$ $1 break;
 
-   location ~ ^/ndrr/api {
-    rewrite ^/ndrr/api(.*) $1 break;
-    proxy_pass http://localhost:7777;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "Upgrade";
-  }
+        add_header Access-Control-Allow-Origin http://localhost:3000;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
 
-   location ~ ^/ndrr/api/rooms {
-    rewrite ^/ndrr/api(.*) $1 break;
-    proxy_pass http://localhost:7777;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "Upgrade";
-  }
-  
-   location ~ ^/ndrr/api/rooms/.*/messages {
-    rewrite ^/ndrr/api(.*) $1 break;
-    proxy_pass http://localhost:7777;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection "Upgrade";
-  }
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Credentials 'true';
+            add_header Access-Control-Max-Age 1728000;
+            add_header Content-Type 'text/plain charset=UTF-8';
+            add_header Content-Length 0;
+            return 204;
+        }
 
- location ~ ^/ndrr/static {
-  rewrite ^/ndrr(.*) $1 break;
-  proxy_pass http://localhost:7777;
-  proxy_set_header Host $host;
-  proxy_set_header X-Real-IP $remote_addr;
-  proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-  proxy_set_header X-Forwarded-Proto $scheme;
-  proxy_set_header Upgrade $http_upgrade;
-  proxy_set_header Connection "Upgrade";
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
+    }
 }
 
-    location /maintenance.html {
-        root /var/www/ron-the-rocker.net;
+    server {
+        listen 443 ssl;
+        server_name ron-the-rocker.net www.ron-the-rocker.net;
+
+        ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
+
+        location / {
+            root /var/www/ron-the-rocker.net;
+            index index.html;
+            try_files $uri $uri/ /index.html;
+        }
+
+        location ~ ^/ndrr/api {
+            rewrite ^/ndrr/api(.*)?$ $1 break;
+
+            add_header Access-Control-Allow-Origin http://localhost:3000;
+            add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+            add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
+
+            if ($request_method = 'OPTIONS') {
+                add_header Access-Control-Allow-Credentials 'true';
+                add_header Access-Control-Max-Age 1728000;
+                add_header Content-Type 'text/plain charset=UTF-8';
+                add_header Content-Length 0;
+                return 204;
+            }
+
+            proxy_pass http://backend;  # upstreamで定義したバックエンドへのプロキシ
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+        }
     }
 
-    error_page 502 /maintenance.html;
-    location = /maintenance.html {
-        root /var/www/ron-the-rocker.net;
-        internal;
-    }
 
-}
-
+  # リクエストされたリソ
 EOF
 
 # Enable the server block
