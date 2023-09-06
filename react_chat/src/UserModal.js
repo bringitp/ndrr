@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 
 function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
-  const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [roomMembers, setRoomMembers] = useState([]);
   
   const headers = new Headers({
@@ -34,23 +33,32 @@ function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
     const data = {
       "blocked_user_id": userId,
     };
-
     fetch(apiUrl, {
-      method: 'POST',
+      method: 'POST', // または 'DELETE'
       headers: headers,
       body: JSON.stringify(data),
     })
       .then(response => {
         if (response.ok) {
-          // ブロックが成功した場合の処理
-          console.log(`User ${userId} has been blocked.`);
+          // 成功した場合の処理
+          console.log(`User ${userId} has been blocked/unblocked.`);
         } else {
-          // エラーハンドリング
-          console.error('ブロック中にエラーが発生しました。');
+          // エラーレスポンスをハンドル
+          if (response.status === 401) {
+            // 認証エラーの場合の処理
+            console.error('認証エラーが発生しました。');
+          } else if (response.status === 500) {
+            // サーバーエラーの場合の処理
+            console.error('ユーザブロック中にサーバーエラーが発生しました。');
+          } else {
+            // その他のエラーの場合の処理
+            console.error('ユーザブロックのAPIエラーが発生しました。');
+          }
         }
       })
       .catch(error => {
-        console.error('ブロック中にエラーが発生しました:', error);
+        // ネットワークエラーなど、fetch自体のエラーをハンドル
+        console.error('APIリクエスト中にエラーが発生しました:', error);
       });
   };
 
@@ -76,9 +84,15 @@ function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
           // 削除が成功した場合の処理
           console.log(`User ${userId} has been unblocked.`);
         } else {
+
+          if (response.status === 401) {
+            // 認証エラーの場合の処理
+            console.error('認証エラーが発生しました。');
+          } else if (response.status === 500) {
           // エラーハンドリング
           console.error('ブロック解除中にエラーが発生しました。');
         }
+      }
       })
       .catch(error => {
         console.error('ブロック解除中にエラーが発生しました:', error);

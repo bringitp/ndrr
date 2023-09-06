@@ -106,8 +106,6 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     return user
 
-
-
 @router.post("/room/{room_id}", response_model=Dict[str, Any])
 async def create_room_message(
     room_id: int, 

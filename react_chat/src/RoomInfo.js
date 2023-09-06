@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useParams } from "react-router-dom";
 import { Card, CardContent, Typography, Grid, Modal, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
@@ -7,6 +7,32 @@ import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
 import UserModal from './UserModal';
 import EditRoomModal from './EditRoomModal';
 import EditAdminModal from './EditAdminModal';
+
+
+const RoomHeader = React.memo(({ room }) => {
+  return (
+    <Grid container spacing={1}>
+      <Grid item xs={5}>
+        <Typography>
+          <strong>Login: {room.room_login_user_name}</strong>
+        </Typography>
+        <Typography>
+          <strong>Host: {room.room_owner_name}</strong>
+        </Typography>
+      </Grid>
+      <Grid item xs={7}>
+        <Typography>
+          <strong>
+            {room.room_name} 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
+          </strong>
+        </Typography>
+      </Grid>
+      <Grid item xs={6}>
+        <Typography>{room.room_label}</Typography>
+      </Grid>
+    </Grid>
+  );
+});
 
 function RoomInfo({jsonData}) {
   const [room, setRoom] = useState(jsonData.room);
@@ -19,107 +45,52 @@ function RoomInfo({jsonData}) {
   const [isEditRoomModalOpen, setEditRoomModalOpen] = useState(false);
   const [isEditAdminModalOpen, setEditAdminModalOpen] = useState(false); // 新しく追加
 
-  const handleEditAdminModalOpen = () => {
-    setEditAdminModalOpen(true);
-  };
+  const handleUserModalOpen = useCallback(() => setUserModalOpen(true), []);
+  const handleUserModalClose = useCallback(() => setUserModalOpen(false), []);
+  const handleEditRoomModalOpen = useCallback(() => setEditRoomModalOpen(true), []);
+  const handleEditRoomModalClose = useCallback(() => setEditRoomModalOpen(false), []);
+  const handleEditAdminModalOpen = useCallback(() => setEditAdminModalOpen(true), []);
+  const handleEditAdminModalClose = useCallback(() => setEditAdminModalOpen(false), []);
 
-  const handleEditAdminModalClose = () => {
-    setEditAdminModalOpen(false);
-  };
+  const headers = new Headers();
+  headers.append("Authorization", `Bearer ${keycloak.token}`);
 
-  const handleUserModalOpen = () => {
-    setUserModalOpen(true);
-  };
-
-  const handleUserModalClose = () => {
-    setUserModalOpen(false);
-  };
-
-  const handleEditRoomModalOpen = () => {
-    setEditRoomModalOpen(true);
-  };
-
-  const handleEditRoomModalClose = () => {
-    setEditRoomModalOpen(false);
-  };
-
- const headers = new Headers();
- headers.append("Authorization", `Bearer ${keycloak.token}`);
-
-const openChatWindow = () => {
-  setIsChatWindowOpen(true);
-};
-const closeChatWindow = () => {
-  setIsChatWindowOpen(false);
-};
-
-
- const handleStartChat = (userId) => {
-  // Simulate starting a chat with the selected user
-  console.log(`Starting chat with user ${userId}`);  
-  setChatMessage(`Hello, ${userId}!`); // Replace with your own message
-  openChatWindow();
-};
-
-return (
-  <Card sx={{ width: '98%' }}>
-    <CardContent>
-      <Grid container spacing={1}>
-        <Grid item xs={5}>
-          <Typography>
-            <strong>Login: {room.room_login_user_name}</strong>
-          </Typography>
-          <Typography>
-            <strong>Host: {room.room_owner_name}</strong>
-          </Typography>
-        </Grid>
-        <Grid item xs={7}>
-          <Typography>
-            <strong>
-              {room.room_name} 🌟 ⬆️ {room.room_restricted_karma_over_limit} ⬇️ {room.room_restricted_karma_under_limit} ({room.room_member_count}/{room.room_max_capacity})
-            </strong>
-          </Typography>
-        </Grid>
-        <Grid item xs={6}>
-          <Typography>{room.room_label}</Typography>
-        </Grid>
-      </Grid>
-    </CardContent>
-    <Button onClick={handleUserModalOpen}>🔊</Button>
-    {/* ⚙ ボタンの表示を制御 */}
-    {room.room_owner_id === room.room_login_user_id && (
-      <Button onClick={handleEditRoomModalOpen}>⚙</Button>
-    )}
-    {/* 🔨 ボタンの表示を制御 */}
-    {room.room_owner_id === room.room_login_user_id && (
-      <Button onClick={handleEditAdminModalOpen}>🔨</Button>
-    )}
-    {/* UserModalコンポーネントを使用 */}
-    <UserModal
-      isUserModalOpen={isUserModalOpen}
-      handleModalClose={handleUserModalClose}
-      token={keycloak.token}
-      jsonData={jsonData}
-    />
-    {/* EditRoomModalコンポーネントを使用 */}
-    <EditRoomModal
-      isOpen={isEditRoomModalOpen}
-      onClose={handleEditRoomModalClose}
-      maxCapacity={room.room_max_capacity}
-      roomTitle={room.room_name}
-      roomLabel={room.room_label}
-      token={keycloak.token}
-      jsonData={jsonData}
-    />
-    <EditAdminModal
-      isOpen={isEditAdminModalOpen}
-      onClose={handleEditAdminModalClose}
-      roomMembers={roomMembers}
-      token={keycloak.token}
-      jsonData={jsonData}
-    />
-  </Card>
-);
+  return (
+    <Card sx={{ width: '98%' }}>
+      <CardContent>
+        <RoomHeader room={jsonData.room} />
+      </CardContent>
+      <Button onClick={handleUserModalOpen}>🔊</Button>
+      {jsonData.room.room_owner_id === jsonData.room.room_login_user_id && (
+        <Button onClick={handleEditRoomModalOpen}>⚙</Button>
+      )}
+      {jsonData.room.room_owner_id === jsonData.room.room_login_user_id && (
+        <Button onClick={handleEditAdminModalOpen}>🔨</Button>
+      )}
+      <UserModal
+        isUserModalOpen={isUserModalOpen}
+        handleModalClose={handleUserModalClose}
+        token={keycloak.token}
+        jsonData={jsonData}
+      />
+      <EditRoomModal
+        isOpen={isEditRoomModalOpen}
+        onClose={handleEditRoomModalClose}
+        maxCapacity={jsonData.room.room_max_capacity}
+        roomTitle={jsonData.room.room_name}
+        roomLabel={jsonData.room.room_label}
+        token={keycloak.token}
+        jsonData={jsonData}
+      />
+      <EditAdminModal
+        isOpen={isEditAdminModalOpen}
+        onClose={handleEditAdminModalClose}
+        roomMembers={jsonData.roomMembers}
+        token={keycloak.token}
+        jsonData={jsonData}
+      />
+    </Card>
+  );
 }
 
 export default RoomInfo;

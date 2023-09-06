@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from 'react-router-dom';
 import {
   Modal,
   Box,
@@ -15,22 +15,55 @@ import {
   Avatar,
 } from '@mui/material';
 
+function MemberRow({ user, selectedUser, handleUserClick, handleTransferAdmin, handleRemoveFromRoom }) {
+  return (
+    <TableRow
+      key={user.user_id}
+      onClick={() => handleUserClick(user)}
+      selected={selectedUser && selectedUser.user_id === user.user_id}
+    >
+      <TableCell>
+        {user.avatar_url && (
+          <Avatar
+            alt={user.username}
+            src={process.env.NODE_ENV === 'development'
+              ? `http://localhost:7777/static/img/${user.avatar_url}`
+              : `https://ron-the-rocker.net/ndrr/api/static/img/${user.avatar_url}`
+            }
+          />
+        )}
+      </TableCell>
+      <TableCell>{user.username}</TableCell>
+      <TableCell>
+        <Button
+          variant="outlined"
+          color="primary"
+          onClick={() => handleTransferAdmin(user)}
+        >
+          Transfer Admin
+        </Button>
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => handleRemoveFromRoom(user)}
+        >
+          Remove from Room
+        </Button>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 function EditAdminModal({ isOpen, onClose, token ,jsonData}) {
-  const { roomId } = useParams(); // URLパラメータからroomIdを取得
+  const { roomId } = useParams();
   const [selectedUser, setSelectedUser] = useState(null);
   const [roomMembers, setRoomMembers] = useState([]);
 
-  const headers = new Headers({
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json',
-  });
-
   useEffect(() => {
     if (isOpen) {
-      // jsonDataからroom_membersデータを取得して設定 ただし自分のIDは表示しない
       const membersWithCheckbox = jsonData.room_members.filter(member => !member.ami).map(member => ({
         ...member,
-        checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+        checked: member.blocked,
       }));
       setRoomMembers(membersWithCheckbox);
     }
