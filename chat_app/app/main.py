@@ -10,7 +10,7 @@ from chat_app.app.endpoints.users_endpoints import router as users_endpoints
 from chat_app.app.endpoints.room_endpoints import router as room_endpoints
 from fastapi.staticfiles import StaticFiles
 import os
-
+from flask import Flask
 app = Flask(__name__)
 Compress(app)
 
