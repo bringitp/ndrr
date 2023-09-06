@@ -15,7 +15,7 @@ import {
   Avatar,
 } from '@mui/material';
 
-function EditAdminModal({ isOpen, onClose, token }) {
+function EditAdminModal({ isOpen, onClose, token ,jsonData}) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [selectedUser, setSelectedUser] = useState(null);
   const [roomMembers, setRoomMembers] = useState([]);

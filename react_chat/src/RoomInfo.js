@@ -8,7 +8,8 @@ import UserModal from './UserModal';
 import EditRoomModal from './EditRoomModal';
 import EditAdminModal from './EditAdminModal';
 
-function RoomInfo({ room }) {
+function RoomInfo({jsonData}) {
+  const [room, setRoom] = useState(jsonData.room);
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [roomMembers, setRoomMembers] = useState([]);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックの使用
@@ -126,12 +127,14 @@ return (
       roomTitle={room.room_name}
       roomLabel={room.room_label}
       token={keycloak.token}
+      jsonData={jsonData}
     />
     <EditAdminModal
       isOpen={isEditAdminModalOpen}
       onClose={handleEditAdminModalClose}
       roomMembers={roomMembers}
       token={keycloak.token}
+      jsonData={jsonData}
     />
   </Card>
 );

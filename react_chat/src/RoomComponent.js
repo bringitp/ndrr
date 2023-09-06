@@ -193,7 +193,7 @@ const handleDepart = async () => {
             backgroundColor: "#bce2e8", // ここに背景色を設定
           }}
         >
-          <RoomInfo room={jsonData.room} />
+          <RoomInfo jsonData={jsonData} />
 
           <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             <div

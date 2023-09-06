@@ -12,7 +12,7 @@ import {
   MenuItem,
 } from '@mui/material';
 
-function EditRoomModal({ isOpen, onClose,  roomTitle, roomLabel, maxCapacity, token }) {
+function EditRoomModal({ isOpen, onClose,  roomTitle, roomLabel, maxCapacity, token ,jsonData}) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [editedRoomTitle, setEditedRoomTitle] = useState(roomTitle);
   const [editedRoomLabel, setEditedRoomLabel] = useState(roomLabel);
