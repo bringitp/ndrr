@@ -48,7 +48,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
     location ~ ^/ndrr/api { 
-       rewrite ^/ndrr/api(.*)?$ $1 break;
+       rewrite ^/ndrr/(.*)?$ $1 break;
 
         add_header Access-Control-Allow-Origin http://localhost:3000;
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
