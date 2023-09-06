@@ -165,12 +165,13 @@ async def get_room_messages(
 
     vital_member_info = []
     blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
+    block_list = get_block_list(login_user.id, db)
 
     for room_member in room_members:
         user = room_member.user
         avatar_url = user_avatar_urls[0] if user.avatar_id else None  # 取得済みのavatar_urlを使いまわす
     # ブロック済みユーザーかどうかを確認
-        blocked = db.query(UserNGList).filter_by(user_id=login_user.id, blocked_user_id=user.id).first()
+        blocked = user.id in block_list  # block_listに含まれているかどうかを確認
         if blocked:
             blocked_user_ids.add(user.id)
         vital_member_info.append({
@@ -204,7 +205,7 @@ async def get_room_messages(
         "version" : "0.01",
     }
 
-    block_list = get_block_list(login_user.id, db)
+
     # UserとAvatarListのEager Loadingを追加
     # private message 取得
     private_messages = (
@@ -243,7 +244,7 @@ async def get_room_messages(
     )
     # private messageのIDと normal massage のIDをかぶらないようにする
     for message in private_messages:
-        message.id += 10000
+        message.id += 1000
 
     all_messages = sorted(
         private_messages + normal_messages,
