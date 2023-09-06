@@ -16,7 +16,7 @@ import os
 
 app = FastAPI()
 
-app.add_middleware(GZipMiddleware, minimum_size=1000)  # You can adjust the minimum_size as needed
+#app.add_middleware(GZipMiddleware, minimum_size=1000)  # You can adjust the minimum_size as needed
 
 # CORS設定を行う
 app.add_middleware(
