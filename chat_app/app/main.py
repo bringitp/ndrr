@@ -2,6 +2,7 @@ import cProfile
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from chat_app.app.endpoints.root_endpoints import router as root_router
 from chat_app.app.endpoints.room_messages_post_endpoints import router as room_message_post_router
 from chat_app.app.endpoints.room_messages_get_endpoints import router as room_message_get_router
@@ -11,11 +12,10 @@ from chat_app.app.endpoints.room_endpoints import router as room_endpoints
 from fastapi.staticfiles import StaticFiles
 import os
 
-from flask import Flask
-from flask_compress import Compress
+app = FastAPI()
 
-app = Flask(__name__)
-Compress(app)
+# GZip圧縮ミドルウェアを追加
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 # CORS設定を行う
 app.add_middleware(
