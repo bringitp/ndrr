@@ -202,9 +202,8 @@ async def get_room_messages(
         },
         "room_members": vital_member_info,# 部屋の現在のメンバー
         "messages": [],
-        "version" : "0.01",
+        "version" : "0.02",
     }
-
 
     # UserとAvatarListのEager Loadingを追加
     # private message 取得
