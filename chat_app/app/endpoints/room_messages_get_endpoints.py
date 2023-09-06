@@ -262,13 +262,13 @@ async def get_room_messages(
         if sender:
             message_data = {
                 "id": message.id,
-                "room_id": message.room_id,
+                #"room_id": message.room_id,
                 "content": message.content,
                 "toxicity": message.toxicity,
                 "sentiment": message.sentiment,
                 "fluence": message.fluence,
                 "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-                "short_sent_at": message.sent_at.strftime("%H:%M"),
+                #"short_sent_at": message.sent_at.strftime("%H:%M"),
                 "sender": {
                     "username": escape_html(sender.username),
                     "user_id": sender.id,
@@ -278,7 +278,7 @@ async def get_room_messages(
                     "privilege": sender.privilege,
                     "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
                     "penalty_points": sender.penalty_points,
-                    "profile": escape_html(sender.profile),
+                    #"profile": escape_html(sender.profile),
                     "sender_id": message.sender_id if is_private else None,
                     "receiver_id": message.receiver_id if is_private else None,
                     "receiver_username": "all",
