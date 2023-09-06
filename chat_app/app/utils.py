@@ -92,7 +92,7 @@ def get_db_settings():
 
 # データベースエンジンとセッションを作成する関数
 def create_db_engine_and_session():
-    engine = create_engine(get_dbserver_config(), pool_size=250, max_overflow=25)
+    engine = create_engine(get_dbserver_config(), pool_size=45, max_overflow=30)
     SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
     # インデックスの設定

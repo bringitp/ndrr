@@ -8,14 +8,12 @@ from chat_app.app.endpoints.room_messages_get_endpoints import router as room_me
 from chat_app.app.endpoints.rooms_get_endpoints import router as rooms_get_router
 from chat_app.app.endpoints.users_endpoints import router as users_endpoints
 from chat_app.app.endpoints.room_endpoints import router as room_endpoints
-
-
 from fastapi.staticfiles import StaticFiles
 import os
 
 app = FastAPI()
 
-#app.add_middleware(GZipMiddleware, minimum_size=1000)  # You can adjust the minimum_size as needed
+app.add_middleware(GZipMiddleware, minimum_size=2000)  # You can adjust the minimum_size as needed
 
 # CORS設定を行う
 app.add_middleware(
