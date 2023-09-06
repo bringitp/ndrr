@@ -27,25 +27,14 @@ function EditAdminModal({ isOpen, onClose, token ,jsonData}) {
 
   useEffect(() => {
     if (isOpen) {
-      const apiUrl = window.location.href.startsWith(
-        "https://ron-the-rocker.net/"
-      )
-        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-        : `http://localhost:7777/room/${roomId}/condition`;
-
-      fetch(apiUrl, { headers: { Authorization: `Bearer ${token}` } })
-        .then(response => response.json())
-        .then(data => {
-          // チェックボックスの初期状態を設定
-          const membersWithCheckbox = data.room_member.map(member => ({
-            ...member,
-            checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
-          }));
-          setRoomMembers(membersWithCheckbox);
-        })
-        .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
+      // jsonDataからroom_membersデータを取得して設定 ただし自分のIDは表示しない
+      const membersWithCheckbox = jsonData.room_members.filter(member => !member.ami).map(member => ({
+        ...member,
+        checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+      }));
+      setRoomMembers(membersWithCheckbox);
     }
-  }, [roomId, isOpen, token]); // roomIdまたはtokenが変更されたときだけ実行されます
+  }, [isOpen, jsonData]);
 
   const handleRemoveFromRoom = (user) => {
     // ユーザーを部屋から追い出すAPI呼び出しを行います。
@@ -157,9 +146,9 @@ function EditAdminModal({ isOpen, onClose, token ,jsonData}) {
             <TableBody>
               {roomMembers.map((user) => (
                 <TableRow
-                  key={user.id}
+                  key={user.user_id} // ユーザーIDをキーとして使用
                   onClick={() => handleUserClick(user)}
-                  selected={selectedUser && selectedUser.id === user.id}
+                  selected={selectedUser && selectedUser.user_id === user.user_id} // ユーザーIDで選択を管理
                 >
                   <TableCell>
                     {user.avatar_url && (
@@ -203,5 +192,6 @@ function EditAdminModal({ isOpen, onClose, token ,jsonData}) {
     </Modal>
   );
 }
+
 
 export default EditAdminModal;

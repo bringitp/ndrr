@@ -14,7 +14,7 @@ import {
   Button,
 } from '@mui/material';
 
-function UserModal({ isUserModalOpen, handleModalClose, token }) {
+function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
   const { roomId } = useParams(); // URLパラメータからroomIdを取得
   const [roomMembers, setRoomMembers] = useState([]);
   
@@ -88,25 +88,14 @@ function UserModal({ isUserModalOpen, handleModalClose, token }) {
   useEffect(() => {
     // isUserModalOpenがtrueのときにのみ実行
     if (isUserModalOpen) {
-      const apiUrl = window.location.href.startsWith(
-        "https://ron-the-rocker.net/"
-      )
-        ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-        : `http://localhost:7777/room/${roomId}/condition`;
-
-      fetch(apiUrl, { headers })
-        .then(response => response.json())
-        .then(data => {
-          // チェックボックスの初期状態を設定
-          const membersWithCheckbox = data.room_member.map(member => ({
-            ...member,
-            checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
-          }));
-          setRoomMembers(membersWithCheckbox);
-        })
-        .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
+      // jsonDataからroom_membersデータを取得して設定 ただし自分のIDは表示しない
+      const membersWithCheckbox = jsonData.room_members.filter(member => !member.ami).map(member => ({
+        ...member,
+        checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
+      }));
+      setRoomMembers(membersWithCheckbox);
     }
-  }, [roomId, isUserModalOpen]);
+  }, [isUserModalOpen, jsonData]);
 
 
   return (

@@ -53,25 +53,6 @@ const closeChatWindow = () => {
   setIsChatWindowOpen(false);
 };
 
-const apiUrl = window.location.href.startsWith(
-    "https://ron-the-rocker.net/"
-   )
-     ? `https://ron-the-rocker.net/ndrr/api/room/${roomId}/condition`
-     : `http://localhost:7777/room/${roomId}/condition`;
-
-useEffect(() => {
-  fetch(apiUrl, { headers })
-    .then(response => response.json())
-    .then(data => {
-      // チェックボックスの初期状態を設定
-      const membersWithCheckbox = data.room_member.map(member => ({
-        ...member,
-        checked: member.blocked, // blockedフラグがtrueの場合、チェックをつける
-      }));
-      setRoomMembers(membersWithCheckbox);
-    })
-    .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-}, [apiUrl]);
 
  const handleStartChat = (userId) => {
   // Simulate starting a chat with the selected user
@@ -118,6 +99,7 @@ return (
       isUserModalOpen={isUserModalOpen}
       handleModalClose={handleUserModalClose}
       token={keycloak.token}
+      jsonData={jsonData}
     />
     {/* EditRoomModalコンポーネントを使用 */}
     <EditRoomModal

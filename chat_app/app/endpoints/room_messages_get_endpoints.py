@@ -154,14 +154,13 @@ async def get_room_messages(
     )
 
 # Eager Loadingを使用してユーザー情報とアバター情報を一括で取得
-    user_ids = [room_member.user_id for room_member in room_members]
+#    user_ids = [room_member.user_id for room_member in room_members]
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
         .filter(User.avatar_id == AvatarList.avatar_id)
         .all()
     )
-# 未使用のSQLクエリ結果を削除
-    del user_ids
+
 
     vital_member_info = []
     blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
@@ -169,7 +168,7 @@ async def get_room_messages(
 
     for room_member in room_members:
         user = room_member.user
-        avatar_url = user_avatar_urls[0] if user.avatar_id else None  # 取得済みのavatar_urlを使いまわす
+        avatar_id_and_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == user.id), None)
     # ブロック済みユーザーかどうかを確認
         blocked = user.id in block_list  # block_listに含まれているかどうかを確認
         if blocked:
@@ -177,8 +176,9 @@ async def get_room_messages(
         vital_member_info.append({
              "user_id": user.id,
              "username": user.username,
-             "avatar_url": avatar_url,
-             "blocked": bool(blocked)
+             "avatar_url":  avatar_id_and_url,
+             "blocked": bool(blocked),
+             "ami"    :  bool(user.id==login_user.id),
          })
     # vital_member_info から user_id と avatar_url の対応を作成
     user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in vital_member_info}
@@ -254,7 +254,7 @@ async def get_room_messages(
     for message in all_messages:
         is_private = isinstance(message, PrivateMessage)
         sender_id = message.sender_id
-        sender_avatar_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == sender_id), None)
+        sender_avatar_id_and_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == sender_id), None)
 
         # senderを再度取得
         sender = db.query(User).filter(User.id == sender_id).first()
@@ -272,7 +272,7 @@ async def get_room_messages(
                 "sender": {
                     "username": escape_html(sender.username),
                     "user_id": sender.id,
-                    "avatar_url": sender_avatar_url,  # 修正: sender_avatar_urlを使用
+                    "avatar_url": sender_avatar_id_and_url,  # 修正: sender_avatar_urlを使用
                     "trip": escape_html(sender.trip),
                     "karma": sender.karma,
                     "privilege": sender.privilege,
