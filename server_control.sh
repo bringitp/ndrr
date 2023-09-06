@@ -18,21 +18,16 @@ if [ "$1" = "start" ]; then
         done
     fi
 elif [ "$1" = "stop" ]; then
-    # Read the process ID from the file
-    pid=$(cat server.pid)
-    
-    # Check if the process is running
-    if ps -p $pid > /dev/null; then
-        # If running, stop the process gracefully
-        echo "Stopping server with PID $pid..."
-        kill $pid
-        
-        # Remove the PID file
-        rm server.pid
-        echo "Server stopped."
-    else
-        echo "Server is not running."
-    fi
+    # Stop all server processes gracefully
+    for pid_file in server_*.pid; do
+        pid=$(cat "$pid_file")
+        if ps -p $pid > /dev/null; then
+            echo "Stopping server with PID $pid..."
+            kill $pid
+            rm "$pid_file"
+            echo "Server with PID $pid stopped."
+        fi
+    done
 else
     echo "Usage: $0 [start [debug]|stop]"
 fi
