@@ -8,7 +8,6 @@ from chat_app.app.endpoints.room_messages_get_endpoints import router as room_me
 from chat_app.app.endpoints.rooms_get_endpoints import router as rooms_get_router
 from chat_app.app.endpoints.users_endpoints import router as users_endpoints
 from chat_app.app.endpoints.room_endpoints import router as room_endpoints
-from fastapi.middleware.gzip import GZipMiddleware  # Import GZipMiddleware
 
 
 from fastapi.staticfiles import StaticFiles
