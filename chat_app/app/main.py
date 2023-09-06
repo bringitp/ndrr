@@ -1,7 +1,7 @@
 import cProfile
 
 from fastapi import FastAPI
-from flask_compress import Compress
+from fastapi.middleware.cors import CORSMiddleware
 from chat_app.app.endpoints.root_endpoints import router as root_router
 from chat_app.app.endpoints.room_messages_post_endpoints import router as room_message_post_router
 from chat_app.app.endpoints.room_messages_get_endpoints import router as room_message_get_router
@@ -10,7 +10,10 @@ from chat_app.app.endpoints.users_endpoints import router as users_endpoints
 from chat_app.app.endpoints.room_endpoints import router as room_endpoints
 from fastapi.staticfiles import StaticFiles
 import os
+
 from flask import Flask
+from flask_compress import Compress
+
 app = Flask(__name__)
 Compress(app)
 
@@ -35,7 +38,6 @@ app.include_router(users_endpoints)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 app.include_router(room_endpoints)
-
 
 if __name__ == "__main__":
     cProfile.run("app.run(host='0.0.0.0', port=7777, reload=True)", sort='cumulative')
