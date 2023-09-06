@@ -1,7 +1,7 @@
 import cProfile
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from flask_compress import Compress
 from chat_app.app.endpoints.root_endpoints import router as root_router
 from chat_app.app.endpoints.room_messages_post_endpoints import router as room_message_post_router
 from chat_app.app.endpoints.room_messages_get_endpoints import router as room_message_get_router
@@ -11,9 +11,8 @@ from chat_app.app.endpoints.room_endpoints import router as room_endpoints
 from fastapi.staticfiles import StaticFiles
 import os
 
-app = FastAPI()
-
-app.add_middleware(GZipMiddleware, minimum_size=2000)  # You can adjust the minimum_size as needed
+app = Flask(__name__)
+Compress(app)
 
 # CORS設定を行う
 app.add_middleware(
@@ -36,6 +35,7 @@ app.include_router(users_endpoints)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 app.include_router(room_endpoints)
+
 
 if __name__ == "__main__":
     cProfile.run("app.run(host='0.0.0.0', port=7777, reload=True)", sort='cumulative')
