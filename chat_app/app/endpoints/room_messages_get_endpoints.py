@@ -45,7 +45,6 @@ jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 response = requests.get(jwks_url)
 jwks_data = response.json()
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
-# キャッシュの設定
 
 # Janomeのトークナイザーの初期化
 router = APIRouter()
@@ -58,15 +57,12 @@ class LoginUser(UserToken):
     username: str
     avatar: str
 
-
 def get_db():
     db = SessionLocal()
     try:
         yield db
     finally:
         db.close()
-
-
 
 # キャッシュデコレータを定義
 def lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5):
@@ -87,7 +83,6 @@ def lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5):
             return result
         return wrapper
     return decorator
-
 
 # ブロックリストを取得する関数
 def get_block_list(user_id: int, db: Session):
@@ -112,16 +107,14 @@ def get_user_by_sub(sub: str, db: Session) -> User:
 # キャッシュデコレータを使用して関数をデコレート
 # 24.78 [#
 #  Requests per second:    24.68 [#/sec] (mean)
-# @lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5)
+@lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5)
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     if not Authorization:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
-
     try:
         bearer, token_string = Authorization.split()
         if bearer != "Bearer":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-
         sub = validate_token(token_string)
 
     except jwt.exceptions.ExpiredSignatureError:
@@ -132,15 +125,23 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
     user = get_user_by_sub(sub, db)
     return user
 
-
-
-
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int, skip: int = 0, limit: int = 50,
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+
+    room = db.query(Room).get(room_id)
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+
+    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+
+    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+
     # メンバー情報を一括で取得
     room_members = (
         db.query(RoomMember)
@@ -153,47 +154,30 @@ async def get_room_messages(
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
         .filter(User.avatar_id == AvatarList.avatar_id)
-        .filter(User.id.in_(user_ids))
         .all()
     )
+# 未使用のSQLクエリ結果を削除
+    del user_ids
 
-    user_avatar_urls = (
-        db.query(User.id, AvatarList.avatar_url)
-        .filter(User.avatar_id == AvatarList.avatar_id)
-        .all()
-    )
-
-    member_info = []
+    vital_member_info = []
     blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
 
     for room_member in room_members:
         user = room_member.user
         avatar_url = user_avatar_urls[0] if user.avatar_id else None  # 取得済みのavatar_urlを使いまわす
-    
-        # ブロック済みユーザーかどうかを確認
+    # ブロック済みユーザーかどうかを確認
         blocked = db.query(UserNGList).filter_by(user_id=login_user.id, blocked_user_id=user.id).first()
         if blocked:
             blocked_user_ids.add(user.id)
-    
-        member_info.append({
-            "user_id": user.id,
-            "username": user.username,
-            "avatar_url": avatar_url,
-            "blocked": bool(blocked)
-        })
-        # member_info から user_id と avatar_url の対応を作成
-    user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in member_info}
+        vital_member_info.append({
+             "user_id": user.id,
+             "username": user.username,
+             "avatar_url": avatar_url,
+             "blocked": bool(blocked)
+         })
+    # vital_member_info から user_id と avatar_url の対応を作成
+    user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in vital_member_info}
     # ルーム情報を取得
-    room = db.query(Room).get(room_id)
-    if not room:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
-
-    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
-
-    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
-
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
     response_data = {
@@ -201,7 +185,7 @@ async def get_room_messages(
             "room_id": room.id,
             "room_label": room.label,
             "room_name": room.name,
-            "room_member_count": len(member_info),  # メンバー情報の数を使う
+            "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
             "room_owner_id": room.owner_id,
             "room_login_user_name": login_user.username,
             "room_login_user_id": login_user.id,
@@ -211,12 +195,14 @@ async def get_room_messages(
             "room_restricted_karma_under_limit": room.under_karma_limit,
             "room_lux": room.lux,
         },
-        "room_members": member_info,
+        "room_members": vital_member_info,# 部屋の現在のメンバー
         "messages": [],
+        "version" : "0.01",
     }
 
     block_list = get_block_list(login_user.id, db)
     # UserとAvatarListのEager Loadingを追加
+    # private message 取得
     private_messages = (
         db.query(PrivateMessage)
         .options(
@@ -236,9 +222,7 @@ async def get_room_messages(
         .all()
     )
 
-    for message in private_messages:
-        message.id += 10000000000
-
+    # normal message 取得
     normal_messages = (
         db.query(Message)
         .options(
@@ -253,6 +237,9 @@ async def get_room_messages(
         .limit(min(limit, 30))
         .all()
     )
+    # private messageのIDと normal massage のIDをかぶらないようにする
+    for message in private_messages:
+        message.id += 10000
 
     all_messages = sorted(
         private_messages + normal_messages,
@@ -264,7 +251,7 @@ async def get_room_messages(
         is_private = isinstance(message, PrivateMessage)
         sender_id = message.sender_id
         sender_avatar_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == sender_id), None)
-    
+
         # senderを再度取得
         sender = db.query(User).filter(User.id == sender_id).first()
     
