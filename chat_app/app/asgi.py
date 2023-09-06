@@ -1,5 +1,3 @@
-import cProfile
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from chat_app.app.endpoints.root_endpoints import router as root_router
@@ -8,11 +6,10 @@ from chat_app.app.endpoints.room_messages_get_endpoints import router as room_me
 from chat_app.app.endpoints.rooms_get_endpoints import router as rooms_get_router
 from chat_app.app.endpoints.users_endpoints import router as users_endpoints
 from chat_app.app.endpoints.room_endpoints import router as room_endpoints
-
-
 from fastapi.staticfiles import StaticFiles
 import os
 
+# FastAPIアプリケーションをインスタンス化
 app = FastAPI()
 
 # CORS設定を行う
@@ -38,5 +35,7 @@ app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 app.include_router(room_endpoints)
 
+# ASGIアプリケーションのエントリーポイントを指定
 if __name__ == "__main__":
-    cProfile.run("app.run(host='0.0.0.0', port=7777, reload=True)", sort='cumulative')
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=7777)

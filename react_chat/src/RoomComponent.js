@@ -287,10 +287,13 @@ const handleDepart = async () => {
                               <Typography variant="subtitle1"  onClick={(event) =>   handleNameMouseDown (message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
                               <strong>{message.is_private ? ' 📧 ' : ' '}</strong> 
                               <strong>{message.sender.username}</strong>
-                              <strong>{message.is_private ? ' ⇒ ' + message.sender.sender_username + " "  : ' '}</strong> 
+                              <Typography variant="caption">
+                                {message.is_private ? ` (${message.sender.trip})` : ' ' }
+                              </Typography>
+                              <strong>{message.is_private ? ' ⇒ ' + message.sender.receiver_username + " "  : ''}</strong> 
    
                               <Typography variant="caption">
-                                {message.sender.trip}
+                                {message.is_private ? ' '  : `(${message.sender.trip})`}
                               </Typography>
                             </Typography>
                                    <Typography variant="caption" onClick={(event) => handleLabelTailMouseDown(message.sender, event)}>

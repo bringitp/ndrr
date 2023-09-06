@@ -4,13 +4,12 @@
 if [ "$1" = "start" ]; then
     if [ "$2" = "debug" ]; then
         # Start the UVicorn server in debug mode with logging to STDOUT
-        uvicorn chat_app.app.main:app --host 0.0.0.0 --port 7777 --reload
+        uvicorn chat_app.app.asgi:app --host 0.0.0.0 --port 7777 --reload
     else
-        # Start the UVicorn server in the background  Requests per second:    26.82 [#/sec] (mean)
-        nohup uvicorn chat_app.app.main:app --host 0.0.0.0 --port 7777 > server.log 2>&1 &
-        # Requests per second:    26.87 [#/sec] (mean)
-        #nohup hypercorn chat_app.app.main:app -b 0.0.0.0:7777 > server.log 2>&1 &
-
+        # Start the UVicorn server in the background 26.87
+        nohup uvicorn chat_app.app.asgi:app --host 0.0.0.0 --port 7777 > server.log 2>&1 &
+        #nohup hypercorn chat_app.app.asgi:app -b 0.0.0.0:7777 > server.log 2>&1 &
+        
         # Save the process ID to a file
         echo $! > server.pid
         echo "Server started in the background. PID: $(cat server.pid)"

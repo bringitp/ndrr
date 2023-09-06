@@ -8,8 +8,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session, aliased
 from chat_app.app.utils import (
-    create_db_engine_and_session,
-    load_ng_words
+    create_db_engine_and_session
 )
 from chat_app.app.database.models import (
     Message,
@@ -28,6 +27,8 @@ import jwt
 from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
+import functools
+import time
 
 def escape_html(text):
     return html.escape(text, quote=True)
@@ -36,7 +37,6 @@ app = FastAPI()
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
-ng_words = load_ng_words()  # ng word 読み込み
 
 # JWT関連の設定
 keycloak_url = "https://ron-the-rocker.net/auth"
@@ -45,6 +45,7 @@ jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 response = requests.get(jwks_url)
 jwks_data = response.json()
 public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+# キャッシュの設定
 
 # Janomeのトークナイザーの初期化
 router = APIRouter()
@@ -57,8 +58,6 @@ class LoginUser(UserToken):
     username: str
     avatar: str
 
-# 前回の投稿時刻を記録するための辞書
-last_post_times = defaultdict(lambda: None)
 
 def get_db():
     db = SessionLocal()
@@ -67,29 +66,34 @@ def get_db():
     finally:
         db.close()
 
+
+
+# キャッシュデコレータを定義
+def lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5):
+    def decorator(func):
+        cache = {}
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # ヘッダー情報をキーにする
+            header_key = kwargs.get("Authorization")
+            if header_key is None:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
+            
+            key = (header_key, args, frozenset(kwargs.items()))
+            if key in cache and time.time() - cache[key]["time"] < cache_timeout:
+                return cache[key]["value"]
+            result = func(*args, **kwargs)
+            cache[key] = {"value": result, "time": time.time()}
+            return result
+        return wrapper
+    return decorator
+
+
 # ブロックリストを取得する関数
 def get_block_list(user_id: int, db: Session):
     block_list = db.query(UserNGList.blocked_user_id).filter(UserNGList.user_id == user_id).all()
     return [item[0] for item in block_list]
 
-def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    if not Authorization:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
-
-    try:
-        bearer, token_string = Authorization.split()
-        if bearer != "Bearer":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-
-        sub = validate_token(token_string)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
-
-    user = get_user_by_sub(sub, db)
-    return user
 
 def validate_token(token_string: str) -> str:
     options = {"verify_signature": True, "verify_aud": False, "exp": True}
@@ -105,6 +109,28 @@ def get_user_by_sub(sub: str, db: Session) -> User:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
     return user
 
+# キャッシュデコレータを使用して関数をデコレート
+# 24.78 [#
+#  Requests per second:    24.68 [#/sec] (mean)
+# @lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5)
+def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
+    if not Authorization:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
+
+    try:
+        bearer, token_string = Authorization.split()
+        if bearer != "Bearer":
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
+
+        sub = validate_token(token_string)
+
+    except jwt.exceptions.ExpiredSignatureError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token {token_string}")
+
+    user = get_user_by_sub(sub, db)
+    return user
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
@@ -154,7 +180,6 @@ async def get_room_messages(
         })
         # member_info から user_id と avatar_url の対応を作成
     user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in member_info}
-
     # ルーム情報を取得
     room = db.query(Room).get(room_id)
     if not room:
@@ -262,7 +287,7 @@ async def get_room_messages(
                     "profile": escape_html(sender.profile),
                     "sender_id": message.sender_id if is_private else None,
                     "receiver_id": message.receiver_id if is_private else None,
-                    "sender_username": None,
+                    "receiver_username": "all",
                 },
                 "is_private": is_private
             }
@@ -270,7 +295,7 @@ async def get_room_messages(
             if is_private:
                 receiver_user = db.query(User).filter(User.id == message.receiver_id).first()
                 if receiver_user:
-                    message_data["sender"]["sender_username"] = escape_html(receiver_user.username)
+                    message_data["sender"]["receiver_username"] = escape_html(receiver_user.username)
     
             response_data["messages"].append(message_data)
 

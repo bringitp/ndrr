@@ -70,7 +70,7 @@ useEffect(() => {
       setRoomMembers(membersWithCheckbox);
     })
     .catch(error => console.error('ルームメンバーの取得中にエラーが発生しました:', error));
-}, [apiUrl,room ]);
+}, [apiUrl]);
 
  const handleStartChat = (userId) => {
   // Simulate starting a chat with the selected user
