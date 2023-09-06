@@ -33,7 +33,6 @@ app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")),
 app.include_router(root_router)
 app.include_router(rooms_get_router)
 app.include_router(users_endpoints)
-#app.include_router(room_condition_get_router)
 app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 app.include_router(room_endpoints)

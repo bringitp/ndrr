@@ -33,23 +33,13 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-   
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
         try_files $uri $uri/ /index.html;
     }
 
-
-
-    location /auth {
-        proxy_pass http://localhost:8180;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-    location ~ ^/ndrr/api { 
+       location ~ ^/ndrr/api { 
        rewrite ^/ndrr/api(.*)?$ $1 break;
 
         add_header Access-Control-Allow-Origin http://localhost:3000;
@@ -64,7 +54,7 @@ server {
             return 204;
         }
 
-        proxy_pass http://backend;
+        proxy_pass http://localhost:7777;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -131,3 +121,5 @@ sudo systemctl start nginx
 sudo systemctl reload nginx
 
 echo "Nginx installed, configured, and running."
+
+

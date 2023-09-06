@@ -133,6 +133,10 @@ async def get_room_messages(
 ):
 
     room = db.query(Room).get(room_id)
+    # Check if the user is a member of the room
+    if not db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
+
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
 
