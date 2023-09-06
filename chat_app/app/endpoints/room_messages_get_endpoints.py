@@ -112,7 +112,7 @@ def get_user_by_sub(sub: str, db: Session) -> User:
 # キャッシュデコレータを使用して関数をデコレート
 # 24.78 [#
 #  Requests per second:    24.68 [#/sec] (mean)
-# @lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5)
+@lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5)
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     if not Authorization:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
