@@ -4,7 +4,10 @@ from typing import List
 from chat_app.app.database.models import Message, Room, User,RoomMember
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
-
+from chat_app.app.utils import (
+    create_db_engine_and_session
+    ,get_public_key
+)
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()

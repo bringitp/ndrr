@@ -1,7 +1,7 @@
 import requests
 from config import TOKEN  # config.py ファイルからトークンをインポート
 
-url = "http://localhost:7777/room/9/join_me"
+url = "http://localhost:7777/room/1/join_me"
 headers = {
     "Authorization": f"Bearer {TOKEN}",
     "Content-Type": "application/json"

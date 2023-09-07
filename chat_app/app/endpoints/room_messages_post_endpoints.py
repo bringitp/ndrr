@@ -10,7 +10,10 @@ from janome.tokenizer import Tokenizer
 from collections import defaultdict
 import html
 import re
-
+from chat_app.app.utils import (
+    create_db_engine_and_session
+    ,get_public_key
+)
 def escape_html(text):
     return html.escape(text, quote=True)
 
@@ -44,12 +47,7 @@ engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み
 
 # JWT関連の設定
-keycloak_url = "https://ron-the-rocker.net/auth"
-realm = "ndrr"
-jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
-response = requests.get(jwks_url)
-jwks_data = response.json()
-public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 
 
 # Janomeのトークナイザーの初期化

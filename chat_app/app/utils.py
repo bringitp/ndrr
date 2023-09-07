@@ -7,7 +7,16 @@ from sqlalchemy.ext.declarative import declarative_base
 import configparser
 from chat_app.app.database.models  import BlockedUser, Room, PrivateMessage, UserNGList, User
 from sqlalchemy.orm import Session
+import requests
+import jwt
 
+
+def get_public_key(keycloak_url, realm):
+    jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
+    response = requests.get(jwks_url)
+    jwks_data = response.json()
+    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
+    return public_key
 
 # データベースセッションの依存性を設定
 def get_db():

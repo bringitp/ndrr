@@ -29,6 +29,7 @@ import functools
 import time
 from chat_app.app.utils import (
     create_db_engine_and_session
+    ,get_public_key
 )
 def escape_html(text):
     return html.escape(text, quote=True)
@@ -37,14 +38,7 @@ app = FastAPI()
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
-
-# JWT関連の設定
-keycloak_url = "https://ron-the-rocker.net/auth"
-realm = "ndrr"
-jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
-response = requests.get(jwks_url)
-jwks_data = response.json()
-public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 
 # Janomeのトークナイザーの初期化
 router = APIRouter()
@@ -120,7 +114,7 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token {token_string}")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token !! {token_string}")
 
     user = get_user_by_sub(sub, db)
     return user

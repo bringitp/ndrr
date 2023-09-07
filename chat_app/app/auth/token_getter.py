@@ -41,7 +41,7 @@ jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
 print (jwks_url)
 response = requests.get(jwks_url)
 jwks_data = response.json()
-public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
 options = {"verify_signature": True, "verify_aud": False, "exp": True}
 
 # JWTトークンのデコード
