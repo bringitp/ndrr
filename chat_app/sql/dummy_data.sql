@@ -190,7 +190,7 @@ INSERT INTO avatar_list (avatar_url)
 
 INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar_id, profile ,trip,  penalty_points,karma, spam_activity_score)
 VALUES
-    ('user_zero', 'e70c9c64-0fbe-48e0-8daa-6f08a75d8185', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
+    ('user0', '3151fcfa-0156-4b89-bf31-cec3d09baa11', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
     ('user1', 'ff66cf0b-dc0b-499c-9cb5-e65d4b4fcd07', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1),
     ('user2', '34b42801-f81c-4a44-9e11-05f8c359a6ea', 10, 3, '3',  'エペ募集','trip789',0, 90, 5),
     ('user3', 'a9f26c5c-e5b2-4cea-89e9-f9871862e468', 10, 3, '4',  '旅行好きなひと〜','tripabc',0, 30, 8),

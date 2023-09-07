@@ -15,7 +15,7 @@ def get_public_key(keycloak_url, realm):
     jwks_url = f"{keycloak_url}/realms/{realm}/protocol/openid-connect/certs"
     response = requests.get(jwks_url)
     jwks_data = response.json()
-    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][1])
+    public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
     return public_key
 
 # データベースセッションの依存性を設定
