@@ -6,13 +6,19 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import configparser
 from chat_app.app.database.models  import BlockedUser, Room, PrivateMessage, UserNGList, User
+from sqlalchemy.orm import Session
+
+
+# データベースセッションの依存性を設定
+def get_db():
+    engine, SessionLocal, Base = create_db_engine_and_session()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 def get_dbserver_config():
-    settings_path = find_settings_ini()
-# settings.iniから接続情報を読み込む
-    config = configparser.ConfigParser()
-    config.read(settings_path)
-
 # 環境変数が設定されている場合はそれを優先
     value = os.environ.get('dbserver')
     if value is None:

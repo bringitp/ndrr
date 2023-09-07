@@ -1,15 +1,17 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
+from fastapi import (FastAPI, Depends, Header, HTTPException, status, APIRouter,
+                     Request, BackgroundTasks)
 from sqlalchemy.orm import Session
-from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember,PrivateMessage
+from chat_app.app.utils import (create_db_engine_and_session, load_ng_words)
+from chat_app.app.database.models import (Message, Room, User, RoomMember, PrivateMessage)
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
 import jwt
 from janome.tokenizer import Tokenizer
-from collections import defaultdict
 import html
 import re
+from fastapi import status
+
 
 def escape_html(text):
     return html.escape(text, quote=True)
@@ -116,7 +118,6 @@ async def create_room_message(
     request: Request,
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db),
-    background_tasks: BackgroundTasks = BackgroundTasks()
 ):
 
     data = await request.json()

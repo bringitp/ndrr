@@ -16,7 +16,6 @@ app = FastAPI()
 
 # GZip圧縮ミドルウェアを追加
 app.add_middleware(GZipMiddleware, minimum_size=1000)
-
 # CORS設定を行う
 app.add_middleware(
     CORSMiddleware,

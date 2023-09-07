@@ -7,9 +7,7 @@ from fastapi import (
     APIRouter,
 )
 from sqlalchemy.orm import Session, aliased
-from chat_app.app.utils import (
-    create_db_engine_and_session
-)
+
 from chat_app.app.database.models import (
     Message,
     Room,
@@ -29,7 +27,9 @@ from collections import defaultdict
 import html
 import functools
 import time
-
+from chat_app.app.utils import (
+    create_db_engine_and_session
+)
 def escape_html(text):
     return html.escape(text, quote=True)
 
@@ -262,13 +262,11 @@ async def get_room_messages(
         if sender:
             message_data = {
                 "id": message.id,
-                #"room_id": message.room_id,
                 "content": message.content,
                 "toxicity": message.toxicity,
                 "sentiment": message.sentiment,
                 "fluence": message.fluence,
                 "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-                #"short_sent_at": message.sent_at.strftime("%H:%M"),
                 "sender": {
                     "username": escape_html(sender.username),
                     "user_id": sender.id,

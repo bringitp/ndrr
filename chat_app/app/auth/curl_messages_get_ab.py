@@ -1,14 +1,14 @@
 import subprocess
 from config import TOKEN  # config.py ファイルからトークンをインポート
 
-#url = "http://localhost:7777/room/1/messages"
-url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
+url = "http://localhost:7777/room/1/messages"
+#url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 headers = {
     "Authorization": f"Bearer {TOKEN}"
 }
 
 # abコマンドを実行するためのコマンドラインを構築
-ab_command = f"ab -n 1000 -c 20 -H 'Authorization: {headers['Authorization']}' {url}"
+ab_command = f"ab -n 100 -c 20 -H 'Authorization: {headers['Authorization']}' {url}"
 
 try:
     # abコマンドを実行し、結果を取得
