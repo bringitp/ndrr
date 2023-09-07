@@ -1,5 +1,15 @@
 #!/bin/bash
 
+# Function to stop UVicorn server by PID
+stop_uvicorn() {
+    local pid=$1
+    if ps -p $pid > /dev/null; then
+        echo "Stopping server with PID $pid..."
+        kill $pid
+        echo "Server with PID $pid stopped."
+    fi
+}
+
 # Check the command-line argument
 if [ "$1" = "start" ]; then
     if [ "$2" = "debug" ]; then
@@ -19,15 +29,21 @@ if [ "$1" = "start" ]; then
     fi
 elif [ "$1" = "stop" ]; then
     # Stop all server processes gracefully
-    for pid_file in server_*.pid; do
-        pid=$(cat "$pid_file")
-        if ps -p $pid > /dev/null; then
-            echo "Stopping server with PID $pid..."
-            kill $pid
+    if [ "$2" = "all" ]; then
+        for pid_file in server_*.pid; do
+            pid=$(cat "$pid_file")
+            stop_uvicorn $pid
             rm "$pid_file"
-            echo "Server with PID $pid stopped."
-        fi
-    done
+        done
+    else
+        # Stop a specific server by PID
+        for pid_file in "${@:2}"; do
+            pid=$(cat "$pid_file")
+            stop_uvicorn $pid
+            rm "$pid_file"
+        done
+    fi
 else
-    echo "Usage: $0 [start [debug]|stop]"
+    echo "Usage: $0 [start [debug]|stop [all|PID1 PID2 ...]]"
 fi
+
