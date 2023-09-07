@@ -4,6 +4,8 @@ services:
     image: mysql:8.0
     ports:
       - "3307:3306"
+#    tmpfs:
+#      - /var/lib/mysql
     environment:
         MYSQL_ROOT_PASSWORD: password
         MYSQL_DATABASE: keycloak
@@ -11,11 +13,15 @@ services:
         MYSQL_PASSWORD: password
     ports:
       - "3307:3306"
+    volumes:
+        - mysql_data:/var/lib/mysql
     networks:
       - keycloak-network
-    command: ["mysqld", "--bind-address=0.0.0.0"]
+    command: ["mysqld", "--bind-address=0.0.0.0", "--innodb-thread-concurrency=0"]
     volumes:
-      - ./custom_sql:/docker-entrypoint-initdb.d   # ホストマシンのカスタムSQLディレクトリをMySQLコンテナ内の特定ディレクトリにマウント
+      - ./custom_sql:/docker-entrypoint-initdb.d   # ホストマシンのカスタムSQLディレクトリをMySQLコンテナ>
+      - mysql_data:/var/lib/mysql
+    mem_limit: 1g # 1GBのメモリ制限を設定
   keycloak:
     image: quay.io/keycloak/keycloak:18.0.0
     depends_on:
@@ -28,6 +34,7 @@ services:
         KC_DB_URL_DATABASE: keycloak
         KC_DB_USERNAME: keycloak
         KC_DB_PASSWORD: password
+        JAVA_OPTS: "-Xmx2g -XX:MaxMetaspaceSize=512m"
     ports:
       - "8180:8180"
     command: start-dev --http-port 8180 --http-relative-path /auth --proxy=reencrypt
@@ -38,5 +45,7 @@ networks:
   keycloak-network:
     driver: bridge
 
-#volumes:
-#  mysql_data:  # Define the named volume
+volumes:
+  mysql_data:  # Define the named volume
+
+

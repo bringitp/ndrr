@@ -10,6 +10,14 @@ stop_uvicorn() {
     fi
 }
 
+# Function to stop all UVicorn servers
+stop_all_uvicorn() {
+    local uvicorn_pids=$(pgrep -f "uvicorn chat_app.app.main:app --host 0.0.0.0 --port")
+    for pid in $uvicorn_pids; do
+        stop_uvicorn $pid
+    done
+}
+
 # Check the command-line argument
 if [ "$1" = "start" ]; then
     if [ "$2" = "debug" ]; then
@@ -17,7 +25,7 @@ if [ "$1" = "start" ]; then
         uvicorn chat_app.app.main:app --host 0.0.0.0 --port 7777 --reload
     else
         # Get the number of CPU cores
-        core_count=2
+        core_count=5
 
         # Start UVicorn servers in the background with incremental port numbers
         for ((i=0; i<core_count; i++)); do
@@ -28,19 +36,14 @@ if [ "$1" = "start" ]; then
         done
     fi
 elif [ "$1" = "stop" ]; then
-    # Stop all server processes gracefully
     if [ "$2" = "all" ]; then
-        for pid_file in server_*.pid; do
-            pid=$(cat "$pid_file")
-            stop_uvicorn $pid
-            rm "$pid_file"
-        done
+        # Stop all UVicorn processes gracefully
+        stop_all_uvicorn
     else
-        # Stop a specific server by PID
-        for pid_file in "${@:2}"; do
-            pid=$(cat "$pid_file")
+        # Stop specific servers by PID
+        shift
+        for pid in "$@"; do
             stop_uvicorn $pid
-            rm "$pid_file"
         done
     fi
 else
