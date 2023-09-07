@@ -13,13 +13,14 @@ services:
         - mysql_data:/var/lib/mysql
     networks:
       - keycloak-network
+    command: ["mysqld", "--bind-address=0.0.0.0"]
   keycloak:
     image: quay.io/keycloak/keycloak:18.0.0
     depends_on:
       - mysql
     environment:
         KEYCLOAK_ADMIN: admin
-        KEYCLOAK_ADMIN_PASSWORD: admin
+        KEYCLOAK_ADMIN_PASSWORD: hilitehilite
         KC_DB : mysql
         KC_DB_URL: jdbc:mysql://mysql:3306/keycloak
         KC_DB_URL_DATABASE: keycloak
