@@ -190,12 +190,12 @@ INSERT INTO avatar_list (avatar_url)
 
 INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar_id, profile ,trip,  penalty_points,karma, spam_activity_score)
 VALUES
-    ('user_zero', 'c01dd252-82bf-4c05-92ee-74ea89c89b10', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
-    ('user2', '71251b8b-f2e3-4261-a8a9-67f04265c5e6', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1),
-    ('user3', 'c4561c8e-6fdd-4e93-b073-51c310358203', 10, 3, '3',  'エペ募集','trip789',0, 90, 5),
-    ('user4', 'sub4', 10, 3, '4',  '旅行好きなひと〜','tripabc',0, 30, 8),
-    ('user5', 'sub5', 10, 3, '5',  '使いこなせないけどコスメ買い漁りたい','tripxyz',0, 20, 2),
-    ('user6', 'sub6', 10, 3, '6',  '頭痛い。。。','trip123',0, 10, 4),
+    ('user_zero', 'e70c9c64-0fbe-48e0-8daa-6f08a75d8185', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
+    ('user1', 'ff66cf0b-dc0b-499c-9cb5-e65d4b4fcd07', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1),
+    ('user2', '34b42801-f81c-4a44-9e11-05f8c359a6ea', 10, 3, '3',  'エペ募集','trip789',0, 90, 5),
+    ('user3', 'a9f26c5c-e5b2-4cea-89e9-f9871862e468', 10, 3, '4',  '旅行好きなひと〜','tripabc',0, 30, 8),
+    ('user4', 'df4445b5-2174-4495-9e84-1a98c2bbaa8f', 10, 3, '5',  '使いこなせないけどコスメ買い漁りたい','tripxyz',0, 20, 2),
+    ('user5', '7312e5ae-2d94-45c6-ba23-d82813d743df', 10, 3, '6',  '頭痛い。。。','trip123',0, 10, 4),
     ('user7', 'sub7', 10, 3, '7',  'ねむねむ','trip456',0, 65, 6),
     ('user8', 'sub8', 10, 3, '8',  '(*´ω`*)','trip789',0, 40, 7),
     ('user9', 'sub9', 10, 3, '9',  '仕事でやらかした。ついてないな','tripabc',0, 55, 9),
