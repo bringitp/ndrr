@@ -36,5 +36,3 @@ app.include_router(room_message_get_router)
 app.include_router(room_message_post_router)
 app.include_router(room_endpoints)
 
-if __name__ == "__main__":
-    cProfile.run("app.run(host='0.0.0.0', port=7777, reload=True)", sort='cumulative')

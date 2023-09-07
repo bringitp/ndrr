@@ -4,7 +4,7 @@ from config import TOKEN  # config.py ファイルからトークンをインポ
 
 url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 #url = "http://localhost:7777/room/1/messages"
-#url = "http://localhost:7777"
+#url = "http://localhost:7777"SQL
 headers = {
     "Authorization": f"Bearer {TOKEN}"
 } 
