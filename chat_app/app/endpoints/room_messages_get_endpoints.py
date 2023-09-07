@@ -31,6 +31,8 @@ from chat_app.app.utils import (
     create_db_engine_and_session
     ,get_public_key
 )
+from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
+
 def escape_html(text):
     return html.escape(text, quote=True)
 
@@ -42,14 +44,6 @@ public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 
 # Janomeのトークナイザーの初期化
 router = APIRouter()
-class UserToken:
-    sub: str
-
-class LoginUser(UserToken):
-    id: int
-    karma: int
-    username: str
-    avatar: str
 
 def get_db():
     db = SessionLocal()
@@ -83,21 +77,6 @@ def get_block_list(user_id: int, db: Session):
     block_list = db.query(UserNGList.blocked_user_id).filter(UserNGList.user_id == user_id).all()
     return [item[0] for item in block_list]
 
-
-def validate_token(token_string: str) -> str:
-    options = {"verify_signature": True, "verify_aud": False, "exp": True}
-    payload = jwt.decode(token_string, public_key, algorithms=["RS256"], options=options)
-    sub = payload.get("sub")
-    if not sub:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
-    return sub
-
-def get_user_by_sub(sub: str, db: Session) -> User:
-    user = db.query(User).filter(User.sub == sub).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
-    return user
-
 # キャッシュデコレータを使用して関数をデコレート
 # 24.78 [#
 #  Requests per second:    24.68 [#/sec] (mean)
@@ -109,15 +88,16 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
         bearer, token_string = Authorization.split()
         if bearer != "Bearer":
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-        sub = validate_token(token_string)
+        sub = validate_token(token_string,public_key)
 
     except jwt.exceptions.ExpiredSignatureError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token {token_string}")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token {token_string} {e}")
 
     user = get_user_by_sub(sub, db)
     return user
+
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
@@ -125,7 +105,6 @@ async def get_room_messages(
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-
     room = db.query(Room).get(room_id)
     # Check if the user is a member of the room
     if not db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first():
