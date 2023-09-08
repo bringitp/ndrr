@@ -25,24 +25,11 @@ from chat_app.app.auth_utils import (
     get_block_list,
 )
 
-import markdown
-
-def markdown_to_html(markdown_text):
-    html = markdown.markdown(markdown_text)
-    return html
-
-def replace_markdown_with_html(match): # md形式
-    markdown_text = match.group(1)
-    html_output = markdown_to_html(markdown_text)
-    return html_output
-
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み
-
 # JWT関連の設定
 public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
-
 
 # Janomeのトークナイザーの初期化
 t = Tokenizer()
@@ -57,7 +44,6 @@ def get_db():
 
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     return skeltone_get_current_user(Authorization,db,public_key)
-
 
 @router.post("/room/{room_id}", response_model=Dict[str, Any])
 async def create_room_message(
@@ -199,7 +185,6 @@ async def add_room_member(
     db.add(new_member)
     db.commit()
     return {"message": "You have successfully joined the room"}
-
 
 @router.put("/room/{room_id}/change_owner", response_model=Dict[str, Any])
 async def change_room_owner(

@@ -87,7 +87,6 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
     return skeltone_get_current_user(Authorization,db,public_key)
 
 
-
 def check_ng_words(message_content: str, ng_words: set) -> None:
     tokens = t.tokenize(message_content)
     if any(token.surface in ng_words for token in tokens):
