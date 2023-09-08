@@ -57,9 +57,10 @@ class Message(Base):
     __tablename__ = 'messages'
     
     id = Column(Integer, primary_key=True)
-    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
-    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False, index=True)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=True, index=True)
+    sent_at = Column(TIMESTAMP, nullable=False, index=True)
     content = Column(Text, nullable=False)
     message_type = Column(Enum('public', 'private'), nullable=False)  # メッセージタイプを区別
     
@@ -70,8 +71,6 @@ class Message(Base):
     foxy = Column(Float(precision=6), nullable=True)
     fluence = Column(Float(precision=6), nullable=True)
     
-    sent_at = Column(TIMESTAMP, nullable=False)
-
     signature_writer_name = Column(String(255), nullable=True)
     signature_recipient_name = Column(String(255), nullable=True)
     signature_avatar_url  = Column(String(255), nullable=True)

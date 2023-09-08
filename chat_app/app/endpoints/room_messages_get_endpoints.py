@@ -124,11 +124,7 @@ async def get_room_messages(
                 "ami": bool(user.id == login_user.id),
             }
         )
-    # vital_member_info から user_id と avatar_url の対応を作成
-    user_id_to_avatar_url = {
-        member["user_id"]: member["avatar_url"] for member in vital_member_info
-    }
-    # ルーム情報を取得
+
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
     response_data = {
@@ -150,17 +146,15 @@ async def get_room_messages(
        "messages": [],
        "version": "0.02",
    }
-    # private message 取得
     # normal message 取得
     normal_messages = (
         db.query(Message)
-        .filter((Message.room_id == room_id) & (~Message.sender_id.in_(block_list)))
+        .filter((Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids)))
         .order_by(Message.sent_at.desc())
         .offset(skip)
         .limit(min(limit, 30))
         .all()
     )
-    # private messageのIDと normal massage のIDをかぶらないようにする
 
     all_messages = sorted(
         normal_messages,
@@ -169,10 +163,6 @@ async def get_room_messages(
     )
 
     for message in all_messages:
-
-        # senderを再度取得
-        #sender = db.query(User).filter(User.id == sender_id).first()
-
         message_data = {
             "id": message.id,
             "content": message.content,
