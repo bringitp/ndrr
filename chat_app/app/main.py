@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.brotli import BrotliMiddleware
 from chat_app.app.endpoints.root_endpoints import router as root_router
 from chat_app.app.endpoints.room_messages_post_endpoints import router as room_message_post_router
 from chat_app.app.endpoints.room_messages_get_endpoints import router as room_message_get_router
@@ -12,8 +12,8 @@ import os
 
 app = FastAPI()
 
-# GZip圧縮ミドルウェアを追加
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+# Brotli 圧縮ミドルウェアを追加
+app.add_middleware(BrotliMiddleware, minimum_size=1000)
 # CORS設定を行う
 app.add_middleware(
     CORSMiddleware,
