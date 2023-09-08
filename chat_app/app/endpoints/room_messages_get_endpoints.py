@@ -144,7 +144,7 @@ async def get_room_messages(
        },
        "room_members": vital_member_info,  # 部屋の現在のメンバー
        "messages": [],
-       "version": "0.02",
+       "version": "0.03",
    }
     # normal message 取得
     normal_messages = (
@@ -176,9 +176,6 @@ async def get_room_messages(
                 "avatar_url": message.signature_avatar_url ,  # 修正: sender_avatar_urlを使用
                 "trip": message.signature_trip,
                 "karma": message.signature_karma,
-                #"privilege": sender.privilege,
-                #"lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
-                #"penalty_points": sender.penalty_points,
                 "profile": message.signature_profile,
                 "sender_id": message.sender_id if message.message_type == "private" else None,
                 "receiver_id": message.receiver_id if message.message_type == "private" else None,
