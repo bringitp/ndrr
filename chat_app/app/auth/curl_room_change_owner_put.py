@@ -8,7 +8,7 @@ headers = {
 }
 
 data = {
-    "new_owner_id": 1  # ここに追加するユーザーのIDを指定
+    "new_owner_id": 2  # ここに追加するユーザーのIDを指定
 }
 
 response = requests.put(url, json=data, headers=headers)

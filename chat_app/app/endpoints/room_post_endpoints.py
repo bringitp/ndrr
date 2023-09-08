@@ -13,7 +13,14 @@ from datetime import datetime, timedelta
 import jwt
 from janome.tokenizer import Tokenizer
 import markdown
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub,get_current_user
+from chat_app.app.auth_utils import (
+    UserToken,
+    LoginUser,
+    validate_token,
+    get_user_by_sub,
+    skeltone_get_current_user,
+    get_block_list,
+)
 
 import markdown
 def markdown_to_html(markdown_text):
@@ -24,8 +31,6 @@ def replace_markdown_with_html(match): # md形式
     markdown_text = match.group(1)
     html_output = markdown_to_html(markdown_text)
     return html_output
-
-app = FastAPI()
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -45,23 +50,8 @@ def get_db():
         db.close()
 
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    if not Authorization:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
+    return skeltone_get_current_user(Authorization,db,public_key)
 
-    try:
-        bearer, token_string = Authorization.split()
-        if bearer != "Bearer":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-
-        sub = validate_token(token_string)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
-
-    user = get_user_by_sub(sub, db)
-    return user
 
 def check_ng_words(message_content: str, ng_words: set) -> None:
     tokens = t.tokenize(message_content)

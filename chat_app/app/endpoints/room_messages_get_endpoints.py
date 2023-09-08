@@ -1,21 +1,6 @@
-from fastapi import (
-    FastAPI,
-    Depends,
-    Header,
-    HTTPException,
-    status,
-    APIRouter,
-)
-from sqlalchemy.orm import Session, aliased
-from chat_app.app.database.models import (
-    Message,
-    Room,
-    User,
-    RoomMember,
-    AvatarList,
-    PrivateMessage,
-    UserNGList
-)
+from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter
+from sqlalchemy.orm import Session
+from chat_app.app.database.models import (Message, Room, User, RoomMember, AvatarList, PrivateMessage, UserNGList)
 from sqlalchemy.orm import joinedload
 from typing import Dict, Any
 from datetime import datetime, timedelta
@@ -27,12 +12,18 @@ import html
 import functools
 import time
 from chat_app.app.utils import (
-    create_db_engine_and_session
-    ,get_public_key
-    ,escape_html
+    create_db_engine_and_session,
+    get_public_key,
+    escape_html,
 )
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub,skeltone_get_current_user,get_block_list
-app = FastAPI()
+from chat_app.app.auth_utils import (
+    UserToken,
+    LoginUser,
+    validate_token,
+    get_user_by_sub,
+    skeltone_get_current_user,
+    get_block_list,
+)
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()

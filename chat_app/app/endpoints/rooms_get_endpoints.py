@@ -13,7 +13,6 @@ from chat_app.app.utils import (
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()
 
-
 def get_db():
     db = SessionLocal()
     try:

@@ -15,9 +15,15 @@ from chat_app.app.utils import (
     ,get_public_key
     ,escape_html
 )
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
+from chat_app.app.auth_utils import (
+    UserToken,
+    LoginUser,
+    validate_token,
+    get_user_by_sub,
+    skeltone_get_current_user,
+    get_block_list,
+)
 
-app = FastAPI()
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -40,38 +46,13 @@ def get_db():
         db.close()
 
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    if not Authorization:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
-
-    try:
-        bearer, token_string = Authorization.split()
-        if bearer != "Bearer":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-
-        sub = validate_token(token_string)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
-
-    user = get_user_by_sub(sub, db)
-    return user
-
-
+    return skeltone_get_current_user(Authorization,db,public_key)
 
 def get_user_by_id(id: str, db: Session) -> User:
     user = db.query(User).filter(User.sub == id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
     return user
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 def db_get_user_ng_list(user_id: int, db: Session):
     user_ng_list = db.query(UserNGList).filter(UserNGList.user_id == user_id).all()

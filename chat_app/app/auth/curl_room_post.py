@@ -8,7 +8,9 @@ headers = {
 }
 
 data = {
-    "blocked_user_id": 2  # ここに追加するユーザーのIDを指定
+    "room_name": "test",  # ここに追加するユーザーのIDを指定
+    "max_capacity" : 9,
+    "room_label" : "ok"
 }
 
 response = requests.post(url, json=data, headers=headers)

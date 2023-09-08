@@ -15,7 +15,14 @@ from chat_app.app.utils import (
     ,get_public_key
     ,escape_html
 )
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
+from chat_app.app.auth_utils import (
+    UserToken,
+    LoginUser,
+    validate_token,
+    get_user_by_sub,
+    skeltone_get_current_user,
+    get_block_list,
+)
 
 import markdown
 
@@ -28,8 +35,6 @@ def replace_markdown_with_html(match): # md形式
     html_output = markdown_to_html(markdown_text)
     return html_output
 
-app = FastAPI()
-
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み
@@ -38,7 +43,6 @@ public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 
 # Janomeのトークナイザーの初期化
 t = Tokenizer()
-router = APIRouter()
 
 # 前回の投稿時刻と投稿回数を記録するための辞書
 user_post_data = defaultdict(lambda: {"last_post_time": None, "post_count": 0})
@@ -70,6 +74,8 @@ def check_post_frequency_within_time(user_sub: str, db: Session, time_interval: 
     user_data["post_count"] += 1
 
     
+router = APIRouter()
+
 def get_db():
     db = SessionLocal()
     try:
@@ -78,23 +84,8 @@ def get_db():
         db.close()
 
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    if not Authorization:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
+    return skeltone_get_current_user(Authorization,db,public_key)
 
-    try:
-        bearer, token_string = Authorization.split()
-        if bearer != "Bearer":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-
-        sub = validate_token(token_string)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Invalid token")
-
-    user = get_user_by_sub(sub, db)
-    return user
 
 
 def check_ng_words(message_content: str, ng_words: set) -> None:
@@ -163,7 +154,7 @@ async def create_room_message(
     }
 
     return response_data
-app.include_router(router)
+
 
 @router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
 async def create_private_message(
