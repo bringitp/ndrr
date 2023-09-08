@@ -1,18 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
+from chat_app.app.database.models import Message, Room, User, RoomMember, AvatarList
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
-from chat_app.app.utils import (
-    create_db_engine_and_session
-    ,get_public_key
-    , escape_html
-)
+from chat_app.app.utils import create_db_engine_and_session, get_public_key, escape_html
 from sqlalchemy import func
+
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()
+
 
 def get_db():
     db = SessionLocal()
@@ -32,16 +30,15 @@ def get_active_room_member_count(room_id: int, db: Session):
     )
     return active_room_member_count
 
+
 @router.get("/rooms", response_model=Dict[str, Any])
 def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
     rooms = db.query(Room).offset(skip).all()
-    response_data = {
-        "rooms": []
-    }
+    response_data = {"rooms": []}
 
     for room in reversed(rooms):  # Display new messages at the top
         # Count active room members
- 
+
         room_data = {
             "id": room.id,
             "name": escape_html(room.name),
@@ -55,10 +52,10 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
             "last_activity": room.last_activity,
             "owner_username": room.owner.username,
             "owner_avatar_url": (
-                        db.query(AvatarList.avatar_url)
-                        .filter(AvatarList.avatar_id == room.owner.avatar_id)
-                        .scalar()
-            ),  
+                db.query(AvatarList.avatar_url)
+                .filter(AvatarList.avatar_id == room.owner.avatar_id)
+                .scalar()
+            ),
             "room_members": [
                 {
                     "username": escape_html(member.user.username),

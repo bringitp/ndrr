@@ -1,6 +1,14 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter
 from sqlalchemy.orm import Session
-from chat_app.app.database.models import (Message, Room, User, RoomMember, AvatarList, PrivateMessage, UserNGList)
+from chat_app.app.database.models import (
+    Message,
+    Room,
+    User,
+    RoomMember,
+    AvatarList,
+    PrivateMessage,
+    UserNGList,
+)
 from sqlalchemy.orm import joinedload
 from typing import Dict, Any
 from datetime import datetime, timedelta
@@ -27,9 +35,10 @@ from chat_app.app.auth_utils import (
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
-public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
+public_key = get_public_key("https://ron-the-rocker.net/auth", "ndrr")
 # Janomeのトークナイザーの初期化
 router = APIRouter()
+
 
 def get_db():
     db = SessionLocal()
@@ -38,35 +47,50 @@ def get_db():
     finally:
         db.close()
 
-def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    return skeltone_get_current_user(Authorization,db,public_key)
+
+def get_current_user(
+    Authorization: str = Header(None), db: Session = Depends(get_db)
+) -> User:
+    return skeltone_get_current_user(Authorization, db, public_key)
+
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
-    room_id: int, skip: int = 0, limit: int = 50,
+    room_id: int,
+    skip: int = 0,
+    limit: int = 50,
     login_user: LoginUser = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     room = db.query(Room).get(room_id)
     # Check if the user is a member of the room
-    if not db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first():
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
+    if (
+        not db.query(RoomMember)
+        .filter_by(room_id=room_id, user_id=login_user.id)
+        .first()
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a member of this room",
+        )
 
     if not room:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
+        )
 
     if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed"
+        )
 
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="More real needed"
+        )
 
     # メンバー情報を一括で取得
-    room_members = (
-        db.query(RoomMember)
-        .filter(RoomMember.room_id == room_id)
-        .all()
-    )
+    room_members = db.query(RoomMember).filter(RoomMember.room_id == room_id).all()
 
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
@@ -80,20 +104,31 @@ async def get_room_messages(
 
     for room_member in room_members:
         user = room_member.user
-        avatar_id_and_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == user.id), None)
-    # ブロック済みユーザーかどうかを確認
+        avatar_id_and_url = next(
+            (
+                avatar_url
+                for user_id, avatar_url in user_avatar_urls
+                if user_id == user.id
+            ),
+            None,
+        )
+        # ブロック済みユーザーかどうかを確認
         blocked = user.id in block_list  # block_listに含まれているかどうかを確認
         if blocked:
             blocked_user_ids.add(user.id)
-        vital_member_info.append({
-             "user_id": user.id,
-             "username": user.username,
-             "avatar_url":  avatar_id_and_url,
-             "blocked": bool(blocked),
-             "ami"    :  bool(user.id==login_user.id),
-         })
+        vital_member_info.append(
+            {
+                "user_id": user.id,
+                "username": user.username,
+                "avatar_url": avatar_id_and_url,
+                "blocked": bool(blocked),
+                "ami": bool(user.id == login_user.id),
+            }
+        )
     # vital_member_info から user_id と avatar_url の対応を作成
-    user_id_to_avatar_url = {member['user_id']: member['avatar_url'] for member in vital_member_info}
+    user_id_to_avatar_url = {
+        member["user_id"]: member["avatar_url"] for member in vital_member_info
+    }
     # ルーム情報を取得
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
@@ -112,9 +147,9 @@ async def get_room_messages(
             "room_restricted_karma_under_limit": room.under_karma_limit,
             "room_lux": room.lux,
         },
-        "room_members": vital_member_info,# 部屋の現在のメンバー
+        "room_members": vital_member_info,  # 部屋の現在のメンバー
         "messages": [],
-        "version" : "0.02",
+        "version": "0.02",
     }
 
     # UserとAvatarListのEager Loadingを追加
@@ -122,14 +157,14 @@ async def get_room_messages(
     private_messages = (
         db.query(PrivateMessage)
         .options(
-            joinedload(PrivateMessage.sender).load_only('avatar_id'),
-            joinedload(PrivateMessage.receiver).load_only('avatar_id')
+            joinedload(PrivateMessage.sender).load_only("avatar_id"),
+            joinedload(PrivateMessage.receiver).load_only("avatar_id"),
         )
         .filter(
             (
-                (PrivateMessage.receiver_id == login_user.id ) |
-                (PrivateMessage.sender_id == login_user.id )
-            ) 
+                (PrivateMessage.receiver_id == login_user.id)
+                | (PrivateMessage.sender_id == login_user.id)
+            )
             & (PrivateMessage.room_id == room_id)
             & (~PrivateMessage.sender_id.in_(block_list))  # 送信者がブロックリストに含まれていないことを確認
         )
@@ -141,13 +176,8 @@ async def get_room_messages(
     # normal message 取得
     normal_messages = (
         db.query(Message)
-        .options(
-             joinedload(Message.sender).load_only('avatar_id')
-        )
-        .filter(
-             (Message.room_id == room_id) &
-             (~Message.sender_id.in_(block_list))
-        )
+        .options(joinedload(Message.sender).load_only("avatar_id"))
+        .filter((Message.room_id == room_id) & (~Message.sender_id.in_(block_list)))
         .order_by(Message.sent_at.desc())
         .offset(skip)
         .limit(min(limit, 30))
@@ -160,17 +190,24 @@ async def get_room_messages(
     all_messages = sorted(
         private_messages + normal_messages,
         key=lambda message: message.sent_at,
-        reverse=True
+        reverse=True,
     )
 
     for message in all_messages:
         is_private = isinstance(message, PrivateMessage)
         sender_id = message.sender_id
-        sender_avatar_id_and_url = next((avatar_url for user_id, avatar_url in user_avatar_urls if user_id == sender_id), None)
+        sender_avatar_id_and_url = next(
+            (
+                avatar_url
+                for user_id, avatar_url in user_avatar_urls
+                if user_id == sender_id
+            ),
+            None,
+        )
 
         # senderを再度取得
         sender = db.query(User).filter(User.id == sender_id).first()
-    
+
         if sender:
             message_data = {
                 "id": message.id,
@@ -193,14 +230,18 @@ async def get_room_messages(
                     "receiver_id": message.receiver_id if is_private else None,
                     "receiver_username": "all",
                 },
-                "is_private": is_private
+                "is_private": is_private,
             }
-    
+
             if is_private:
-                receiver_user = db.query(User).filter(User.id == message.receiver_id).first()
+                receiver_user = (
+                    db.query(User).filter(User.id == message.receiver_id).first()
+                )
                 if receiver_user:
-                    message_data["sender"]["receiver_username"] = escape_html(receiver_user.username)
-    
+                    message_data["sender"]["receiver_username"] = escape_html(
+                        receiver_user.username
+                    )
+
             response_data["messages"].append(message_data)
 
     return response_data

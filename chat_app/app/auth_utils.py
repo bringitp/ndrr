@@ -10,7 +10,7 @@ class UserToken:
     sub: str
 
 class LoginUser(UserToken):
-    id: int
+    id:     int
     karma: int
     username: str
     avatar: str
