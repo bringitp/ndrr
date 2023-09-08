@@ -13,8 +13,7 @@ from datetime import datetime, timedelta
 import jwt
 from janome.tokenizer import Tokenizer
 import markdown
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
-
+from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub,get_current_user
 
 import markdown
 def markdown_to_html(markdown_text):

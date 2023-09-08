@@ -23,4 +23,4 @@ if response.status_code == 200:
     print(formatted_json)
 else:
     print("Error:", response.status_code) 
-    print("Error:", response.text)
+    print("Error:", response.text) 

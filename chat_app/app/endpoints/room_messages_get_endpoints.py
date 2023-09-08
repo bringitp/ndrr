@@ -7,7 +7,6 @@ from fastapi import (
     APIRouter,
 )
 from sqlalchemy.orm import Session, aliased
-
 from chat_app.app.database.models import (
     Message,
     Room,
@@ -32,15 +31,12 @@ from chat_app.app.utils import (
     ,get_public_key
     ,escape_html
 )
-from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
-
-
+from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub,skeltone_get_current_user,get_block_list
 app = FastAPI()
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
-
 # Janomeのトークナイザーの初期化
 router = APIRouter()
 
@@ -51,52 +47,8 @@ def get_db():
     finally:
         db.close()
 
-# キャッシュデコレータを定義
-def lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=5):
-    def decorator(func):
-        cache = {}
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            # ヘッダー情報をキーにする
-            header_key = kwargs.get("Authorization")
-            if header_key is None:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
-            
-            key = (header_key, args, frozenset(kwargs.items()))
-            if key in cache and time.time() - cache[key]["time"] < cache_timeout:
-                return cache[key]["value"]
-            result = func(*args, **kwargs)
-            cache[key] = {"value": result, "time": time.time()}
-            return result
-        return wrapper
-    return decorator
-
-# ブロックリストを取得する関数
-def get_block_list(user_id: int, db: Session):
-    block_list = db.query(UserNGList.blocked_user_id).filter(UserNGList.user_id == user_id).all()
-    return [item[0] for item in block_list]
-
-# キャッシュデコレータを使用して関数をデコレート
-# 24.78 [#
-#  Requests per second:    24.68 [#/sec] (mean)
-@lru_cache_with_headers(maxsize=None, typed=False, cache_timeout=15)
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
-    if not Authorization:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
-    try:
-        bearer, token_string = Authorization.split()
-        if bearer != "Bearer":
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid Bearer token format")
-        sub = validate_token(token_string,public_key)
-
-    except jwt.exceptions.ExpiredSignatureError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has expired")
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail=f"Invalid token {token_string} {e}")
-
-    user = get_user_by_sub(sub, db)
-    return user
-
+    return skeltone_get_current_user(Authorization,db,public_key)
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
@@ -125,14 +77,11 @@ async def get_room_messages(
         .all()
     )
 
-# Eager Loadingを使用してユーザー情報とアバター情報を一括で取得
-#    user_ids = [room_member.user_id for room_member in room_members]
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
         .filter(User.avatar_id == AvatarList.avatar_id)
         .all()
     )
-
 
     vital_member_info = []
     blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
