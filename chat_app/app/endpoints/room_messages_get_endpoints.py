@@ -154,7 +154,6 @@ async def get_room_messages(
     # normal message 取得
     normal_messages = (
         db.query(Message)
-        .options(joinedload(Message.sender).load_only("avatar_id"))
         .filter((Message.room_id == room_id) & (~Message.sender_id.in_(block_list)))
         .order_by(Message.sent_at.desc())
         .offset(skip)
@@ -170,45 +169,34 @@ async def get_room_messages(
     )
 
     for message in all_messages:
-        sender_id = message.sender_id
-        sender_avatar_id_and_url = next(
-            (
-                avatar_url
-                for user_id, avatar_url in user_avatar_urls
-                if user_id == sender_id
-            ),
-            None,
-        )
-        print (message.id)
 
         # senderを再度取得
-        sender = db.query(User).filter(User.id == sender_id).first()
+        #sender = db.query(User).filter(User.id == sender_id).first()
 
-        if sender:
-            message_data = {
-                "id": message.id,
-                "content": message.content,
-                "toxicity": message.toxicity,
-                "sentiment": message.sentiment,
-                "fluence": message.fluence,
-                "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-                "sender": {
-                    "username": escape_html(sender.username),
-                    "user_id": sender.id,
-                    "avatar_url": sender_avatar_id_and_url,  # 修正: sender_avatar_urlを使用
-                    "trip": escape_html(sender.trip),
-                    "karma": sender.karma,
-                    "privilege": sender.privilege,
-                    "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
-                    "penalty_points": sender.penalty_points,
-                    "profile": escape_html(sender.profile),
-                    "sender_id": message.sender_id if message.message_type == "private" else None,
-                    "receiver_id": message.receiver_id if message.message_type == "private" else None,
-                    "receiver_username": "all",
-                },
-                "is_private": (message.message_type == "private"),
-            }
+        message_data = {
+            "id": message.id,
+            "content": message.content,
+            "toxicity": message.toxicity,
+            "sentiment": message.sentiment,
+            "fluence": message.fluence,
+            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
+            "sender": {
+                "username": message.signature_writer_name,
+                "user_id": message.sender_id,
+                "avatar_url": message.signature_avatar_url ,  # 修正: sender_avatar_urlを使用
+                "trip": message.signature_trip,
+                "karma": message.signature_karma,
+                #"privilege": sender.privilege,
+                #"lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
+                #"penalty_points": sender.penalty_points,
+                "profile": message.signature_profile,
+                "sender_id": message.sender_id if message.message_type == "private" else None,
+                "receiver_id": message.receiver_id if message.message_type == "private" else None,
+                "receiver_username": message.signature_recipient_name,
+            },
+            "is_private": (message.message_type == "private"),
+        }
 
-            response_data["messages"].append(message_data)
+        response_data["messages"].append(message_data)
 
     return response_data

@@ -41,8 +41,6 @@ class AvatarList(Base):
     avatar_id = Column(Integer, primary_key=True)
     avatar_url = Column(String(255), nullable=False)
 
-
-
 class UserNGList(Base):
     __tablename__ = 'user_ng_lists'
 
@@ -53,7 +51,8 @@ class UserNGList(Base):
     user = relationship("User", back_populates="ng_lists", foreign_keys=[user_id])
     blocked_user = relationship("User", foreign_keys=[blocked_user_id])
 
-
+# avatr_url_signatue
+# signatue
 class Message(Base):
     __tablename__ = 'messages'
     
@@ -72,6 +71,13 @@ class Message(Base):
     fluence = Column(Float(precision=6), nullable=True)
     
     sent_at = Column(TIMESTAMP, nullable=False)
+
+    signature_writer_name = Column(String(255), nullable=True)
+    signature_recipient_name = Column(String(255), nullable=True)
+    signature_avatar_url  = Column(String(255), nullable=True)
+    signature_trip  = Column(String(255), nullable=True)
+    signature_karma  = Column(String(255), nullable=True)
+    signature_profile = Column(String(200))
     
     room = relationship("Room", back_populates="messages")
     sender = relationship("User", back_populates="sent_private_messages", foreign_keys=[sender_id])
