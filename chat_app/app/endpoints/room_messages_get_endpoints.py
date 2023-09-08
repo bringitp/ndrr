@@ -31,6 +31,9 @@ from chat_app.app.auth_utils import (
     skeltone_get_current_user,
     get_block_list,
 )
+from cachetools import TTLCache
+# キャッシュの設定（20秒のTTLキャッシュ）
+cache = TTLCache(maxsize=1000, ttl=120)
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -50,32 +53,44 @@ def get_db():
 def get_current_user(
     Authorization: str = Header(None), db: Session = Depends(get_db)
 ) -> User:
-    return skeltone_get_current_user(Authorization, db, public_key)
+    # キャッシュからユーザー情報を取得
+    cached_user = cache.get(Authorization)
+    if cached_user:
+        return cached_user
+    
+    # キャッシュにない場合はデータベースからユーザー情報を取得
+    user = skeltone_get_current_user(Authorization, db, public_key)
+    
+    # ユーザー情報をキャッシュに保存
+    cache[Authorization] = user
+    
+    return user
 
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
     room_id: int,
-    skip: int = 0,
-    limit: int = 50,
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     room = db.query(Room).get(room_id)
-    # Check if the user is a member of the room
-    if (
-        not db.query(RoomMember)
-        .filter_by(room_id=room_id, user_id=login_user.id)
-        .first()
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You are not a member of this room",
-        )
-
     if not room:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
+        )
+    # Check if the user is a member of the room
+    # ログインユーザーがルームのメンバーであるかを確認し、メンバー情報を一括で取得
+    room_member = (
+        db.query(RoomMember)
+        .filter(RoomMember.room_id == room_id, RoomMember.user_id == login_user.id)
+        .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
+        .first()
+    )
+
+    if not room_member:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a member of this room",
         )
 
     if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
@@ -85,11 +100,21 @@ async def get_room_messages(
 
     if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="More real needed"
+            status_code=status.HTTP_403_FORBIDDEN, detail="More reality needed"
         )
 
-    # メンバー情報を一括で取得
-    room_members = db.query(RoomMember).filter(RoomMember.room_id == room_id).all()
+    # メンバー情報を一括で取得（ループ内でのアクセスを回避）
+    room_members = [room_member] if room_member else []
+
+    # ルームの他のメンバーを取得
+    other_room_members = (
+        db.query(RoomMember)
+        .filter(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id)
+        .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
+        .all()
+    )
+
+    room_members.extend(other_room_members)
 
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
@@ -128,31 +153,32 @@ async def get_room_messages(
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
     response_data = {
-       "room": {
-           "room_id": room.id,
-           "room_label": room.label,
-           "room_name": room.name,
-           "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
-           "room_owner_id": room.owner_id,
-           "room_login_user_name": login_user.username,
-           "room_login_user_id": login_user.id,
-           "room_owner_name": room_owner.username,
-           "room_max_capacity": room.max_capacity,
-           "room_restricted_karma_over_limit": room.over_karma_limit,
-           "room_restricted_karma_under_limit": room.under_karma_limit,
-           "room_lux": room.lux,
-       },
-       "room_members": vital_member_info,  # 部屋の現在のメンバー
-       "messages": [],
-       "version": "0.03",
-   }
+        "room": {
+            "room_id": room.id,
+            "room_label": room.label,
+            "room_name": room.name,
+            "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
+            "room_owner_id": room.owner_id,
+            "room_login_user_name": login_user.username,
+            "room_login_user_id": login_user.id,
+            "room_owner_name": room_owner.username,
+            "room_max_capacity": room.max_capacity,
+            "room_restricted_karma_over_limit": room.over_karma_limit,
+            "room_restricted_karma_under_limit": room.under_karma_limit,
+            "room_lux": room.lux,
+        },
+        "room_members": vital_member_info,  # 部屋の現在のメンバー
+        "messages": [],
+        "version": "0.03",
+    }
     # normal message 取得
     normal_messages = (
         db.query(Message)
-        .filter((Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids)))
+        .filter(
+            (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
+        )
         .order_by(Message.sent_at.desc())
-        .offset(skip)
-        .limit(min(limit, 30))
+        .limit(30)
         .all()
     )
 
@@ -173,12 +199,16 @@ async def get_room_messages(
             "sender": {
                 "username": message.signature_writer_name,
                 "user_id": message.sender_id,
-                "avatar_url": message.signature_avatar_url ,  # 修正: sender_avatar_urlを使用
+                "avatar_url": message.signature_avatar_url,  # 修正: sender_avatar_urlを使用
                 "trip": message.signature_trip,
                 "karma": message.signature_karma,
                 "profile": message.signature_profile,
-                "sender_id": message.sender_id if message.message_type == "private" else None,
-                "receiver_id": message.receiver_id if message.message_type == "private" else None,
+                "sender_id": message.sender_id
+                if message.message_type == "private"
+                else None,
+                "receiver_id": message.receiver_id
+                if message.message_type == "private"
+                else None,
                 "receiver_username": message.signature_recipient_name,
             },
             "is_private": (message.message_type == "private"),
