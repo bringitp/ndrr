@@ -63,9 +63,11 @@ class AvatarList(Base):
 
 class UserNGList(Base):
     __tablename__ = "user_ng_lists"
+
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     blocked_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
     user = relationship("User", back_populates="ng_lists", foreign_keys=[user_id])
     blocked_user = relationship("User", foreign_keys=[blocked_user_id])
 
@@ -77,8 +79,8 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False, index=True)
-    sender_id = Column(Integer, nullable=False, index=True)
-    receiver_id = Column(Integer, nullable=True, index=True)
+    sender_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    receiver_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     sent_at = Column(TIMESTAMP, nullable=False, index=True)
     content = Column(Text, nullable=False)
     message_type = Column(Enum("public", "private"), nullable=False)  # メッセージタイプを区別
