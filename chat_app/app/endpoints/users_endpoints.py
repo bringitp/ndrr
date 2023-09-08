@@ -13,23 +13,11 @@ import html
 from chat_app.app.utils import (
     create_db_engine_and_session
     ,get_public_key
+    ,escape_html
 )
-def escape_html(text):
-    return html.escape(text, quote=True)
+from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
 
 app = FastAPI()
-
-# イベントハンドラの定義
-def on_startup():
-    # アプリケーション起動時の処理
-    pass
-
-def on_shutdown():
-    # アプリケーション終了時の処理
-    pass
-
-app.add_event_handler("startup", on_startup)
-app.add_event_handler("shutdown", on_shutdown)
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -39,16 +27,6 @@ public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 # Janomeのトークナイザーの初期化
 t = Tokenizer()
 router = APIRouter()
-
-class UserToken:
-    sub: str
-
-class LoginUser(UserToken):
-    id: int
-    karma: int
-    username: str
-    avatar: str
-
 # 前回の投稿時刻を記録するための辞書
 last_post_times = defaultdict(lambda: None)
 # 最大投稿回数
@@ -80,19 +58,7 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
     user = get_user_by_sub(sub, db)
     return user
 
-def validate_token(token_string: str) -> str:
-    options = {"verify_signature": True, "verify_aud": False, "exp": True}
-    payload = jwt.decode(token_string, public_key, algorithms=["RS256"], options=options)
-    sub = payload.get("sub")
-    if not sub:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
-    return sub
 
-def get_user_by_sub(sub: str, db: Session) -> User:
-    user = db.query(User).filter(User.sub == sub).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"{sub} User not found")
-    return user
 
 def get_user_by_id(id: str, db: Session) -> User:
     user = db.query(User).filter(User.sub == id).first()

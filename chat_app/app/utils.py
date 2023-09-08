@@ -9,6 +9,10 @@ from chat_app.app.database.models  import BlockedUser, Room, PrivateMessage, Use
 from sqlalchemy.orm import Session
 import requests
 import jwt
+import html
+
+def escape_html(text):
+    return html.escape(text, quote=True)
 
 
 def get_public_key(keycloak_url, realm):

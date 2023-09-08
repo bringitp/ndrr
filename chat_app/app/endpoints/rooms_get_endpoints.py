@@ -4,17 +4,15 @@ from typing import List
 from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from typing import Dict, Any
-import html
 from chat_app.app.utils import (
     create_db_engine_and_session
     ,get_public_key
+    , escape_html
 )
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()
 
-def escape_html(text):
-    return html.escape(text, quote=True)
 
 def get_db():
     db = SessionLocal()

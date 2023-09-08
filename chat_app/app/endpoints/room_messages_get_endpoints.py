@@ -30,11 +30,10 @@ import time
 from chat_app.app.utils import (
     create_db_engine_and_session
     ,get_public_key
+    ,escape_html
 )
 from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
 
-def escape_html(text):
-    return html.escape(text, quote=True)
 
 app = FastAPI()
 

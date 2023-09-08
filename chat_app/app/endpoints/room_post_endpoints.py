@@ -1,26 +1,22 @@
-from fastapi import (FastAPI, Depends, Header, HTTPException, status, APIRouter,
-                     Request, BackgroundTasks)
+from fastapi import (
+    FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
+)
 from sqlalchemy.orm import Session
-from chat_app.app.utils import (create_db_engine_and_session, load_ng_words)
-from chat_app.app.database.models import (Message, Room, User, RoomMember, PrivateMessage)
+from chat_app.app.utils import (
+    create_db_engine_and_session, load_ng_words, create_db_engine_and_session, get_public_key  ,escape_html
+)
+from chat_app.app.database.models import (
+    Message, Room, User, RoomMember, PrivateMessage
+)
 from typing import Dict, Any
 from datetime import datetime, timedelta
-import requests
 import jwt
 from janome.tokenizer import Tokenizer
-import html
-import re
-from fastapi import status
-from chat_app.app.utils import (
-    create_db_engine_and_session
-    ,get_public_key
-)
+import markdown
+from chat_app.app.auth_utils import UserToken, LoginUser, validate_token, get_user_by_sub
 
-def escape_html(text):
-    return html.escape(text, quote=True)
 
 import markdown
-
 def markdown_to_html(markdown_text):
     html = markdown.markdown(markdown_text)
     return html
@@ -32,18 +28,6 @@ def replace_markdown_with_html(match): # md形式
 
 app = FastAPI()
 
-# イベントハンドラの定義
-def on_startup():
-    # アプリケーション起動時の処理
-    pass
-
-def on_shutdown():
-    # アプリケーション終了時の処理
-    pass
-
-app.add_event_handler("startup", on_startup)
-app.add_event_handler("shutdown", on_shutdown)
-
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み
@@ -54,15 +38,6 @@ public_key = get_public_key("https://ron-the-rocker.net/auth","ndrr")
 t = Tokenizer()
 router = APIRouter()
 
-class UserToken:
-    sub: str
-
-class LoginUser(UserToken):
-    id: int
-    karma: int
-    username: str
-    avatar: str
-    
 def get_db():
     db = SessionLocal()
     try:
@@ -89,20 +64,6 @@ def get_current_user(Authorization: str = Header(None), db: Session = Depends(ge
     user = get_user_by_sub(sub, db)
     return user
 
-def validate_token(token_string: str) -> str:
-    options = {"verify_signature": True, "verify_aud": False, "exp": True}
-    payload = jwt.decode(token_string, public_key, algorithms=["RS256"], options=options)
-    sub = payload.get("sub")
-    if not sub:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token payload")
-    return sub
-
-def get_user_by_sub(sub: str, db: Session) -> User:
-    user = db.query(User).filter(User.sub == sub).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-    return user
-
 def check_ng_words(message_content: str, ng_words: set) -> None:
     tokens = t.tokenize(message_content)
     if any(token.surface in ng_words for token in tokens):
@@ -117,7 +78,6 @@ async def create_room_message(
 ):
 
     data = await request.json()
-
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
@@ -145,11 +105,6 @@ async def create_room_message(
 
     response_data = {
         "message": "Room name changed successfully"
-    }
-
-
-    response_data = {
-        1:1
     }
 
     return response_data
