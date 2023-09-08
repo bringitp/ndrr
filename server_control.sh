@@ -25,7 +25,7 @@ if [ "$1" = "start" ]; then
         uvicorn chat_app.app.main:app --host 0.0.0.0 --port 7777 --reload
     else
         # Get the number of CPU cores
-        core_count=5
+        core_count=6
 
         # Start UVicorn servers in the background with incremental port numbers
         for ((i=0; i<core_count; i++)); do
