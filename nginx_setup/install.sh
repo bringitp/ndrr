@@ -9,31 +9,6 @@ sudo mkdir -p /var/www/ron-the-rocker.net
 echo "<html lang="ja"><head><meta charset="utf-8"></meta></head>....hello ? 🐟</html>" | sudo tee /var/www/ron-the-rocker.net/index.html
 echo "<html lang="ja"><head><meta charset="utf-8"></meta></head>🐟多分メンテ中</html>" | sudo tee /var/www/ron-the-rocker.net/maintenance.html
 
-
-sudo apt-get install brotli libbrotli-dev -y
-wget https://github.com/google/ngx_brotli/archive/master.tar.gz
-tar -xf master.tar.gz
-cd ngx_brotli-master
-sudo apt-get install autoconf automake libtool -y
-./setup
-./configure --with-openssl=/usr/lib
-make
-sudo make install
-
-# 追加する設定
-brotli_config="load_module /usr/lib/nginx/modules/ngx_http_brotli_filter_module.so;\nload_module /usr/lib/nginx/modules/ngx_http_brotli_static_module.so;"
-# 設定を追加するファイル
-nginx_conf_file="/etc/nginx/nginx.conf"
-
-# 設定を追加
-echo -e "$brotli_config" | sudo tee -a "$nginx_conf_file"
-
-# 設定ファイルの保存とNginxの再読み込み
-sudo nginx -t
-sudo systemctl reload nginx
-
-echo "BrotliモジュールをNginxに追加しました。"
-
 # Create a server block configuration
 sudo tee /etc/nginx/sites-available/ron-the-rocker.net <<'EOF'
 server {
@@ -62,27 +37,33 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-    brotli on;
-    brotli_static on;
-    brotli_comp_level 6;
-    brotli_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
+    # Gzipを有効にする
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
 
-    # すべてのリソースにBrotli圧縮を適用
+    # 圧縮レベルを設定（1から9までの範囲で指定）
+    gzip_comp_level 6;
+
+    # 圧縮対象の最小サイズ（1,000バイト以上のファイルを圧縮）
+    gzip_min_length 1000;
+
+    # 圧縮を適用するMIMEタイプを指定
+    gzip_types text/html application/javascript;
+
+    # すべてのリソースにGzip圧縮を適用
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
         try_files $uri $uri/ /index.html;
-        brotli_types text/html application/javascript;
     }
 
-    # /auth および /ndrr/api にもBrotli圧縮を適用
+    # /auth および /ndrr/api にもGzip圧縮を適用
     location /auth {
         proxy_pass http://localhost:8180;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        brotli_types text/html application/javascript;
     }
 
     location ~ ^/ndrr/api { 
@@ -107,7 +88,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        brotli_types text/html application/javascript;
     }
 }
 
@@ -118,27 +98,33 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-    brotli on;
-    brotli_static on;
-    brotli_comp_level 6;
-    brotli_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
+    # Gzipを有効にする
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
 
-    # すべてのリソースにBrotli圧縮を適用
+    # 圧縮レベルを設定（1から9までの範囲で指定）
+    gzip_comp_level 6;
+
+    # 圧縮対象の最小サイズ（1,000バイト以上のファイルを圧縮）
+    gzip_min_length 1000;
+
+    # 圧縮を適用するMIMEタイプを指定
+    gzip_types text/html application/javascript;
+
+    # すべてのリソースにGzip圧縮を適用
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
         try_files $uri $uri/ /index.html;
-        brotli_types text/html application/javascript;
     }
 
-    # /auth および /ndrr/api にもBrotli圧縮を適用
+    # /auth および /ndrr/api にもGzip圧縮を適用
     location /auth {
         proxy_pass http://localhost:8180;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        brotli_types text/html application/javascript;
     }
 
     location ~ ^/ndrr/api { 
@@ -163,9 +149,9 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        brotli_types text/html application/javascript;
     }
 }
+
 server {
     listen 443 ssl;
     server_name ron-the-rocker.net www.ron-the-rocker.net;
@@ -173,27 +159,33 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-    brotli on;
-    brotli_static on;
-    brotli_comp_level 6;
-    brotli_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
+    # Gzipを有効にする
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
 
-    # すべてのリソースにBrotli圧縮を適用
+    # 圧縮レベルを設定（1から9までの範囲で指定）
+    gzip_comp_level 6;
+
+    # 圧縮対象の最小サイズ（1,000バイト以上のファイルを圧縮）
+    gzip_min_length 1000;
+
+    # 圧縮を適用するMIMEタイプを指定
+    gzip_types text/html application/javascript;
+
+    # すべてのリソースにGzip圧縮を適用
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
         try_files $uri $uri/ /index.html;
-        brotli_types text/html application/javascript;
     }
 
-    # /auth および /ndrr/api にもBrotli圧縮を適用
+    # /auth および /ndrr/api にもGzip圧縮を適用
     location /auth {
         proxy_pass http://localhost:8180;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        brotli_types text/html application/javascript;
     }
 
     location ~ ^/ndrr/api { 
@@ -218,63 +210,6 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        brotli_types text/html application/javascript;
-    }
-}
-    
-server {
-    listen 443 ssl;
-    server_name ron-the-rocker.net www.ron-the-rocker.net;
-
-    ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
-
-    brotli on;
-    brotli_static on;
-    brotli_comp_level 6;
-    brotli_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
-
-    # すべてのリソースにBrotli圧縮を適用
-    location / {
-        root /var/www/ron-the-rocker.net;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-        brotli_types text/html application/javascript;
-    }
-
-    # /auth および /ndrr/api にもBrotli圧縮を適用
-    location /auth {
-        proxy_pass http://localhost:8180;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        brotli_types text/html application/javascript;
-    }
-
-    location ~ ^/ndrr/api { 
-        rewrite ^/ndrr/api(.*)?$ $1 break;
-
-        add_header Access-Control-Allow-Origin http://localhost:3000;
-        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
-        add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
-
-        if ($request_method = 'OPTIONS') {
-            add_header Access-Control-Allow-Credentials 'true';
-            add_header Access-Control-Max-Age 1728000;
-            add_header Content-Type 'text/plain charset=UTF-8';
-            add_header Content-Length 0;
-            return 204;
-        }
-
-        proxy_pass http://backend;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "Upgrade";
-        brotli_types text/html application/javascript;
     }
 }
     
@@ -285,27 +220,33 @@ server {
     ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
 
-    brotli on;
-    brotli_static on;
-    brotli_comp_level 6;
-    brotli_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
+    # Gzipを有効にする
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
 
-    # すべてのリソースにBrotli圧縮を適用
+    # 圧縮レベルを設定（1から9までの範囲で指定）
+    gzip_comp_level 6;
+
+    # 圧縮対象の最小サイズ（1,000バイト以上のファイルを圧縮）
+    gzip_min_length 1000;
+
+    # 圧縮を適用するMIMEタイプを指定
+    gzip_types text/html application/javascript;
+
+    # すべてのリソースにGzip圧縮を適用
     location / {
         root /var/www/ron-the-rocker.net;
         index index.html;
         try_files $uri $uri/ /index.html;
-        brotli_types text/html application/javascript;
     }
 
-    # /auth および /ndrr/api にもBrotli圧縮を適用
+    # /auth および /ndrr/api にもGzip圧縮を適用
     location /auth {
         proxy_pass http://localhost:8180;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        brotli_types text/html application/javascript;
     }
 
     location ~ ^/ndrr/api { 
@@ -330,7 +271,67 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
-        brotli_types text/html application/javascript;
+    }
+}
+    
+server {
+    listen 443 ssl;
+    server_name ron-the-rocker.net www.ron-the-rocker.net;
+
+    ssl_certificate /etc/letsencrypt/live/ron-the-rocker.net/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/ron-the-rocker.net/privkey.pem;
+
+    # Gzipを有効にする
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/xml application/xhtml+xml image/svg+xml application/rss+xml application/atom+xml image/x-icon image/vnd.microsoft.icon image/jpeg image/png image/gif;
+
+    # 圧縮レベルを設定（1から9までの範囲で指定）
+    gzip_comp_level 6;
+
+    # 圧縮対象の最小サイズ（1,000バイト以上のファイルを圧縮）
+    gzip_min_length 1000;
+
+    # 圧縮を適用するMIMEタイプを指定
+    gzip_types text/html application/javascript;
+
+    # すべてのリソースにGzip圧縮を適用
+    location / {
+        root /var/www/ron-the-rocker.net;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # /auth および /ndrr/api にもGzip圧縮を適用
+    location /auth {
+        proxy_pass http://localhost:8180;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ ^/ndrr/api { 
+        rewrite ^/ndrr/api(.*)?$ $1 break;
+
+        add_header Access-Control-Allow-Origin http://localhost:3000;
+        add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
+        add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
+
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Credentials 'true';
+            add_header Access-Control-Max-Age 1728000;
+            add_header Content-Type 'text/plain charset=UTF-8';
+            add_header Content-Length 0;
+            return 204;
+        }
+
+        proxy_pass http://backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "Upgrade";
     }
 }
 
