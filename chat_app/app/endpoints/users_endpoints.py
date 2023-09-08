@@ -23,8 +23,6 @@ from chat_app.app.auth_utils import (
     skeltone_get_current_user,
     get_block_list,
 )
-
-
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 ng_words = load_ng_words()  # ng word 読み込み

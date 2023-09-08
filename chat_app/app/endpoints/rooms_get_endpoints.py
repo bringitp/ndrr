@@ -9,6 +9,7 @@ from chat_app.app.utils import (
     ,get_public_key
     , escape_html
 )
+from sqlalchemy import func
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
 router = APIRouter()
@@ -21,6 +22,16 @@ def get_db():
         db.close()
 
 
+def get_active_room_member_count(room_id: int, db: Session):
+    # 特定の部屋内でアクティブなユーザーの数を取得
+    active_room_member_count = (
+        db.query(RoomMember)
+        .filter(RoomMember.room_id == room_id)
+        .join(RoomMember.user)
+        .count()
+    )
+    return active_room_member_count
+
 @router.get("/rooms", response_model=Dict[str, Any])
 def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
     rooms = db.query(Room).offset(skip).all()
@@ -29,9 +40,12 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
     }
 
     for room in reversed(rooms):  # Display new messages at the top
+        # Count active room members
+ 
         room_data = {
             "id": room.id,
             "name": escape_html(room.name),
+            "room_member_count": get_active_room_member_count(room.id, db),
             "label": escape_html(room.label),
             "max_capacity": room.max_capacity,
             "over_karma_limit": room.over_karma_limit,
