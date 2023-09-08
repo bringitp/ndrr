@@ -9,6 +9,31 @@ sudo mkdir -p /var/www/ron-the-rocker.net
 echo "<html lang="ja"><head><meta charset="utf-8"></meta></head>....hello ? 🐟</html>" | sudo tee /var/www/ron-the-rocker.net/index.html
 echo "<html lang="ja"><head><meta charset="utf-8"></meta></head>🐟多分メンテ中</html>" | sudo tee /var/www/ron-the-rocker.net/maintenance.html
 
+
+sudo apt-get install brotli libbrotli-dev -y
+wget https://github.com/google/ngx_brotli/archive/master.tar.gz
+tar -xf master.tar.gz
+cd ngx_brotli-master
+sudo apt-get install autoconf automake libtool -y
+./setup
+./configure --with-openssl=/usr/lib
+make
+sudo make install
+
+# 追加する設定
+brotli_config="load_module /usr/lib/nginx/modules/ngx_http_brotli_filter_module.so;\nload_module /usr/lib/nginx/modules/ngx_http_brotli_static_module.so;"
+# 設定を追加するファイル
+nginx_conf_file="/etc/nginx/nginx.conf"
+
+# 設定を追加
+echo -e "$brotli_config" | sudo tee -a "$nginx_conf_file"
+
+# 設定ファイルの保存とNginxの再読み込み
+sudo nginx -t
+sudo systemctl reload nginx
+
+echo "BrotliモジュールをNginxに追加しました。"
+
 # Create a server block configuration
 sudo tee /etc/nginx/sites-available/ron-the-rocker.net <<'EOF'
 server {
