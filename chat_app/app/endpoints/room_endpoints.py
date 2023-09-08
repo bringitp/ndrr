@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember,PrivateMessage
+from chat_app.app.database.models import Message, Room, User,RoomMember
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests

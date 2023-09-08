@@ -41,24 +41,7 @@ class AvatarList(Base):
     avatar_id = Column(Integer, primary_key=True)
     avatar_url = Column(String(255), nullable=False)
 
-class PrivateMessage(Base):
-    __tablename__ = 'private_messages'
-    
-    id = Column(Integer, primary_key=True)
-    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
-    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    content = Column(Text, nullable=False)
-    toxicity = Column(Float(precision=6), nullable=True)  
-    sentiment = Column(Float(precision=6), nullable=True)
-    constructive = Column(Float(precision=6), nullable=True)
-    incendiary = Column(Float(precision=6), nullable=True)
-    foxy = Column(Float(precision=6), nullable=True)
-    fluence = Column(Float(precision=6), nullable=True)
-    sent_at = Column(TIMESTAMP, nullable=False)
-    
-    sender = relationship("User", foreign_keys=[sender_id], back_populates="sent_private_messages")
-    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
+
 
 class UserNGList(Base):
     __tablename__ = 'user_ng_lists'
@@ -69,6 +52,30 @@ class UserNGList(Base):
 
     user = relationship("User", back_populates="ng_lists", foreign_keys=[user_id])
     blocked_user = relationship("User", foreign_keys=[blocked_user_id])
+
+
+class Message(Base):
+    __tablename__ = 'messages'
+    
+    id = Column(Integer, primary_key=True)
+    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    receiver_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    content = Column(Text, nullable=False)
+    message_type = Column(Enum('public', 'private'), nullable=False)  # メッセージタイプを区別
+    
+    toxicity = Column(Float(precision=6), nullable=True)  
+    sentiment = Column(Float(precision=6), nullable=True)
+    constructive = Column(Float(precision=6), nullable=True)
+    incendiary = Column(Float(precision=6), nullable=True)
+    foxy = Column(Float(precision=6), nullable=True)
+    fluence = Column(Float(precision=6), nullable=True)
+    
+    sent_at = Column(TIMESTAMP, nullable=False)
+    
+    room = relationship("Room", back_populates="messages")
+    sender = relationship("User", back_populates="sent_private_messages", foreign_keys=[sender_id])
+    receiver = relationship("User", foreign_keys=[receiver_id], back_populates="received_private_messages")
 
 class User(Base): 
     __tablename__ = 'users'
@@ -94,10 +101,10 @@ class User(Base):
     room_memberships = relationship("RoomMember", back_populates="user")
     # 新しいカラム：プライベートメッセージのNGリスト
     # プライベートメッセージの関連性
-    received_private_messages = relationship("PrivateMessage", back_populates="receiver", foreign_keys=[PrivateMessage.receiver_id])
-    sent_private_messages = relationship("PrivateMessage", back_populates="sender", foreign_keys=[PrivateMessage.sender_id])
+    received_private_messages = relationship("Message", back_populates="receiver", foreign_keys=[Message.receiver_id])
+    sent_private_messages = relationship("Message", back_populates="sender", foreign_keys=[Message.sender_id])
     sessions = relationship("UserSession", back_populates="user")
-    sent_messages = relationship("Message", back_populates="sender")
+ 
 
     room_memberships = relationship("RoomMember", back_populates="user")
     images = relationship("Image", back_populates="sender")
@@ -124,6 +131,7 @@ class User(Base):
         foreign_keys="[BlockedUser.blocked_user_id]",
     )
 
+
 class UserSession(Base):
     __tablename__ = 'user_sessions'
     
@@ -146,23 +154,6 @@ class RoomMember(Base):
     room = relationship("Room", back_populates="room_members")
     user = relationship("User", back_populates="room_memberships")
 
-class Message(Base):
-    __tablename__ = 'messages'
-    
-    id = Column(Integer, primary_key=True)
-    room_id = Column(Integer, ForeignKey('rooms.id'), nullable=False)
-    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    content = Column(Text, nullable=False)
-    toxicity      =  Column(Float(precision=6), nullable=True)  
-    sentiment     =  Column(Float(precision=6), nullable=True)
-    constructive  =  Column(Float(precision=6), nullable=True)
-    incendiary    =  Column(Float(precision=6), nullable=True)
-    foxy           =  Column(Float(precision=6), nullable=True)
-    fluence       =  Column(Float(precision=6), nullable=True)
-    sent_at = Column(TIMESTAMP, nullable=False)
-    
-    room = relationship("Room", back_populates="messages")
-    sender = relationship("User", back_populates="sent_messages")
 
 class Image(Base):
     __tablename__ = 'images'
@@ -220,4 +211,3 @@ class SuspiciousMessage(Base):
     timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
     
     user = relationship("User", back_populates="suspicious_messages")
-

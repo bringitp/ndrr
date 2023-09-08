@@ -6,7 +6,6 @@ from chat_app.app.database.models import (
     User,
     RoomMember,
     AvatarList,
-    PrivateMessage,
     UserNGList,
 )
 from sqlalchemy.orm import joinedload
@@ -133,46 +132,25 @@ async def get_room_messages(
     # ルームオーナー情報を取得
     room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
     response_data = {
-        "room": {
-            "room_id": room.id,
-            "room_label": room.label,
-            "room_name": room.name,
-            "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
-            "room_owner_id": room.owner_id,
-            "room_login_user_name": login_user.username,
-            "room_login_user_id": login_user.id,
-            "room_owner_name": room_owner.username,
-            "room_max_capacity": room.max_capacity,
-            "room_restricted_karma_over_limit": room.over_karma_limit,
-            "room_restricted_karma_under_limit": room.under_karma_limit,
-            "room_lux": room.lux,
-        },
-        "room_members": vital_member_info,  # 部屋の現在のメンバー
-        "messages": [],
-        "version": "0.02",
-    }
-
-    # UserとAvatarListのEager Loadingを追加
+       "room": {
+           "room_id": room.id,
+           "room_label": room.label,
+           "room_name": room.name,
+           "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
+           "room_owner_id": room.owner_id,
+           "room_login_user_name": login_user.username,
+           "room_login_user_id": login_user.id,
+           "room_owner_name": room_owner.username,
+           "room_max_capacity": room.max_capacity,
+           "room_restricted_karma_over_limit": room.over_karma_limit,
+           "room_restricted_karma_under_limit": room.under_karma_limit,
+           "room_lux": room.lux,
+       },
+       "room_members": vital_member_info,  # 部屋の現在のメンバー
+       "messages": [],
+       "version": "0.02",
+   }
     # private message 取得
-    private_messages = (
-        db.query(PrivateMessage)
-        .options(
-            joinedload(PrivateMessage.sender).load_only("avatar_id"),
-            joinedload(PrivateMessage.receiver).load_only("avatar_id"),
-        )
-        .filter(
-            (
-                (PrivateMessage.receiver_id == login_user.id)
-                | (PrivateMessage.sender_id == login_user.id)
-            )
-            & (PrivateMessage.room_id == room_id)
-            & (~PrivateMessage.sender_id.in_(block_list))  # 送信者がブロックリストに含まれていないことを確認
-        )
-        .order_by(PrivateMessage.sent_at.desc())
-        .limit(min(limit, 30))
-        .all()
-    )
-
     # normal message 取得
     normal_messages = (
         db.query(Message)
@@ -184,17 +162,14 @@ async def get_room_messages(
         .all()
     )
     # private messageのIDと normal massage のIDをかぶらないようにする
-    for message in private_messages:
-        message.id += 1000
 
     all_messages = sorted(
-        private_messages + normal_messages,
+        normal_messages,
         key=lambda message: message.sent_at,
         reverse=True,
     )
 
     for message in all_messages:
-        is_private = isinstance(message, PrivateMessage)
         sender_id = message.sender_id
         sender_avatar_id_and_url = next(
             (
@@ -204,6 +179,7 @@ async def get_room_messages(
             ),
             None,
         )
+        print (message.id)
 
         # senderを再度取得
         sender = db.query(User).filter(User.id == sender_id).first()
@@ -226,21 +202,12 @@ async def get_room_messages(
                     "lastlogin_at": sender.lastlogin_at.strftime("%m-%d %H:%M"),
                     "penalty_points": sender.penalty_points,
                     "profile": escape_html(sender.profile),
-                    "sender_id": message.sender_id if is_private else None,
-                    "receiver_id": message.receiver_id if is_private else None,
+                    "sender_id": message.sender_id if message.message_type == "private" else None,
+                    "receiver_id": message.receiver_id if message.message_type == "private" else None,
                     "receiver_username": "all",
                 },
-                "is_private": is_private,
+                "is_private": (message.message_type == "private"),
             }
-
-            if is_private:
-                receiver_user = (
-                    db.query(User).filter(User.id == message.receiver_id).first()
-                )
-                if receiver_user:
-                    message_data["sender"]["receiver_username"] = escape_html(
-                        receiver_user.username
-                    )
 
             response_data["messages"].append(message_data)
 

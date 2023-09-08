@@ -6,7 +6,7 @@ from chat_app.app.utils import (
     create_db_engine_and_session, load_ng_words, create_db_engine_and_session, get_public_key  ,escape_html
 )
 from chat_app.app.database.models import (
-    Message, Room, User, RoomMember, PrivateMessage
+    Message, Room, User, RoomMember
 )
 from typing import Dict, Any
 from datetime import datetime, timedelta

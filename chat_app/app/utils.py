@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, Index  # Index を追加
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import configparser
-from chat_app.app.database.models  import BlockedUser, Room, PrivateMessage, UserNGList, User
+from chat_app.app.database.models  import BlockedUser, Room, UserNGList, User
 from sqlalchemy.orm import Session
 import requests
 import jwt
