@@ -144,37 +144,37 @@ async def get_room_messages(
             }
         )
 
-#  # ルームオーナー情報を取得
-#  room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
-#  response_data = {
-#      "room": {
-#          "room_id": room.id,
-#          "room_label": room.label,
-#          "room_name": room.name,
-#          "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
-#          "room_owner_id": room.owner_id,
-#          "room_login_user_name": login_user.username,
-#          "room_login_user_id": login_user.id,
-#          "room_owner_name": room_owner.username,
-#          "room_max_capacity": room.max_capacity,
-#          "room_restricted_karma_over_limit": room.over_karma_limit,
-#          "room_restricted_karma_under_limit": room.under_karma_limit,
-#          "room_lux": room.lux,
-#      },
-#      "room_members": vital_member_info,  # 部屋の現在のメンバー
-#      "messages": [],
-#      "version": "0.03",
-#  }
-#  # normal message 取得
-#  normal_messages = (
-#      db.query(Message)
-#      .filter(
-#          (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
-#      )
-#      .order_by(Message.sent_at.desc())
-#      .limit(2)
-#      .all()
-#  )
+    # ルームオーナー情報を取得
+    room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
+    response_data = {
+        "room": {
+            "room_id": room.id,
+            "room_label": room.label,
+            "room_name": room.name,
+            "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
+            "room_owner_id": room.owner_id,
+            "room_login_user_name": login_user.username,
+            "room_login_user_id": login_user.id,
+            "room_owner_name": room_owner.username,
+            "room_max_capacity": room.max_capacity,
+            "room_restricted_karma_over_limit": room.over_karma_limit,
+            "room_restricted_karma_under_limit": room.under_karma_limit,
+            "room_lux": room.lux,
+        },
+        "room_members": vital_member_info,  # 部屋の現在のメンバー
+        "messages": [],
+        "version": "0.03",
+    }
+    # normal message 取得
+    normal_messages = (
+        db.query(Message)
+        .filter(
+            (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
+        )
+        .order_by(Message.sent_at.desc())
+        .limit(2)
+        .all()
+    )
 
 #  all_messages = sorted(
 #      normal_messages,
