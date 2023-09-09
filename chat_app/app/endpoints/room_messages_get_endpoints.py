@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter
+from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter,Response
 from sqlalchemy.orm import Session
 from chat_app.app.database.models import (
     Message,
@@ -32,7 +32,7 @@ from chat_app.app.auth_utils import (
     get_block_list,
 )
 from cachetools import TTLCache
-
+import hashlib
 # キャッシュの設定（20秒のTTLキャッシュ）
 cache = TTLCache(maxsize=1000, ttl=1)
 
@@ -41,6 +41,7 @@ engine, SessionLocal, Base = create_db_engine_and_session()
 public_key = get_public_key("https://ron-the-rocker.net/auth", "ndrr")
 # Janomeのトークナイザーの初期化
 router = APIRouter()
+import json
 
 
 def get_db():
@@ -66,6 +67,8 @@ def get_current_user(
 
     return user
 
+def generate_etag(content: str) -> str:
+    return hashlib.md5(content.encode()).hexdigest()
 
 @router.get("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def get_room_messages(
@@ -228,5 +231,14 @@ async def get_room_messages(
         }
 
         response_data["messages"].append(message_data)
+
+        # response_data全体をJSON文字列に変換
+    response_data_json = json.dumps(response_data, ensure_ascii=False)  # ensure_ascii=False で非ASCII文字もサポート
+    etag = generate_etag(response_data_json)
+    # response_dataにETagヘッダーを設定
+    response_data["ETag"] = etag
+    response_data_json = json.dumps(response_data)
+    # Responseオブジェクトを作成して返す
+    response = Response(content=response_data_json, media_type="application/json")    
 
     return response_data

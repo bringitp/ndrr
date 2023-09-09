@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 import cachetools
 from datetime import datetime
 # キャッシュの設定（10秒のTTLキャッシュ）
-token_cache = cachetools.TTLCache(maxsize=1000, ttl=20)
+token_cache = cachetools.TTLCache(maxsize=1000, ttl=180)
 
 class UserToken:
     sub: str
