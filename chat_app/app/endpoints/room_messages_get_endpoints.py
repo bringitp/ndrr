@@ -93,7 +93,6 @@ async def get_room_messages(
         )
 
 
-
     if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed"
@@ -105,117 +104,117 @@ async def get_room_messages(
         )
 
     # メンバー情報を一括で取得（ループ内でのアクセスを回避）
-    room_members = [room_member] if room_member else []
+#  room_members = [room_member] if room_member else []
 
-    # ルームの他のメンバーを取得
-    other_room_members = (
-        db.query(RoomMember)
-        .filter(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id)
-        .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
-        .limit(1)
-        .all()
-    )
+#  # ルームの他のメンバーを取得
+#  other_room_members = (
+#      db.query(RoomMember)
+#      .filter(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id)
+#      .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
+#      .limit(1)
+#      .all()
+#  )
 
-    room_members.extend(other_room_members)
+#  room_members.extend(other_room_members)
 
-    user_avatar_urls = (
-        db.query(User.id, AvatarList.avatar_url)
-        .filter(User.avatar_id == AvatarList.avatar_id)
-        .all()
-    )
+#  user_avatar_urls = (
+#      db.query(User.id, AvatarList.avatar_url)
+#      .filter(User.avatar_id == AvatarList.avatar_id)
+#      .all()
+#  )
 
-    vital_member_info = []
-    blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
-    block_list = get_block_list(login_user.id, db)
+#  vital_member_info = []
+#  blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
+#  block_list = get_block_list(login_user.id, db)
 
-    for room_member in room_members:
-        user = room_member.user
-        avatar_id_and_url = next(
-            (
-                avatar_url
-                for user_id, avatar_url in user_avatar_urls
-                if user_id == user.id
-            ),
-            None,
-        )
-        # ブロック済みユーザーかどうかを確認
-        blocked = user.id in block_list  # block_listに含まれているかどうかを確認
-        if blocked:
-            blocked_user_ids.add(user.id)
-        vital_member_info.append(
-            {
-                "user_id": user.id,
-                "username": user.username,
-                "avatar_url": avatar_id_and_url,
-                "blocked": bool(blocked),
-                "ami": bool(user.id == login_user.id),
-            }
-        )
+#  for room_member in room_members:
+#      user = room_member.user
+#      avatar_id_and_url = next(
+#          (
+#              avatar_url
+#              for user_id, avatar_url in user_avatar_urls
+#              if user_id == user.id
+#          ),
+#          None,
+#      )
+#      # ブロック済みユーザーかどうかを確認
+#      blocked = user.id in block_list  # block_listに含まれているかどうかを確認
+#      if blocked:
+#          blocked_user_ids.add(user.id)
+#      vital_member_info.append(
+#          {
+#              "user_id": user.id,
+#              "username": user.username,
+#              "avatar_url": avatar_id_and_url,
+#              "blocked": bool(blocked),
+#              "ami": bool(user.id == login_user.id),
+#          }
+#      )
 
-    # ルームオーナー情報を取得
-    room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
-    response_data = {
-        "room": {
-            "room_id": room.id,
-            "room_label": room.label,
-            "room_name": room.name,
-            "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
-            "room_owner_id": room.owner_id,
-            "room_login_user_name": login_user.username,
-            "room_login_user_id": login_user.id,
-            "room_owner_name": room_owner.username,
-            "room_max_capacity": room.max_capacity,
-            "room_restricted_karma_over_limit": room.over_karma_limit,
-            "room_restricted_karma_under_limit": room.under_karma_limit,
-            "room_lux": room.lux,
-        },
-        "room_members": vital_member_info,  # 部屋の現在のメンバー
-        "messages": [],
-        "version": "0.03",
-    }
-    # normal message 取得
-    normal_messages = (
-        db.query(Message)
-        .filter(
-            (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
-        )
-        .order_by(Message.sent_at.desc())
-        .limit(2)
-        .all()
-    )
+#  # ルームオーナー情報を取得
+#  room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
+#  response_data = {
+#      "room": {
+#          "room_id": room.id,
+#          "room_label": room.label,
+#          "room_name": room.name,
+#          "room_member_count": len(vital_member_info),  # メンバー情報の数を使う
+#          "room_owner_id": room.owner_id,
+#          "room_login_user_name": login_user.username,
+#          "room_login_user_id": login_user.id,
+#          "room_owner_name": room_owner.username,
+#          "room_max_capacity": room.max_capacity,
+#          "room_restricted_karma_over_limit": room.over_karma_limit,
+#          "room_restricted_karma_under_limit": room.under_karma_limit,
+#          "room_lux": room.lux,
+#      },
+#      "room_members": vital_member_info,  # 部屋の現在のメンバー
+#      "messages": [],
+#      "version": "0.03",
+#  }
+#  # normal message 取得
+#  normal_messages = (
+#      db.query(Message)
+#      .filter(
+#          (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
+#      )
+#      .order_by(Message.sent_at.desc())
+#      .limit(2)
+#      .all()
+#  )
 
-    all_messages = sorted(
-        normal_messages,
-        key=lambda message: message.sent_at,
-        reverse=True,
-    )
+#  all_messages = sorted(
+#      normal_messages,
+#      key=lambda message: message.sent_at,
+#      reverse=True,
+#  )
 
-    for message in all_messages:
-        message_data = {
-            "id": message.id,
-            "content": message.content,
-            "toxicity": message.toxicity,
-            "sentiment": message.sentiment,
-            "fluence": message.fluence,
-            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-            "sender": {
-                "username": message.signature_writer_name,
-                "user_id": message.sender_id,
-                "avatar_url": message.signature_avatar_url,  # 修正: sender_avatar_urlを使用
-                "trip": message.signature_trip,
-                "karma": message.signature_karma,
-                "profile": message.signature_profile,
-                "sender_id": message.sender_id
-                if message.message_type == "private"
-                else None,
-                "receiver_id": message.receiver_id
-                if message.message_type == "private"
-                else None,
-                "receiver_username": message.signature_recipient_name,
-            },
-            "is_private": (message.message_type == "private"),
-        }
+#  for message in all_messages:
+#      message_data = {
+#          "id": message.id,
+#          "content": message.content,
+#          "toxicity": message.toxicity,
+#          "sentiment": message.sentiment,
+#          "fluence": message.fluence,
+#          "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
+#          "sender": {
+#              "username": message.signature_writer_name,
+#              "user_id": message.sender_id,
+#              "avatar_url": message.signature_avatar_url,  # 修正: sender_avatar_urlを使用
+#              "trip": message.signature_trip,
+#              "karma": message.signature_karma,
+#              "profile": message.signature_profile,
+#              "sender_id": message.sender_id
+#              if message.message_type == "private"
+#              else None,
+#              "receiver_id": message.receiver_id
+#              if message.message_type == "private"
+#              else None,
+#              "receiver_username": message.signature_recipient_name,
+#          },
+#          "is_private": (message.message_type == "private"),
+#      }
 
-        response_data["messages"].append(message_data)
+#      response_data["messages"].append(message_data)
 
-    return response_data
+    return {1:1}#response_data
