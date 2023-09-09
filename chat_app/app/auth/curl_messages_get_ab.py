@@ -5,11 +5,14 @@ from config import TOKEN  # config.py ファイルからトークンをインポ
 url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 headers = {"Authorization": f"Bearer {TOKEN}"}
 
+# 前回のETagを設定
+previous_etag = "d5bcf446655cecd3932a3626763c55c6"
+
 # abコマンドを実行するためのコマンドラインを構築
-ab_command = f"ab -n 1500 -c 40 -H'Authorization: {headers['Authorization']}'   {url}"
+ab_command = f"ab -n 1500 -c 40 -H 'Authorization: {headers['Authorization']}' -H 'If-None-Match: {previous_etag}' {url}"
 
 try:
-    # abコマンドを実行し、結果を取得|||
+    # abコマンドを実行し、結果を取得
     result = subprocess.check_output(
         ab_command, shell=True, stderr=subprocess.STDOUT, universal_newlines=True
     )
