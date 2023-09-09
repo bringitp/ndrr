@@ -196,7 +196,7 @@ class UserSession(Base):
 class RoomMember(Base):
     __tablename__ = "room_members"
 
-    member_id = Column(Integer, primary_key=True)
+    member_id = Column(Integer, index=True, primary_key=True)
     room_id = Column(Integer, ForeignKey("rooms.id"), nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     joined_at = Column(TIMESTAMP, nullable=False)
