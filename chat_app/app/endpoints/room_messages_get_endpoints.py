@@ -210,4 +210,4 @@ async def get_room_messages(
 
         response_data["messages"].append(message_data)
 
-    return {1:1}#response_data
+    return response_data
