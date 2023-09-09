@@ -57,7 +57,10 @@ server {
         add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
         add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
         add_header etag $upstream_http_etag;
-
+                # ETagヘッダーを追加
+        if ($upstream_http_etag ~* (.+)) {
+               add_header ETag $1;
+        }
         if ($request_method = 'OPTIONS') {
             add_header Access-Control-Allow-Credentials 'true';
             add_header Access-Control-Max-Age 1728000;
@@ -97,7 +100,10 @@ server {
             add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
             add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
             add_header etag $upstream_http_etag;
-
+                # ETagヘッダーを追加
+            if ($upstream_http_etag ~* (.+)) {
+               add_header ETag $1;
+            }
             if ($request_method = 'OPTIONS') {
                 add_header Access-Control-Allow-Credentials 'true';
                 add_header Access-Control-Max-Age 1728000;
@@ -137,7 +143,10 @@ server {
             add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
             add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
             add_header etag $upstream_http_etag;
-
+                # ETagヘッダーを追加
+            if ($upstream_http_etag ~* (.+)) {
+               add_header ETag $1;
+            }
             if ($request_method = 'OPTIONS') {
                 add_header Access-Control-Allow-Credentials 'true';
                 add_header Access-Control-Max-Age 1728000;
@@ -176,7 +185,10 @@ server {
             add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
             add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
             add_header etag $upstream_http_etag;
-
+                # ETagヘッダーを追加
+            if ($upstream_http_etag ~* (.+)) {
+               add_header ETag $1;
+            }
             if ($request_method = 'OPTIONS') {
                 add_header Access-Control-Allow-Credentials 'true';
                 add_header Access-Control-Max-Age 1728000;
@@ -214,7 +226,10 @@ server {
             add_header Access-Control-Allow-Origin http://localhost:3000;
             add_header Access-Control-Allow-Methods 'GET, POST, OPTIONS';
             add_header Access-Control-Allow-Headers 'Origin, Content-Type, Accept, Authorization';
-            add_header etag $upstream_http_etag;
+                # ETagヘッダーを追加
+            if ($upstream_http_etag ~* (.+)) {
+               add_header ETag $1;
+            }
 
             if ($request_method = 'OPTIONS') {
                 add_header Access-Control-Allow-Credentials 'true';
