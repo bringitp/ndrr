@@ -75,6 +75,7 @@ async def get_room_messages(
     room_id: int,
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db),
+    if_none_match: str = Header(None)
 ):
     # ルームオーナー情報を取得（joinedloadを使用）
     room = db.query(Room).filter(Room.id == room_id).options(joinedload(Room.owner)).first()
@@ -235,10 +236,15 @@ async def get_room_messages(
         # response_data全体をJSON文字列に変換
     response_data_json = json.dumps(response_data, ensure_ascii=False)  # ensure_ascii=False で非ASCII文字もサポート
     etag = generate_etag(response_data_json)
+
+    # リクエストのETagヘッダーと比較
+    if if_none_match and if_none_match == etag:
+        return Response(status_code=status.HTTP_304_NOT_MODIFIED)
+
     # response_dataにETagヘッダーを設定
     response_data["ETag"] = etag
     response_data_json = json.dumps(response_data)
     # Responseオブジェクトを作成して返す
     response = Response(content=response_data_json, media_type="application/json")    
-
-    return response_data
+    response.headers["ETag"] = etag
+    return response

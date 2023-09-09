@@ -16,6 +16,8 @@ function Room() {
   const messageInputRef = useRef(null);
   const { keycloak, initialized } = useKeycloak();
   const [error, setError] = useState(null);
+    const [etag, setEtag] = useState(null); // ETagを保持するステート
+
 
   const fetchData = async () => {
     const apiUrl = window.location.href.startsWith("https://ron-the-rocker.net/")
@@ -24,34 +26,52 @@ function Room() {
     const headers = new Headers();
     headers.append("Authorization", `Bearer ${keycloak.token}`);
 
-    try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 2500),
-      );
-      const response = await Promise.race([
-        fetch(apiUrl, { headers }),
-        timeoutPromise,
-      ]);
+  try {
+    // ETagをリクエストヘッダーに含める
+    const requestOptions = {
+      headers,
+      method: "GET",
+    };
 
-      if (response.ok) {
+    // 前回のETagが存在する場合、リクエストヘッダーにIf-None-Matchヘッダーを追加
+    if (etag) {
+      requestOptions.headers.append("If-None-Match", etag);
+    }
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 2500),
+    );
+
+    const response = await Promise.race([
+      fetch(apiUrl, requestOptions), // ETag付きリクエストを送信
+      timeoutPromise,
+    ]);
+
+    if (response.ok) {
+      // 新しいETagを取得
+      const newEtag = response.headers.get("ETag");
+
         const data = await response.json();
         setJsonData(data);
+        setEtag(newEtag);
         if (messageContainerRef.current) {
           messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }
-      } else if (response.status === 403 || response.status === 406) {
-        setError(`部屋の許可がありません: ${response.status}`);
-      }
-    } catch (error) {
-      if (error.message === 'Failed to fetch') {
-        setError('通信がタイムアウトしました');
-      } else {
-        setError(`その他のエラーが発生しました ${error.message}`);
-        console.error('Error fetching data:', error);
-      }
+      
+    } else if (response.status === 304) {
+      // サーバーから新しいデータがない場合 (304 Not Modified)、何もせずに終了
+      console.log("Data not modified (304 Not Modified)");
+      alert("same");
     }
-  };
-
+  } catch (error) {
+    if (error.message === 'Failed to fetch') {
+      setError('通信がタイムアウトしました');
+    } else {
+      setError(`その他のエラーが発生しました ${error.message}`);
+      console.error('Error fetching data:', error);
+    }
+  }
+};
   useEffect(() => {
     if (initialized && keycloak.authenticated) {
       fetchData();

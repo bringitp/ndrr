@@ -12,6 +12,13 @@ headers = {
 response = requests.get(url, headers=headers)
 
 if response.status_code == 200:
+    # Check if the "ETag" header is present in the response
+    if 'ETag' in response.headers:
+        etag = response.headers['ETag']
+        print(f"ETag found: {etag}")
+    else:
+        print("ETag not found in the response headers.")
+    
     # Check if the response has a Content-Encoding header and if it's set to "gzip"
     if 'Content-Encoding' in response.headers and response.headers['Content-Encoding'] == 'gzip':
         print("Response is Gzipped.")
