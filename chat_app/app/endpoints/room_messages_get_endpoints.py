@@ -104,53 +104,40 @@ async def get_room_messages(
             status_code=status.HTTP_403_FORBIDDEN, detail="More reality needed"
         )
 
-    # メンバー情報を一括で取得（ループ内でのアクセスを回避）
-#  room_members = [room_member] if room_member else []
 
-#  # ルームの他のメンバーを取得
-#  other_room_members = (
-#      db.query(RoomMember)
-#      .filter(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id)
-#      .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
-#      .limit(1)
-#      .all()
-#  )
+    user_avatar_urls = (
+       db.query(User.id, AvatarList.avatar_url)
+       .filter(User.avatar_id == AvatarList.avatar_id)
+       .all()
+    )
 
-#  room_members.extend(other_room_members)
+    vital_member_info = []
+    blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
+    block_list = get_block_list(login_user.id, db)
 
-#  user_avatar_urls = (
-#      db.query(User.id, AvatarList.avatar_url)
-#      .filter(User.avatar_id == AvatarList.avatar_id)
-#      .all()
-#  )
-
-#  vital_member_info = []
-#  blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
-#  block_list = get_block_list(login_user.id, db)
-
-#  for room_member in room_members:
-#      user = room_member.user
-#      avatar_id_and_url = next(
-#          (
-#              avatar_url
-#              for user_id, avatar_url in user_avatar_urls
-#              if user_id == user.id
-#          ),
-#          None,
-#      )
-#      # ブロック済みユーザーかどうかを確認
-#      blocked = user.id in block_list  # block_listに含まれているかどうかを確認
-#      if blocked:
-#          blocked_user_ids.add(user.id)
-#      vital_member_info.append(
-#          {
-#              "user_id": user.id,
-#              "username": user.username,
-#              "avatar_url": avatar_id_and_url,
-#              "blocked": bool(blocked),
-#              "ami": bool(user.id == login_user.id),
-#          }
-#      )
+    for room_member in room_members:
+        user = room_member.user
+        avatar_id_and_url = next(
+            (
+                avatar_url
+                for user_id, avatar_url in user_avatar_urls
+                if user_id == user.id
+            ),
+            None,
+        )
+        # ブロック済みユーザーかどうかを確認
+        blocked = user.id in block_list  # block_listに含まれているかどうかを確認
+        if blocked:
+            blocked_user_ids.add(user.id)
+        vital_member_info.append(
+            {
+                "user_id": user.id,
+                "username": user.username,
+                "avatar_url": avatar_id_and_url,
+                "blocked": bool(blocked),
+                "ami": bool(user.id == login_user.id),
+            }
+        )
 
 #  # ルームオーナー情報を取得
 #  room_owner = db.query(User.username).filter(User.id == room.owner_id).first()
