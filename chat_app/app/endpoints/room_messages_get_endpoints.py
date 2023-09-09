@@ -79,19 +79,20 @@ async def get_room_messages(
         )
     # Check if the user is a member of the room
     # ログインユーザーがルームのメンバーであるかを確認し、メンバー情報を一括で取得
-    room_member = (
+    room_members = (
         db.query(RoomMember)
-        .filter(RoomMember.room_id == room_id, RoomMember.user_id == login_user.id)
+        .filter(RoomMember.room_id == room_id)
         .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
-        .first()
+        .all()
     )
 
-    if not room_member:
+    # ログインユーザーがルームのメンバーであるかを確認
+    user_ids_in_room = [room_member.user_id for room_member in room_members]
+    if login_user.id not in user_ids_in_room:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not a member of this room",
         )
-
 
     if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
         raise HTTPException(
