@@ -6,10 +6,10 @@ url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 headers = {"Authorization": f"Bearer {TOKEN}"}
 
 # 前回のETagを設定
-previous_etag = "d5bcf446655cecd3932a3626763c55c6"
+previous_etag = "1a5d5db37a4ef9d2312b1646bfe02469"
 
 # abコマンドを実行するためのコマンドラインを構築
-ab_command = f"ab -n 1500 -c 40 -H 'Authorization: {headers['Authorization']}' -H 'If-None-Match: {previous_etag}' {url}"
+ab_command = f"ab -n 15 -c 4 -H 'Authorization: {headers['Authorization']}' -H 'If-None-Match: {previous_etag}' {url}"
 
 try:
     # abコマンドを実行し、結果を取得
