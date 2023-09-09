@@ -10,7 +10,7 @@ from fastapi import (
 )
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User, RoomMember
+from chat_app.app.database.models import Message, Room, User, RoomMember , AvatarList
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -161,21 +161,25 @@ async def create_room_message(
         login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT
     )
 
-    # htmlをエスケープする
-    sanitizing_content = escape_html(message_content)
+    # Escape HTML characters in the message content
+    sanitized_content = escape_html(message_content)
+    sanitized_content = replace_youtube_links(sanitized_content)
 
-    # 正規表現パターン
-    youtube_url_regex = re.compile(
-        r"^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?([a-zA-Z0-9_-]{11})"
-    )
-
-    # YouTubeのアドレスを<iframe>タグに置き換える
-    new_contents = youtube_url_regex.sub(replace_youtube_links, sanitizing_content)
+    # Retrieve the current user's data
+    current_user = db.query(User).filter_by(id=login_user.id).first()
+    avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
+    # Populate the signature fields with the current user's data
     new_message = Message(
-        content=new_contents,
+        content=sanitized_content,
         room_id=room_id,
         sender_id=login_user.id,
         sent_at=datetime.now(),
+        signature_writer_name=current_user.username,
+        message_type ="public",  # Adjust as needed
+        signature_avatar_url=avatar_url ,  # Adjust as needed
+        signature_trip=current_user.trip,  # Adjust as needed
+        signature_karma=str(current_user.karma),  # Convert to string if necessary
+        signature_profile=current_user.profile,
     )
 
     db.add(new_message)
@@ -193,64 +197,96 @@ async def create_room_message(
     return response_data
 
 
-#    @router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
-#    async def create_private_message(
-#        room_id: int,
-#        request: Request,
-#        login_user: LoginUser = Depends(get_current_user),
-#        db: Session = Depends(get_db),
-#        background_tasks: BackgroundTasks = BackgroundTasks()
-#    ):
-#
-#        data = await request.json()
-#        message_content = data.get("message_content")
-#        receiver_id = data.get("receiver_id")  # 新しく追加した行
-#        if not message_content:
-#            raise HTTPException(status_code=422, detail="message_content is required")
-#        if len(message_content) > 350:
-#            raise HTTPException(status_code=406, detail="message_content is too long")
-#
-#        # Check if the user is a member of the room
-#        room_member = db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
-#        if not room_member:
-#            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not a member of this room")
-#
-#        room = db.query(Room).filter(Room.id == room_id).first()
-#        if not room:
-#            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Room not found")
-#
-#        if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
-#            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed")
-#
-#        if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
-#            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="More real needed")
-#
-#        if receiver_id is None:
-#            raise HTTPException(status_code=422, detail="receiver_id is required")
-#
-#        check_ng_words(message_content, ng_words)
-#        # Check post frequency within 180 seconds and 5 post count
-#        check_post_frequency_within_time(login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT)
-#
-#        # htmlをエスケープする
-#        sanitizing_content = escape_html(message_content)
-#        # プライベートメッセージを作成
-#        new_private_message = PrivateMessage(content=sanitizing_content, room_id=room_id, sender_id=login_user.id, receiver_id=receiver_id, sent_at=datetime.now())
-#
-#        db.add(new_private_message)
-#        db.commit()
-#        db.refresh(new_private_message)
-#
-#        response_data = {
-#            "room_id": room.id,
-#            "private_message_id": new_private_message.id,
-#            "content": new_private_message.content,
-#            "sent_at": new_private_message.sent_at,
-#            "sender": {
-#                "username": login_user.username,
-#                "karma": login_user.karma
-#            },
-#            "receiver_id": receiver_id  # プライベートメッセージの受信者IDを含めることが重要です
-#        }
-#
-#        return response_data
+@router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
+async def create_private_message(
+        room_id: int,
+        request: Request,
+        login_user: LoginUser = Depends(get_current_user),
+        db: Session = Depends(get_db),
+        background_tasks: BackgroundTasks = BackgroundTasks()
+    ):
+
+    data = await request.json()
+    message_content = data.get("message_content")
+    receiver_id= data.get("receiver_id")
+    if not message_content:
+        raise HTTPException(status_code=422, detail="message_content is required")
+    if len(message_content) > 350:
+        raise HTTPException(status_code=406, detail="message_content is too long")
+
+    # Check if the user is a member of the room
+    room_member = (
+        db.query(RoomMember).filter_by(room_id=room_id, user_id=login_user.id).first()
+    )
+    if not room_member:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not a member of this room",
+        )
+
+    room = db.query(Room).filter(Room.id == room_id).first()
+    if not room:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
+        )
+
+    if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed"
+        )
+
+    if room.under_karma_limit < login_user.karma and room.under_karma_limit != 0:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="More real needed"
+        )
+
+    check_ng_words(message_content, ng_words)
+    # Check post frequency within 180 seconds and 5 post count
+    check_post_frequency_within_time(
+        login_user.sub, db, timedelta(seconds=15), MAX_POST_COUNT
+    )
+
+    # Escape HTML characters in the message content
+    sanitized_content = escape_html(message_content)
+
+    # Retrieve the current user's data
+    current_user = db.query(User).filter_by(id=login_user.id).first()
+    avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
+
+    receiver_user = db.query(User).filter_by(id=receiver_id).first()
+# ユーザーデータからユーザー名（名前）を抽出
+    if receiver_user:
+        receiver_name = receiver_user.username
+    else:
+    # ユーザーが存在しない場合、適切なエラー処理を行うか、デフォルトの値を設定します
+        receiver_name = "Unknown User"
+
+    # Populate the signature fields with the current user's data
+    new_message = Message(
+        content=sanitized_content,
+        room_id=room_id,
+        sender_id=login_user.id,
+        receiver_id=receiver_id,
+        sent_at=datetime.now(),
+        signature_writer_name=current_user.username,
+        signature_recipient_name =receiver_name,
+        message_type ="private",  # Adjust as needed
+        signature_avatar_url=avatar_url ,  # Adjust as needed
+        signature_trip=current_user.trip,  # Adjust as needed
+        signature_karma=str(current_user.karma),  # Convert to string if necessary
+        signature_profile=current_user.profile,
+    )
+
+    db.add(new_message)
+    db.commit()
+    db.refresh(new_message)
+
+    response_data = {
+        "room_id": room.id,
+        "message_id": new_message.id,
+        "content": new_message.content,
+        "sent_at": new_message.sent_at,
+        "sender": {"username": login_user.username, "karma": login_user.karma},
+    }
+
+

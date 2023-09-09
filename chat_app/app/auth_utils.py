@@ -52,8 +52,6 @@ def get_block_list(user_id: int, db: Session):
     block_list = db.query(UserNGList.blocked_user_id).filter(UserNGList.user_id == user_id).all()
     return [item[0] for item in block_list]
 
-
-
 def skeltone_get_current_user(Authorization: str, db: Session,public_key) -> User:
     if not Authorization:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Bearer token missing")
