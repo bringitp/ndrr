@@ -57,13 +57,12 @@ def get_current_user(
     cached_user = cache.get(Authorization)
     if cached_user:
         return cached_user
-    
+
     # キャッシュにない場合はデータベースからユーザー情報を取得
     user = skeltone_get_current_user(Authorization, db, public_key)
-    
     # ユーザー情報をキャッシュに保存
     cache[Authorization] = user
-    
+
     return user
 
 
@@ -179,7 +178,7 @@ async def get_room_messages(
         )
         .order_by(Message.sent_at.desc())
         .limit(30)
-        .all()
+        .first()
     )
 
     all_messages = sorted(
