@@ -188,7 +188,7 @@ async def get_room_messages(
     normal_messages = (
         db.query(Message)
         .filter(
-            (Message.room_id == room_id) 
+            (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
         )
         .order_by(Message.sent_at.desc())
         .limit(30)
