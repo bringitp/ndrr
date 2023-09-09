@@ -72,6 +72,7 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "Upgrade";
+        proxy_set_header If-None-Match $http_if_none_match;
     }
   }
 
@@ -110,6 +111,7 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_set_header If-None-Match $http_if_none_match;
         }
      }
      
@@ -148,6 +150,7 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_set_header If-None-Match $http_if_none_match;
         }
      }
      server {
@@ -185,6 +188,7 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_set_header If-None-Match $http_if_none_match;
         }
      }
      server {
@@ -222,6 +226,7 @@ server {
             proxy_set_header X-Forwarded-Proto $scheme;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection "Upgrade";
+            proxy_set_header If-None-Match $http_if_none_match;
         }
      }     
    

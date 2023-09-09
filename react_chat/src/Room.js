@@ -16,8 +16,7 @@ function Room() {
   const messageInputRef = useRef(null);
   const { keycloak, initialized } = useKeycloak();
   const [error, setError] = useState(null);
-    const [etag, setEtag] = useState(null); // ETagを保持するステート
-
+  const [etag, setEtag] = useState(null); // ETagを保持するステート
 
   const fetchData = async () => {
     const apiUrl = window.location.href.startsWith("https://ron-the-rocker.net/")
@@ -34,9 +33,9 @@ function Room() {
     };
 
     // 前回のETagが存在する場合、リクエストヘッダーにIf-None-Matchヘッダーを追加
-    if (etag) {
-      requestOptions.headers.append("If-None-Match", etag);
-    }
+  
+    requestOptions.headers.append("If-None-Match", etag);
+    
 
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 2500),
@@ -49,10 +48,11 @@ function Room() {
 
     if (response.ok) {
       // 新しいETagを取得
-      const newEtag = response.headers.get("ETag");
 
         const data = await response.json();
         setJsonData(data);
+        const newEtag =jsonData.version;
+        alert(newEtag);
         setEtag(newEtag);
         if (messageContainerRef.current) {
           messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
@@ -61,7 +61,6 @@ function Room() {
     } else if (response.status === 304) {
       // サーバーから新しいデータがない場合 (304 Not Modified)、何もせずに終了
       console.log("Data not modified (304 Not Modified)");
-      alert("same");
     }
   } catch (error) {
     if (error.message === 'Failed to fetch') {
