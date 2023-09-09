@@ -74,7 +74,16 @@ async def get_room_messages(
     db: Session = Depends(get_db),
 ):
     # ルームオーナー情報を取得（joinedloadを使用）
-    room = db.query(Room).filter(Room.id == room_id).options(joinedload(Room.owner)).first()
+    # ルーム情報とメンバー情報を1回のクエリで取得
+    room = (
+        db.query(Room)
+        .filter(Room.id == room_id)
+        .options(
+            joinedload(Room.owner),  # ルームオーナー情報を取得
+            joinedload(Room.room_members).joinedload(RoomMember.user),  # メンバー情報を取得
+        )
+    .first()
+    )
 
     if not room:
         raise HTTPException(
