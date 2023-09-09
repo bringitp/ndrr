@@ -32,8 +32,9 @@ from chat_app.app.auth_utils import (
     get_block_list,
 )
 from cachetools import TTLCache
+
 # キャッシュの設定（20秒のTTLキャッシュ）
-cache = TTLCache(maxsize=1000, ttl=120)
+cache = TTLCache(maxsize=1000, ttl=1)
 
 # データベース関連の初期化
 engine, SessionLocal, Base = create_db_engine_and_session()
@@ -72,7 +73,9 @@ async def get_room_messages(
     login_user: LoginUser = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    room = db.query(Room).get(room_id)
+    # ルームオーナー情報を取得（joinedloadを使用）
+    room = db.query(Room).filter(Room.id == room_id).options(joinedload(Room.owner)).first()
+
     if not room:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Room not found"
@@ -105,21 +108,39 @@ async def get_room_messages(
         )
 
     # room_membersからavatar_idのリストを取得
-    avatar_ids = [room_member.user.avatar_id for room_member in room_members]
+    room_member_avatar_ids = [
+        room_member.user.avatar_id for room_member in room_members
+    ]
 
     # AvatarListから対応するavatar_idのレコードを取得
-# AvatarListとUserテーブルを結合し、avatar_idを用いて結合条件を指定
+    # AvatarListとUserテーブルを結合し、avatar_idを用いて結合条件を指定
     user_avatar_urls = (
         db.query(User.id, AvatarList.avatar_url)
         .join(AvatarList, User.avatar_id == AvatarList.avatar_id)
-        .filter(User.id.in_(avatar_ids))  # avatar_idsに含まれるユーザーIDに絞り込み
+        .filter(
+            User.id.in_(room_member_avatar_ids)
+        )  # room_member_avatar_idsに含まれるユーザーIDに絞り込み
         .all()
     )
 
     vital_member_info = []
     blocked_user_ids = set()  # ブロック済みユーザーのIDをセットで保持
+    # ブロックリストの取得を最適化
     block_list = get_block_list(login_user.id, db)
-
+    
+    # ユーザー情報の一括取得
+    user_ids_to_fetch = set()  # 取得すべきユーザーIDのセット
+    for room_member in room_members:
+        user_ids_to_fetch.add(room_member.user_id)
+    user_avatar_urls = (
+        db.query(User.id, AvatarList.avatar_url)
+        .join(AvatarList, User.avatar_id == AvatarList.avatar_id)
+        .filter(User.id.in_(user_ids_to_fetch))
+        .all()
+    )
+    
+    # vital_member_infoの構築を高速化
+    vital_member_info = []
     for room_member in room_members:
         user = room_member.user
         avatar_id_and_url = next(
@@ -130,10 +151,8 @@ async def get_room_messages(
             ),
             None,
         )
-        # ブロック済みユーザーかどうかを確認
-        blocked = user.id in block_list  # block_listに含まれているかどうかを確認
-        if blocked:
-            blocked_user_ids.add(user.id)
+        # ブロック済みユーザーかどうかを高速にチェック
+        blocked = user.id in block_list
         vital_member_info.append(
             {
                 "user_id": user.id,
@@ -155,7 +174,7 @@ async def get_room_messages(
             "room_owner_id": room.owner_id,
             "room_login_user_name": login_user.username,
             "room_login_user_id": login_user.id,
-            "room_owner_name": room_owner.username,
+            "room_owner_name": room.owner.username,  # joinedloadによりオーナー情報が取得できる
             "room_max_capacity": room.max_capacity,
             "room_restricted_karma_over_limit": room.over_karma_limit,
             "room_restricted_karma_under_limit": room.under_karma_limit,
@@ -177,9 +196,9 @@ async def get_room_messages(
     )
 
     all_messages = sorted(
-       normal_messages,
-       key=lambda message: message.sent_at,
-       reverse=True,
+        normal_messages,
+        key=lambda message: message.sent_at,
+        reverse=True,
     )
 
     for message in all_messages:

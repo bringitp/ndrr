@@ -6,7 +6,7 @@ url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 headers = {"Authorization": f"Bearer {TOKEN}"}
 
 # abコマンドを実行するためのコマンドラインを構築
-ab_command = f"ab -n 1500 -c 10 -H'Authorization: {headers['Authorization']}'   {url}"
+ab_command = f"ab -n 1500 -c 40 -H'Authorization: {headers['Authorization']}'   {url}"
 
 try:
     # abコマンドを実行し、結果を取得|||
