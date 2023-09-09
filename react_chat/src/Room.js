@@ -48,7 +48,6 @@ function Room() {
 
     if (response.ok) {
       // 新しいETagを取得
-
         const data = await response.json();
         setJsonData(data);
         const newEtag =jsonData.version;
