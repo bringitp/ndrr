@@ -162,15 +162,21 @@ async def create_room_message(
     )
 
     # Escape HTML characters in the message content
-    sanitized_content = escape_html(message_content)
-    sanitized_content = replace_youtube_links(sanitized_content)
+    sanitizing_content= escape_html(message_content)
+    # 正規表現パターン
+    youtube_url_regex = re.compile(
+        r"^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?([a-zA-Z0-9_-]{11})"
+    )
+
+    # YouTubeのアドレスを<iframe>タグに置き換える
+    new_contents = youtube_url_regex.sub(replace_youtube_links, sanitizing_content)
 
     # Retrieve the current user's data
     current_user = db.query(User).filter_by(id=login_user.id).first()
     avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
     # Populate the signature fields with the current user's data
     new_message = Message(
-        content=sanitized_content,
+        content=new_contents ,
         room_id=room_id,
         sender_id=login_user.id,
         sent_at=datetime.now(),
