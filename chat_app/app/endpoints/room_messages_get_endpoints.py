@@ -172,42 +172,42 @@ async def get_room_messages(
             (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
         )
         .order_by(Message.sent_at.desc())
-        .limit(2)
+        .limit(30)
         .all()
     )
 
-#  all_messages = sorted(
-#      normal_messages,
-#      key=lambda message: message.sent_at,
-#      reverse=True,
-#  )
+    all_messages = sorted(
+       normal_messages,
+       key=lambda message: message.sent_at,
+       reverse=True,
+    )
 
-#  for message in all_messages:
-#      message_data = {
-#          "id": message.id,
-#          "content": message.content,
-#          "toxicity": message.toxicity,
-#          "sentiment": message.sentiment,
-#          "fluence": message.fluence,
-#          "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
-#          "sender": {
-#              "username": message.signature_writer_name,
-#              "user_id": message.sender_id,
-#              "avatar_url": message.signature_avatar_url,  # 修正: sender_avatar_urlを使用
-#              "trip": message.signature_trip,
-#              "karma": message.signature_karma,
-#              "profile": message.signature_profile,
-#              "sender_id": message.sender_id
-#              if message.message_type == "private"
-#              else None,
-#              "receiver_id": message.receiver_id
-#              if message.message_type == "private"
-#              else None,
-#              "receiver_username": message.signature_recipient_name,
-#          },
-#          "is_private": (message.message_type == "private"),
-#      }
+    for message in all_messages:
+        message_data = {
+            "id": message.id,
+            "content": message.content,
+            "toxicity": message.toxicity,
+            "sentiment": message.sentiment,
+            "fluence": message.fluence,
+            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
+            "sender": {
+                "username": message.signature_writer_name,
+                "user_id": message.sender_id,
+                "avatar_url": message.signature_avatar_url,  # 修正: sender_avatar_urlを使用
+                "trip": message.signature_trip,
+                "karma": message.signature_karma,
+                "profile": message.signature_profile,
+                "sender_id": message.sender_id
+                if message.message_type == "private"
+                else None,
+                "receiver_id": message.receiver_id
+                if message.message_type == "private"
+                else None,
+                "receiver_username": message.signature_recipient_name,
+            },
+            "is_private": (message.message_type == "private"),
+        }
 
-#      response_data["messages"].append(message_data)
+        response_data["messages"].append(message_data)
 
     return {1:1}#response_data
