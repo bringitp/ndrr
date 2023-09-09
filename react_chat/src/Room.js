@@ -32,11 +32,8 @@ function Room() {
       method: "GET",
     };
 
-    // 前回のETagが存在する場合、リクエストヘッダーにIf-None-Matchヘッダーを追加
-  
-    requestOptions.headers.append("If-None-Match", etag);
-    
-
+    // 前回のETagが存在する場合、リクエストヘッダーにIf-None-Matchヘッダーを追
+    //requestOptions.headers.append("If-None-Match", etag);
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 2500),
     );
@@ -48,11 +45,9 @@ function Room() {
 
     if (response.ok) {
       // 新しいETagを取得
+        const newEtag = response.headers.get("Etag");
         const data = await response.json();
         setJsonData(data);
-        const newEtag =jsonData.version;
-        alert(newEtag);
-        setEtag(newEtag);
         if (messageContainerRef.current) {
           messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
         }

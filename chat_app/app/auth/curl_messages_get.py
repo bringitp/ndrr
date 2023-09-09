@@ -10,8 +10,10 @@ previous_etag = "1a5d5db37a4ef9d2312b1646bfe024609"
 
 headers = {
     "Authorization": f"Bearer {TOKEN}",
-    "If-None-Match": f"{previous_etag}"
+
 } 
+
+print (f"Authorization :Bearer {TOKEN}")
 
 response = requests.get(url, headers=headers)
 
