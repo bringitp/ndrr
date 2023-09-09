@@ -177,8 +177,8 @@ async def get_room_messages(
             (Message.room_id == room_id) & (~Message.sender_id.in_(blocked_user_ids))
         )
         .order_by(Message.sent_at.desc())
-        .limit(30)
-        .first()
+        .limit(2)
+        .all()
     )
 
     all_messages = sorted(
