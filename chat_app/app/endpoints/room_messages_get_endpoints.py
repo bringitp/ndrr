@@ -104,11 +104,16 @@ async def get_room_messages(
             status_code=status.HTTP_403_FORBIDDEN, detail="More reality needed"
         )
 
+    # room_membersからavatar_idのリストを取得
+    avatar_ids = [room_member.user.avatar_id for room_member in room_members]
 
+    # AvatarListから対応するavatar_idのレコードを取得
+# AvatarListとUserテーブルを結合し、avatar_idを用いて結合条件を指定
     user_avatar_urls = (
-       db.query(User.id, AvatarList.avatar_url)
-       .filter(User.avatar_id == AvatarList.avatar_id)
-       .all()
+        db.query(User.id, AvatarList.avatar_url)
+        .join(AvatarList, User.avatar_id == AvatarList.avatar_id)
+        .filter(User.id.in_(avatar_ids))  # avatar_idsに含まれるユーザーIDに絞り込み
+        .all()
     )
 
     vital_member_info = []
