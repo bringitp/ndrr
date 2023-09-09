@@ -92,6 +92,8 @@ async def get_room_messages(
             detail="You are not a member of this room",
         )
 
+
+
     if room.over_karma_limit < login_user.karma and room.over_karma_limit != 0:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="More karma needed"
@@ -110,6 +112,7 @@ async def get_room_messages(
         db.query(RoomMember)
         .filter(RoomMember.room_id == room_id, RoomMember.user_id != login_user.id)
         .options(joinedload(RoomMember.user))  # ユーザー情報を一括で取得
+        .limit(1)
         .all()
     )
 
