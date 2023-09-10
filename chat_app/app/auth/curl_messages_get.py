@@ -6,11 +6,11 @@ url = "https://ron-the-rocker.net/ndrr/api/room/1/messages"
 #url = "http://localhost:7777/room/1/messages"
 #url = "http://localhost:7777"
 
-previous_etag = "1a5d5db37a4ef9d2312b1646bfe024609"
+previous_etag = "90c2ebdc500724c45426b2cc935ad76"
 
 headers = {
     "Authorization": f"Bearer {TOKEN}",
-
+    "If-None-Match": f"{previous_etag}"
 } 
 
 print (f"Authorization :Bearer {TOKEN}")

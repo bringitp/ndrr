@@ -162,7 +162,7 @@ const RoomList = () => {
                 }}
               >
                 <Typography variant="body2">
-                     <strong>🚪:</strong> {room.status} <strong>🪣:</strong> {room.max_capacity}　<strong>⌚:</strong> {simplifyTime(room.last_activity)}
+                     <strong>🚪:</strong> {room.status} <strong>🪣:</strong> ( {room.room_member_count} / {room.max_capacity} )　<strong>⌚:</strong> {simplifyTime(room.last_activity)}
                 </Typography>
               </Box>
               {room.label && (

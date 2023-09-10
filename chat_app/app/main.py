@@ -14,6 +14,14 @@ app = FastAPI()
 
 # GZipMiddlewareをアプリに追加
 app.add_middleware(GZipMiddleware, minimum_size=1000)  # ここで最小のサイズを指定
+# CORS設定を行う
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # ここに許可したいオリジンを指定
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # main.pyのディレクトリパスを取得
 current_dir = os.path.dirname(os.path.abspath(__file__))
