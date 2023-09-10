@@ -212,7 +212,7 @@ async def get_room_messages(
             "toxicity": message.toxicity,
             "sentiment": message.sentiment,
             "fluence": message.fluence,
-            "sent_at": message.sent_at.strftime("%y-%m-%d %H:%M:%S"),
+            "sent_at": message.sent_at.strftime("%Y-%m-%dT%H:%M:%S"),  # ISO 8601形式に変換
             "sender": {
                 "username": message.signature_writer_name,
                 "user_id": message.sender_id,

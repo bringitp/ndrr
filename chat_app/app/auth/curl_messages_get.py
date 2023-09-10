@@ -34,6 +34,7 @@ if response.status_code == 200:
     data = response.json()
     formatted_json = json.dumps(data, indent=4, ensure_ascii=False) 
     print(formatted_json)
+
 else:
     print("Error:", response.status_code) 
     print("Error:", response.text) 

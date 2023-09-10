@@ -155,6 +155,8 @@ const handleDepart = async () => {
   }
 };
 
+
+
   return (
     <Container>
       <div
@@ -296,8 +298,22 @@ const handleDepart = async () => {
                                 {message.is_private ? ' '  : `(${message.sender.trip})`}
                               </Typography>
                             </Typography>
+    
                                    <Typography variant="caption" onClick={(event) => handleLabelTailMouseDown(message.sender, event)}>
-                                     {window.innerWidth > 1100 ? `${message.sent_at} ( ★ ${message.sender.karma} : login ${message.sender.lastlogin_at} )` : `${message.short_sent_at} ★ ${message.sender.karma}`} 
+                              {(() => {
+                               const sentAt = new Date(message.sent_at);
+
+                               const iso8601String = sentAt.toISOString(); // 例: "2023-09-09T20:31:17.000Z"
+                               const formattedString = iso8601String.replace("T", " ").replace(".000Z", ""); // "2023-09-09 20:31:17.000Z"から"T"を取り除く
+                               const date = sentAt.toLocaleDateString([], { day: '2-digit', month: '2-digit' });
+                               const time = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                                    if (window.innerWidth > 1100) {
+                                     return `${formattedString}  ★ ${message.sender.karma} `;
+                                       } else {
+                                      return `${date} ${time} ★ ${message.sender.karma}`;
+                                    }
+                                       })()}
                                    </Typography>
                           </div>
                           <Typography variant="body1" dangerouslySetInnerHTML={{ __html: message.content }} />
