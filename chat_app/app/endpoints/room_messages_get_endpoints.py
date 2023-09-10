@@ -228,7 +228,7 @@ async def get_room_messages(
                 else None,
                 "receiver_username": message.signature_recipient_name,
             },
-            "is_private": (message.message_type == "private"),
+            "message_type": message.message_type,
         }
 
         response_data["messages"].append(message_data)

@@ -33,16 +33,13 @@ function Room() {
     };
 
     // 前回のETagが存在する場合、リクエストヘッダーにIf-None-Matchヘッダーを追
-    //requestOptions.headers.append("If-None-Match", etag);
     const timeoutPromise = new Promise((_, reject) =>
       setTimeout(() => reject(new Error('timeout')), 2500),
     );
-
     const response = await Promise.race([
       fetch(apiUrl, requestOptions), // ETag付きリクエストを送信
       timeoutPromise,
     ]);
-
     if (response.ok) {
       // 新しいETagを取得
         const newEtag = response.headers.get("Etag");
@@ -54,7 +51,7 @@ function Room() {
       
     } else if (response.status === 304) {
       // サーバーから新しいデータがない場合 (304 Not Modified)、何もせずに終了
-      console.log("Data not modified (304 Not Modified)");
+      console.log("304 Not Modified");
     }
   } catch (error) {
     if (error.message === 'Failed to fetch') {

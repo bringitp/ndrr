@@ -83,7 +83,7 @@ class Message(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     sent_at = Column(TIMESTAMP, nullable=False, index=True)
     content = Column(Text, nullable=False)
-    message_type = Column(Enum("public", "private"), nullable=False)  # メッセージタイプを区別
+    message_type = Column(Enum("public", "private","system"), nullable=False)  # メッセージタイプを区別
 
     toxicity = Column(Float(precision=6), nullable=True)
     sentiment = Column(Float(precision=6), nullable=True)

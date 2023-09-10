@@ -101,18 +101,15 @@ def get_db():
     finally:
         db.close()
 
-
 def get_current_user(
     Authorization: str = Header(None), db: Session = Depends(get_db)
 ) -> User:
     return skeltone_get_current_user(Authorization, db, public_key)
 
-
 def check_ng_words(message_content: str, ng_words: set) -> None:
     tokens = t.tokenize(message_content)
     if any(token.surface in ng_words for token in tokens):
         raise HTTPException(status_code=406, detail="NG words found in the message")
-
 
 @router.post("/room/{room_id}/messages", response_model=Dict[str, Any])
 async def create_room_message(
@@ -167,10 +164,8 @@ async def create_room_message(
     youtube_url_regex = re.compile(
         r"^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/(watch\?v=)?([a-zA-Z0-9_-]{11})"
     )
-
     # YouTubeのアドレスを<iframe>タグに置き換える
     new_contents = youtube_url_regex.sub(replace_youtube_links, sanitizing_content)
-
     # Retrieve the current user's data
     current_user = db.query(User).filter_by(id=login_user.id).first()
     avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
@@ -201,7 +196,6 @@ async def create_room_message(
     }
 
     return response_data
-
 
 @router.post("/room/{room_id}/private_messages", response_model=Dict[str, Any])
 async def create_private_message(
@@ -294,5 +288,3 @@ async def create_private_message(
         "sent_at": new_message.sent_at,
         "sender": {"username": login_user.username, "karma": login_user.karma},
     }
-
-

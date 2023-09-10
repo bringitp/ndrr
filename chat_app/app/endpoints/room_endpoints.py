@@ -154,6 +154,22 @@ async def remove_room_member(
         if longest_stay_member:
             room.owner_id = longest_stay_member.user_id
 
+    system = db.query(User).filter(User.id == 1).first()
+
+    new_message = Message(
+        content= f"{current_user.username}が退室しました",
+        room_id=room_id,
+        sender_id=1,
+        sent_at=datetime.now(),
+        signature_writer_name="emeth",
+        message_type ="system",  # Adjust as needed
+        signature_avatar_url= "s128_f_event_79_1bg.png" ,  # Adjust as needed
+        signature_trip="(system)",  # Adjust as needed
+        signature_karma=str(777),  # Convert to string if necessary
+        signature_profile=system.profile,
+    )
+
+    db.add(new_message)
     db.commit()
     return {"message": "Member removed from the room successfully"}
 
@@ -183,6 +199,23 @@ async def add_room_member(
     # 新しいメンバーを部屋に追加
     new_member = RoomMember(room_id=room_id, user_id=current_user.id, joined_at=func.now())
     db.add(new_member)
+
+    system = db.query(User).filter(User.id == 1).first()
+
+    new_message = Message(
+        content= f"{current_user.username}が入室しました",
+        room_id=room_id,
+        sender_id=1,
+        sent_at=datetime.now(),
+        signature_writer_name="emeth",
+        message_type ="system",  # Adjust as needed
+        signature_avatar_url= "s128_f_event_79_1bg.png" ,  # Adjust as needed
+        signature_trip="(system)",  # Adjust as needed
+        signature_karma=str(777),  # Convert to string if necessary
+        signature_profile=system.profile,
+    )
+
+    db.add(new_message)
     db.commit()
     return {"message": "You have successfully joined the room"}
 

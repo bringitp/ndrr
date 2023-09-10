@@ -190,6 +190,7 @@ INSERT INTO avatar_list (avatar_url)
 
 INSERT INTO users (username, sub,  allowed_name_changes ,life,avatar_id, profile ,trip,  penalty_points,karma, spam_activity_score)
 VALUES
+    ('emeth', '5903a2f3-de8b-4eaf-8f99-50c065ef9722', 3,10,'1','...( ˘ω˘)ｽﾔｧ','trip123',0, 50, 3),
     ('user0', '3151fcfa-0156-4b89-bf31-cec3d09baa11', 3,10,'1','致し方なくPythonを書いています。よろしくおねがいします。','trip123',0, 50, 3),
     ('user1', 'ff66cf0b-dc0b-499c-9cb5-e65d4b4fcd07', 10, 3, '2', '暑くて寝れるかな','trip456',0, 75, 1),
     ('user2', '34b42801-f81c-4a44-9e11-05f8c359a6ea', 10, 3, '3',  'エペ募集','trip789',0, 90, 5),
@@ -237,7 +238,6 @@ VALUES
 -- room_members テーブルのダミーデータ
 INSERT INTO room_members (room_id, user_id, joined_at)
 VALUES
-    (1, 1, '2023-08-21 12:00:00'),
     (1, 2, '2023-08-21 13:00:00'),
     (1, 3, '2023-08-21 14:00:00'),
     (2, 4, '2023-08-21 15:00:00'),
@@ -248,23 +248,29 @@ VALUES
     (5, 9, '2023-08-21 20:00:00'),
     (5, 10, '2023-08-21 21:00:00');
 
+
+-- システムメッセージの挿入
+INSERT INTO messages (room_id, sender_id, content, message_type, toxicity, sentiment, constructive, incendiary, foxy, fluence, signature_writer_name ,signature_avatar_url,signature_trip,signature_karma,signature_profile,sent_at)
+VALUES
+  (1, 1, '部屋ができました', 'system', 0.1, 0.5, 0.8, NULL, NULL, 0.6,"emeth", "s128_f_event_79_1bg.png","triptest",50,"大神の御粮沾れて黴生えき すなわち酒を醸さしめて 庭酒を献りて宴しき",'2023-09-08 08:00:00');
+
 -- 一般メッセージの挿入
 INSERT INTO messages (room_id, sender_id, content, message_type, toxicity, sentiment, constructive, incendiary, foxy, fluence, signature_writer_name ,signature_avatar_url,signature_trip,signature_karma,signature_profile,sent_at)
 VALUES
-  (1, 1, 'こんにちは、みんな！', 'public', 0.1, 0.5, 0.8, NULL, NULL, 0.6,"user0", "FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 09:00:00'),
-  (1, 1, 'おはようございます！', 'public', 0.2, 0.6, 0.7, NULL, NULL, 0.4,"user0", "FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 09:05:00'),
-  (1, 2, '新しいプロジェクトの進捗状況はどうですか？', 'public', 0.3, 0.4, 0.6, NULL, NULL, 0.5,"user1","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"エペ募集",'2023-09-08 10:00:00');
+  (1, 2, 'こんにちは、みんな！', 'public', 0.1, 0.5, 0.8, NULL, NULL, 0.6,"user0", "FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 09:00:00'),
+  (1, 3, 'おはようございます！', 'public', 0.2, 0.6, 0.7, NULL, NULL, 0.4,"user0", "FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 09:05:00'),
+  (1, 3, '新しいプロジェクトの進捗状況はどうですか？', 'public', 0.3, 0.4, 0.6, NULL, NULL, 0.5,"user1","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"エペ募集",'2023-09-08 10:00:00');
   -- 他の一般メッセージの挿入 ...
 
 -- プライベートメッセージの挿入
 INSERT INTO messages (room_id, sender_id, receiver_id, content, message_type, toxicity, sentiment, constructive, incendiary, foxy, fluence, signature_writer_name ,signature_recipient_name,signature_avatar_url,signature_trip,signature_karma,signature_profile,sent_at)
 VALUES
-  (1, 1, 2, '秘密の話ですが...', 'private', 0.7, 0.2, 0.1, NULL, NULL, 0.8, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 11:30:00'),
-  (1, 2, 1, '了解しました。', 'private', 0.1, 0.8, 0.9, NULL, NULL, 0.3, "user1","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 11:35:00'),
-  (1, 2, 1, '今晩の計画を話しましょう。', 'private', 0.2, 0.7, 0.5, NULL, NULL, 0.6, "user1","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 12:00:00'),
-  (1, 3, 1, '新しいプロジェクトの進捗状況はどうですか？', 'private', 0.3, 0.4, 0.6, NULL, NULL, 0.5, "user2","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 12:30:00'),
-  (1, 1, 2, '進捗は順調です。', 'private', 0.1, 0.7, 0.8, NULL, NULL, 0.4, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 12:45:00'),
-  (1, 1, 2, '昼食の計画を立てましょう。', 'private', 0.2, 0.6, 0.5, NULL, NULL, 0.7, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 13:15:00');
+  (1, 2, 3, '秘密の話ですが...', 'private', 0.7, 0.2, 0.1, NULL, NULL, 0.8, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 11:30:00'),
+  (1, 3, 2, '了解しました。', 'private', 0.1, 0.8, 0.9, NULL, NULL, 0.3, "user1","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 11:35:00'),
+  (1, 3, 2, '今晩の計画を話しましょう。', 'private', 0.2, 0.7, 0.5, NULL, NULL, 0.6, "user1","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。", '2023-09-08 12:00:00'),
+  (1, 4, 2, '新しいプロジェクトの進捗状況はどうですか？', 'private', 0.3, 0.4, 0.6, NULL, NULL, 0.5, "user2","user0","FVnDBlXaQAA2vJ_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 12:30:00'),
+  (1, 2, 3, '進捗は順調です。', 'private', 0.1, 0.7, 0.8, NULL, NULL, 0.4, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 12:45:00'),
+  (1, 2, 3, '昼食の計画を立てましょう。', 'private', 0.2, 0.6, 0.5, NULL, NULL, 0.7, "user0","user1","FVnDBlVaUAA7QP_.jpeg","triptest",50,"致し方なくPythonを書いています。よろしくおねがいします。",'2023-09-08 13:15:00');
 
 
 -- blocked_users テーブルのダミーデータ
