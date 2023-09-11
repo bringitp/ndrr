@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Header, HTTPException, status, APIRouter, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
-from chat_app.app.database.models import Message, Room, User,RoomMember
+from chat_app.app.database.models import Message, Room, User,RoomMember,AvatarList
 from typing import Dict, Any
 from datetime import datetime, timedelta
 import requests
@@ -155,16 +155,17 @@ async def remove_room_member(
             room.owner_id = longest_stay_member.user_id
 
     system = db.query(User).filter(User.id == 1).first()
+    avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
 
     new_message = Message(
         content= f"{current_user.username}が退室しました",
         room_id=room_id,
         sender_id=1,
         sent_at=datetime.now(),
-        signature_writer_name="emeth",
+        signature_writer_name=system.username,
         message_type ="system",  # Adjust as needed
-        signature_avatar_url= "s128_f_event_79_1bg.png" ,  # Adjust as needed
-        signature_trip="(system)",  # Adjust as needed
+        signature_avatar_url= avatar_url  ,  # Adjust as needed
+        signature_trip="(emeth)",  # Adjust as needed
         signature_karma=str(777),  # Convert to string if necessary
         signature_profile=system.profile,
     )
@@ -201,16 +202,17 @@ async def add_room_member(
     db.add(new_member)
 
     system = db.query(User).filter(User.id == 1).first()
+    avatar_url = db.query(AvatarList.avatar_url).filter_by(avatar_id=current_user.avatar_id).scalar()
 
     new_message = Message(
         content= f"{current_user.username}が入室しました",
         room_id=room_id,
         sender_id=1,
         sent_at=datetime.now(),
-        signature_writer_name="emeth",
+        signature_writer_name=system.username,
         message_type ="system",  # Adjust as needed
-        signature_avatar_url= "s128_f_event_79_1bg.png" ,  # Adjust as needed
-        signature_trip="(system)",  # Adjust as needed
+        signature_avatar_url= avatar_url  ,  # Adjust as needed
+        signature_trip="(emeth)",  # Adjust as needed
         signature_karma=str(777),  # Convert to string if necessary
         signature_profile=system.profile,
     )
