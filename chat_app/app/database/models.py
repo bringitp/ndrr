@@ -46,7 +46,8 @@ class Room(Base):
     over_karma_limit = Column(Integer, nullable=True, default=0)
     under_karma_limit = Column(Integer, nullable=True, default=0)
     lux = Column(Integer, nullable=True, default=0)
-
+    room_type = Column(Enum("public", "private"), nullable=False, default="public") 
+    room_password = Column(String(50), nullable=True, default="") 
     status = Column(Enum("active", "inactive"), nullable=False, default="active")
     last_activity = Column(TIMESTAMP, nullable=False)
     owner = relationship("User", back_populates="owned_rooms", foreign_keys=[owner_id])
