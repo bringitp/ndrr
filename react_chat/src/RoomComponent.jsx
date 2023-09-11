@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Typography, Button, CircularProgress, Container, Paper, TextareaAutosize } from "@mui/material";
 import RoomInfo from "./RoomInfo";
 import UserProfilePopup from "./UserProfilePopup";
@@ -246,99 +246,96 @@ const handleDepart = async () => {
                       {jsonData.messages.map((message) => {
 
                         if (message.message_type === 'system') {
-                        return (
-                        <div
-                          key={message.id}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            marginBottom: '10px',
-                            width: '98%',
-                            borderRadius: '8px',
-                            backgroundColor: '#dbd0d0',
-                          }}
-                        >
-<img
-  src={
-    process.env.NODE_ENV === 'development'
-      ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
-      : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
-  }
-  alt="Icon"
-  width="30"
-  height="30"
-  style={{ borderRadius: '75%', marginLeft: '17px' }}
-  onClick={(event) => handleUserIconMouseDown(message.sender, event)}
-  onMouseUp={() => handleUserIconMouseUp(message.sender)}
-/>
-                          <div
-                            style={{
-                              marginLeft: '30px',
-                              backgroundColor: '#dbd0d0',
-                              borderRadius: '8px',
-                              paddingRight: '9px',
-                              marginBottom: '0px',
-                              width: 'calc(100%)',
-                            }}
-                          >
 
-                            <div
-                              style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingRight: '9px',
-                                margin: '0px',
-                              }}
-                            >
-                              <Typography variant="subtitle1" onClick={(event) => handleNameMouseDown(message.sender, event)} style={{ fontSize: '85%',whiteSpace: 'pre-wrap' }}>
-                                <strong>{message.sender.username}</strong>
-                                <Typography variant="caption">
-                                  {message.is_private ? ` (${message.sender.trip})` : ' '}
-                                </Typography>
-                                <strong>{message.message_type === 'private' ? ` ⇒ ${message.sender.receiver_username} ` : ''}</strong>
+return (
+  <div
+    key={message.id}
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: '10px',
+      width: '98%',
+      borderRadius: '8px',
+      backgroundColor: '#dbd0d0',
+    }}
+  >
+    <img
+      src={
+        process.env.NODE_ENV === 'development'
+          ? `http://localhost:7777/static/img/${message.sender.avatar_url}`
+          : `https://ron-the-rocker.net/ndrr/api/static/img/${message.sender.avatar_url}`
+      }
+      alt="Icon"
+      width="30"
+      height="30"
+      style={{ borderRadius: '75%', marginLeft: '17px' }}
+      onClick={(event) => handleUserIconMouseDown(message.sender, event)}
+      onMouseUp={() => handleUserIconMouseUp(message.sender)}
+    />
+    <div
+      style={{
+        marginLeft: '30px',
+        backgroundColor: '#dbd0d0',
+        borderRadius: '8px',
+        paddingRight: '9px',
+        marginBottom: '0px',
+        width: 'calc(100%)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingRight: '9px',
+          margin: '0px',
+        }}
+      >
+        <Typography variant="subtitle1" onClick={(event) => handleNameMouseDown(message.sender, event)} style={{ fontSize: '85%', whiteSpace: 'pre-wrap' }}>
+          <strong>{message.sender.username}</strong>
+          <Typography variant="caption">
+            {message.is_private ? ` (${message.sender.trip})` : ' '}
+          </Typography>
+          <strong>{message.message_type === 'private' ? ` ⇒ ${message.sender.receiver_username} ` : ''}</strong>
+          <Typography variant="caption">
+            {message.message_type === 'private' ? ' ' : '(system)'}
+          </Typography>
+        </Typography>
+        <Typography variant="caption" onClick={(event) => handleLabelTailMouseDown(message.sender, event)}>
+          {(() => {
+            const sentAt = new Date(message.sent_at);
+            const iso8601String = sentAt.toISOString();
+            const formattedString = iso8601String.replace('T', ' ').replace('.000Z', '');
+            const date = sentAt.toLocaleDateString([], { day: '2-digit' });
+            const time = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-                                <Typography variant="caption">
-                                  {message.message_type === 'private'  ? ' ' : `(system)`}
-                                </Typography>
-                              </Typography>
+            if (window.innerWidth > 1100) {
+              return `✪ ${formattedString}`;
+            } else {
+              return `✪ ${date}${time}`;
+            }
+          })()}
+        </Typography>
+      </div>
+      <Typography variant="body1" style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingTop: '0px',
+        paddingBottom: '0px',
+        fontSize: '85%',
+      }} dangerouslySetInnerHTML={{ __html: message.content }} />
+      {selectedUser && isSelectedName && (
+        <UserProfilePopup user={selectedUser} onClose={handleIconMouseUP} anchorEl={messageContainerRef.current} />
+      )}
+    </div>
+  </div>
+);
 
-                              <Typography variant="caption" onClick={(event) => handleLabelTailMouseDown(message.sender, event)}>
-                                {(() => {
-                                  const sentAt = new Date(message.sent_at);
 
-                                  const iso8601String = sentAt.toISOString();
-                                  const formattedString = iso8601String.replace('T', ' ').replace('.000Z', '');
-                                  const date = sentAt.toLocaleDateString([], { day: '2-digit' });
-                                  const time = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                                  if (window.innerWidth > 1100) {
-                                    return `✪ ${formattedString}`;
-                                  } else {
-                                    return `✪ ${date}${time}`;
-                                  }
-                                })()}
-                              </Typography>
-                            </div>
-
-
-                            <Typography variant="body1"                               style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                paddingTop: '0px',
-                                paddingBottom: '0px',
-                                fontSize: '85%'
-                              }}
-                               dangerouslySetInnerHTML={{ __html: message.content }} />
-                            {selectedUser && isSelectedName && (
-                              <UserProfilePopup user={selectedUser} onClose={handleIconMouseUP} anchorEl={messageContainerRef.current} />
-                            )}
-                          </div>
-                        </div>
-                      );
                    }
+
 
 
                         if (message.message_type === 'private' || message.message_type === 'public') {
@@ -386,7 +383,7 @@ return (
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-           marginLeft: '0px',
+          marginLeft: '0px',
         }}
       >
         <Typography variant="subtitle1" onClick={(event) => handleNameMouseDown(message.sender, event)} style={{ whiteSpace: 'pre-wrap' }}>
@@ -395,33 +392,34 @@ return (
           <strong style={{ fontSize: '85%' }}>{message.message_type === 'private' ? ` ⇒ ${message.sender.receiver_username} ` : ''}</strong>
         </Typography>
       </div>
-      <Typography variant="body1" style={{ fontSize: '92%' ,  marginLeft: '9px',}} dangerouslySetInnerHTML={{ __html: message.content }} />
+      <Typography variant="body1" style={{ fontSize: '92%', marginLeft: '9px' }} dangerouslySetInnerHTML={{ __html: message.content }} />
       {selectedUser && isSelectedName && (
         <UserProfilePopup user={selectedUser} onClose={handleIconMouseUP} anchorEl={messageContainerRef.current} />
       )}
 
-<div style={{ textAlign: 'right', width: '98%', boxSizing: 'border-box' }}>
-  <Typography variant="caption">
-    {(() => {
-      const sentAt = new Date(message.sent_at);
+      <div style={{ textAlign: 'right', width: '98%', boxSizing: 'border-box' }}>
+        <Typography variant="caption">
+          {(() => {
+            const sentAt = new Date(message.sent_at);
 
-      const iso8601String = sentAt.toISOString();
-      const formattedString = iso8601String.replace('T', ' ').replace('.000Z', '');
-      const date = sentAt.toLocaleDateString([], { day: '2-digit' });
-      const time = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const iso8601String = sentAt.toISOString();
+            const formattedString = iso8601String.replace('T', ' ').replace('.000Z', '');
+            const date = sentAt.toLocaleDateString([], { day: '2-digit' });
+            const time = sentAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-      if (window.innerWidth > 1100) {
-        return `(${message.sender.trip}) - ${formattedString}`;
-      } else {
-        return `(${message.sender.trip}) - ${formattedString}`;
-      }
-    })()}
-  </Typography>
-
-</div>
+            if (window.innerWidth > 1100) {
+              return `(${message.sender.trip}) - ${formattedString}`;
+            } else {
+              return `(${message.sender.trip}) - ${formattedString}`;
+            }
+          })()}
+        </Typography>
+      </div>
     </div>
   </div>
 );
+
+
                    }
                    return null;
 
@@ -535,7 +533,10 @@ return (
         <CircularProgress />
       )}
     </Container>
-  );
+  )
+
+
+           ;
 }
 
 export default RoomComponent;
