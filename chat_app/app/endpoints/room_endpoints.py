@@ -45,6 +45,64 @@ def get_db():
 def get_current_user(Authorization: str = Header(None), db: Session = Depends(get_db)) -> User:
     return skeltone_get_current_user(Authorization,db,public_key)
 
+
+@router.post("/room/create", response_model=Dict[str, Any])
+async def create_room(
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    data = await request.json()
+    # Create a new room
+    new_room = Room(
+        name=data.get("name"),
+        label=data.get("label"),
+        owner_id=current_user.id,
+        max_capacity=data.get("max_capacity", 20),
+        over_karma_limit=data.get("over_karma_limit", 0),
+        under_karma_limit=data.get("under_karma_limit", 0),
+        lux=data.get("lux", 0),
+        status="active",
+        last_activity=datetime.now(),
+    )
+
+    db.add(new_room)
+    db.commit()
+
+    response_data = {
+        "message": "Room created successfully",
+        "room_id": new_room.id,
+    }
+    return response_data
+
+
+@router.delete("/room/{room_id}/destroy", response_model=Dict[str, Any])
+async def destroy_room(
+    room_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # ルームをデータベースから取得
+    room = db.query(Room).filter(Room.id == room_id).first()
+    
+    # ルームが存在しない場合、404エラーを返す
+    if not room:
+        raise HTTPException(status_code=404, detail="Room not found")
+
+    # ユーザーがルームのオーナーでない場合、403エラーを返す
+    if room.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="You are not the owner of this room")
+
+    # ルームに参加している全てのメンバーを退出させる
+    db.query(RoomMember).filter(RoomMember.room_id == room_id).delete()
+    
+    # ルームを削除
+    db.delete(room)
+    db.commit()
+
+    return {"message": "Room deleted successfully"}
+
+
 @router.post("/room/{room_id}", response_model=Dict[str, Any])
 async def create_room_message(
     room_id: int, 

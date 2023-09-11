@@ -38,7 +38,7 @@ class BlockedUser(Base):
 class Room(Base):
     __tablename__ = "rooms"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(50), nullable=False)
     label = Column(String(300), nullable=True)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -83,7 +83,9 @@ class Message(Base):
     receiver_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     sent_at = Column(TIMESTAMP, nullable=False, index=True)
     content = Column(Text, nullable=False)
-    message_type = Column(Enum("public", "private","system"), nullable=False)  # メッセージタイプを区別
+    message_type = Column(
+        Enum("public", "private", "system"), nullable=False
+    )  # メッセージタイプを区別
 
     toxicity = Column(Float(precision=6), nullable=True)
     sentiment = Column(Float(precision=6), nullable=True)
@@ -247,7 +249,7 @@ class SpamMessage(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     spam_type = Column(Integer, nullable=False)
     score = Column(Float(precision=6), nullable=True)
-    message = Column(Text, nullable=False)
+    content = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False)
 
     user = relationship("User", back_populates="spam_messages")
@@ -261,7 +263,7 @@ class SuspiciousMessage(Base):
     spam_type = Column(Integer, nullable=False)
     score = Column(Float(precision=6), nullable=True)
 
-    message = Column(Text, nullable=False)
+    content  = Column(Text, nullable=False)
     timestamp = Column(TIMESTAMP, nullable=False, server_default=func.now())
 
     user = relationship("User", back_populates="suspicious_messages")

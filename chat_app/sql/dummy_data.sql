@@ -330,7 +330,7 @@ VALUES
 
 
 -- spam_messages テーブルのダミーデータ
-INSERT INTO spam_messages (user_id, spam_type, message, timestamp)
+INSERT INTO spam_messages (user_id, spam_type, content, timestamp)
 VALUES
     (1, 1, 'これはスパムメッセージです。', '2023-08-21 12:00:00'),
     (2, 2, 'お得な情報があります。', '2023-08-21 13:00:00'),
@@ -344,7 +344,7 @@ VALUES
     (10, 3, 'プロダクトの詳細はこちら。', '2023-08-21 21:00:00');
 
 
-INSERT INTO suspicious_messages (user_id,spam_type, message, timestamp)
+INSERT INTO suspicious_messages (user_id,spam_type, content, timestamp)
 VALUES
     (1, 1,'このメッセージは疑わしいです。', '2023-08-21 12:00:00'),
     (2, 2,'怪しい内容が含まれています。', '2023-08-21 13:00:00');
