@@ -67,6 +67,8 @@ async def create_room(
         name=data.get("name"),
         label=data.get("label"),
         owner_id=current_user.id,
+        room_type=data.get("room_type", "public"),
+        room_password=data.get("room_password", ""),
         max_capacity=data.get("max_capacity", 20),
         over_karma_limit=data.get("over_karma_limit", 0),
         under_karma_limit=data.get("under_karma_limit", 0),
@@ -74,6 +76,7 @@ async def create_room(
         status="active",
         last_activity=datetime.now(),
     )
+
 
     db.add(new_room)
     db.commit()
@@ -246,7 +249,6 @@ async def remove_room_member(
         else:
             # オーナーである自分以外のメンバーがいない場合は、オーナーを削除
             room.owner_id = None
-        print(longest_stay_member.user_id)
         if longest_stay_member:
             room.owner_id = longest_stay_member.user_id
 
@@ -283,10 +285,15 @@ async def add_room_member(
     db: Session = Depends(get_db),
 ):
     data = await request.json()
-    # ユーザーが部屋のオーナーかどうかを確認
+    # 部屋が存在するか確認
     room = db.query(Room).filter(Room.id == room_id).first()
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
+
+    if not room.room_type == "private":
+        room_password=data.get("room_password"),
+        if room.room_password != password :
+            raise HTTPException(status_code=400, detail="Room Password incorect")
 
     # Check if the user is already a member of the room
     existing_member = (
@@ -295,9 +302,11 @@ async def add_room_member(
         .first()
     )
     if existing_member:
-        raise HTTPException(
-            status_code=400, detail="You are already a member of this room"
-        )
+        # すでに部屋にいる場合。退出処理がなんらかの原因でできていない
+        #raise HTTPException(
+        #    status_code=400, detail="You are already a member of this room"
+        #)
+        return {"message": "You have successfully joined the room"}
 
     # 部屋の定員を確認
     if len(room.room_members) >= room.max_capacity:

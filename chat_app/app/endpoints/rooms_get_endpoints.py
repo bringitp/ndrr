@@ -41,6 +41,7 @@ def get_rooms(skip: int = 0, db: Session = Depends(get_db)):
 
         room_data = {
             "id": room.id,
+            "room_type" : room.room_type ,
             "name": escape_html(room.name),
             "room_member_count": get_active_room_member_count(room.id, db),
             "label": escape_html(room.label),

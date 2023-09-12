@@ -134,6 +134,8 @@ const RoomList = () => {
                   alignItems: 'center', // 縦方向の中央揃え
                 }}
               >
+
+               <strong style={{ fontSize: '100%' }}>{room.room_type === 'private' ? ' 🔒 ' : ''}</strong>
                 {room.name} : 
            <Chip
               label={room.owner_username}

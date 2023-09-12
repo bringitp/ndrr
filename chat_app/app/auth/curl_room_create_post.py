@@ -10,9 +10,10 @@ headers = {
 data = {
     "name": "New Room Name",
     "label": "Description of the new room",
-    "max_capacity": 30,
-    "over_karma_limit": 5,
-    "under_karma_limit": 5,
+    "password": "testtest",
+    "room_type": "private",
+    "over_karma_limit": 0,
+    "under_karma_limit": 0,
     "lux": 10
 }
 
