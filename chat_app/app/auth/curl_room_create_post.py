@@ -2,10 +2,7 @@ import requests
 from config import TOKEN  # Import your token from the config.py file
 
 url = "http://localhost:7777/room/create"
-headers = {
-    "Authorization": f"Bearer {TOKEN}",
-    "Content-Type": "application/json"
-}
+headers = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
 
 data = {
     "name": "New Room Name",
@@ -14,7 +11,7 @@ data = {
     "room_type": "private",
     "over_karma_limit": 0,
     "under_karma_limit": 0,
-    "lux": 10
+    "lux": 10,
 }
 
 response = requests.post(url, json=data, headers=headers)

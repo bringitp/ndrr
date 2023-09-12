@@ -249,6 +249,12 @@ async def remove_room_member(
         else:
             # オーナーである自分以外のメンバーがいない場合は、オーナーを削除
             room.owner_id = None
+            # ルームを削除
+            db.delete(room)
+            db.commit()
+            return {"message": "Room deleted successfully"}
+                    # その後部屋を削除
+
         if longest_stay_member:
             room.owner_id = longest_stay_member.user_id
 
@@ -290,9 +296,9 @@ async def add_room_member(
     if not room:
         raise HTTPException(status_code=404, detail="Room not found")
 
-    if not room.room_type == "private":
+    if  room.room_type == "private":
         room_password=data.get("room_password"),
-        if room.room_password != password :
+        if room.room_password != room_password :
             raise HTTPException(status_code=400, detail="Room Password incorect")
 
     # Check if the user is already a member of the room
