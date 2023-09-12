@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect} from 'react';
 import {
   Card,
   CardContent,
@@ -15,91 +15,116 @@ import {
   DialogActions,
 } from '@mui/material';
 import NaviBar from './NaviBar';
-import { ReactKeycloakProvider, useKeycloak } from "@react-keycloak/web";
-import Keycloak from "keycloak-js";
+import {useKeycloak } from "@react-keycloak/web";
 
 const RoomList = () => {
   const [rooms, setRooms] = useState([]);
-  const [navBarWidth, setNavBarWidth] = useState(null);
-  const navBarRef = useRef(null);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // ダイアログの開閉状態
   const [passwordInput, setPasswordInput] = useState(""); // パスワード入力
   const [selectedRoom, setSelectedRoom] = useState(null); // 新しく追加
 
+const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
+const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
   // ダイアログを開く関数
   const openPasswordModal = (room) => {
     setSelectedRoom(room);
   };
 
-  // パスワードを送信する関数
-  const handlePasswordSubmit = async () => {
-    try {
-      const data = {
-        member_id: 1,
-        password: passwordInput,
-      };
-
-      const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
-        ? `https://ron-the-rocker.net/ndrr/api/room/${selectedRoom.id}/join_me`
-        : `http://localhost:7777/room/${selectedRoom.id}/join_me`;
-
-      const response = await fetch(apiUrl, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${keycloak.token}`,
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        const jumpUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
-          ? `https://ron-the-rocker.net/room/${selectedRoom.id}`
-          : `http://localhost:3000/room/${selectedRoom.id}`;
-        window.location.href = jumpUrl;
-      } else {
-        console.error('Error joining the room:', response.status);
-      }
-
-      // パスワード送信後、ダイアログを閉じる
-      setIsPasswordModalOpen(false);
-      setPasswordInput("");
-    } catch (error) {
-      console.error('Error joining the room:', error);
-      alert('Error joining the room: ' + error);
-    }
-  };
-
-
-
-
 function PasswordModal(props) {
   const { room, onClose, onPasswordSubmit } = props;
+  const [passwordInput, setPasswordInput] = useState(""); // パスワード入力の状態を管理
+
+  // パスワードフィールドの値が変更されたときのハンドラ
+  const handlePasswordInputChange = (event) => {
+    setPasswordInput(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    onPasswordSubmit({ passwordInput }); // passwordInput をオブジェクトとして渡す
+  };
 
   return (
-    <Dialog open={true} onClose={onClose} sx={{ backgroundColor: '#87CEFF' }}>
+    <Dialog open={true} onClose={onClose} sx={{ backgroundColor: '#87CEFF' }}>　
       <DialogTitle>Enter Password</DialogTitle>
       <DialogContent>
         <TextField
           label="Password"
           type="password"
-          value={room.passwordInput}
-          // onChange={(e) => onPasswordSubmit(e.target.value)}
+          value={passwordInput} // パスワード入力の値を表示
+          onChange={handlePasswordInputChange} // 値が変更されたときのハンドラを設定
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">
           Cancel
         </Button>
-        <Button onClick={onPasswordSubmit} color="primary">
+        <Button onClick={handleSubmit} color="primary">
           Submit
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );}
+
+function PasswordIncorrectModal() {
+  return (
+    <Dialog open={isPasswordIncorrect} onClose={() => setIsPasswordIncorrect(false)} sx={{ backgroundColor: '#87CEFF' }}>
+      <DialogTitle>Password Incorrect</DialogTitle>
+      <DialogContent>
+        <Typography>{passwordErrorMessage}</Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setIsPasswordIncorrect(false)} color="primary">
+          OK
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
+
+
+  // パスワードを送信する関数
+const handlePasswordSubmit = async ({ passwordInput }) => {
+  try {
+    const data = {
+      room_password: passwordInput,
+    };
+
+    const apiUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
+      ? `https://ron-the-rocker.net/ndrr/api/room/${selectedRoom.id}/join_me`
+      : `http://localhost:7777/room/${selectedRoom.id}/join_me`;
+
+    const response = await fetch(apiUrl, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${keycloak.token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+      const jumpUrl = window.location.href.startsWith('https://ron-the-rocker.net/')
+        ? `https://ron-the-rocker.net/room/${selectedRoom.id}`
+        : `http://localhost:3000/room/${selectedRoom.id}`;
+      window.location.href = jumpUrl;
+    } else if (response.status === 401) {
+      // パスワードが異なる場合の処理
+      setIsPasswordIncorrect(true);
+      setPasswordErrorMessage("Password is incorrect.");
+    } else {
+      console.error('Error joining the room:', response.status);
+    }
+
+    // パスワード送信後、ダイアログを閉じる
+    setIsPasswordModalOpen(false);
+    setPasswordInput("");
+  } catch (error) {
+    console.error('Error joining the room:', error);
+    alert('Error joining the room: ' + error);
+  }
+};
 
   const apiUrl = window.location.href.startsWith(
     'https://ron-the-rocker.net/'
@@ -147,8 +172,6 @@ function PasswordModal(props) {
 
   // Define the function to handle joining a room
   const handleJoin = async (roomId) => {
- 
-
     try {
       // Data object to send in the request
       const data = {
@@ -320,6 +343,18 @@ function PasswordModal(props) {
                 room={selectedRoom} // 選択された部屋を渡す
               />
             )}
+
+            {isPasswordModalOpen && (
+              <PasswordModal
+                open={isPasswordModalOpen}
+                onClose={() => setIsPasswordModalOpen(false)}
+                onPasswordSubmit={handlePasswordSubmit}
+                room={selectedRoom}
+              />
+            )}
+
+            <PasswordIncorrectModal />
+
             </Box>
           </Card>
         </Grid>
@@ -327,5 +362,8 @@ function PasswordModal(props) {
     </Grid>
   );
 };
+
+
+
 
 export default RoomList;

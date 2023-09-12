@@ -248,10 +248,10 @@ async def remove_room_member(
             room.owner_id = longest_stay_member.user_id
         else:
             # オーナーである自分以外のメンバーがいない場合は、オーナーを削除
-            room.owner_id = None
             # ルームを削除
             db.delete(room)
-            db.commit()
+            # TODO 
+            # db.commit()
             return {"message": "Room deleted successfully"}
                     # その後部屋を削除
 
@@ -282,7 +282,6 @@ async def remove_room_member(
     db.commit()
     return {"message": "Member removed from the room successfully"}
 
-
 @router.put("/room/{room_id}/join_me", response_model=dict)
 async def add_room_member(
     room_id: int,
@@ -297,9 +296,10 @@ async def add_room_member(
         raise HTTPException(status_code=404, detail="Room not found")
 
     if  room.room_type == "private":
-        room_password=data.get("room_password"),
+        room_password=str(data.get("room_password",""))
+        print (f"  room.room_password :{room.room_password} room_password : {room_password}")
         if room.room_password != room_password :
-            raise HTTPException(status_code=400, detail="Room Password incorect")
+            raise HTTPException(status_code=401, detail="Room Password incorect") ## react のエラーメッセージボックスと連動あり
 
     # Check if the user is already a member of the room
     existing_member = (

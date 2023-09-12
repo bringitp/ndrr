@@ -7,7 +7,7 @@ headers = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json
 data = {
     "name": "New Room Name",
     "label": "Description of the new room",
-    "password": "testtest",
+    "room_password": "t",
     "room_type": "private",
     "over_karma_limit": 0,
     "under_karma_limit": 0,
