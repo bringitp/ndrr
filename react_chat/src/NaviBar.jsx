@@ -1,40 +1,41 @@
-// src/NaviBar.js
-
-import React, { useState, useEffect, useRef } from 'react';
-import { Drawer, List, ListItem, ListItemText, Divider } from '@mui/material';
+import React, { useState } from 'react';
+import { Drawer, List, ListItem, ListItemText, Divider, Button } from '@mui/material';
 import IconsGallery from './IconsGallery';
 import UserProfileModal from './UserProfileModal';
+import { useKeycloak } from '@react-keycloak/web'; // useKeycloak フックをインポート
 
 const NaviBar = () => {
-  const dummyData = ['🏠', '⚙', '🔌']; // ダミーデータ
+  const dummyData = ['🏠', '⚙', '🔌'];
   const [isIconsGalleryModalOpen, setIconsGalleryModalOpen] = useState(false);
   const [isIconsUserProfileModalOpen, setIconsUserProfileModalOpen] = useState(false);
+  const { keycloak, initialized } = useKeycloak(); // useKeycloak フックを使用
 
-  // ボタンがクリックされたときにモーダルを開く関数
   const handleUserProfileModalOpenModal = () => {
     setIconsUserProfileModalOpen(true);
   };
 
-  // モーダルが閉じられたときに呼び出される関数
   const handleUserProfileModalCloseModal = () => {
     setIconsUserProfileModalOpen(false);
   };
 
-  // ボタンがクリックされたときにモーダルを開く関数
   const handleIconGalleryOpenModal = () => {
     setIconsGalleryModalOpen(true);
   };
 
-  // モーダルが閉じられたときに呼び出される関数
   const handleIconGalleryCloseModal = () => {
     setIconsGalleryModalOpen(false);
+  };
+
+const handleLogout = () => {
+    keycloak.logout(); // Keycloakからログアウト
   };
 
   return (
     <div>
       <Drawer variant="permanent" anchor="left">
-   
         <List>
+
+
       {/* モーダルをアイコンがクリックされたときに表示 */}
       {isIconsGalleryModalOpen && (
         <IconsGallery onClose={handleIconGalleryCloseModal} />
@@ -44,27 +45,41 @@ const NaviBar = () => {
         <UserProfileModal onClose={handleUserProfileModalCloseModal} />
       )}
 
-          {dummyData.map((item, index) => (
-            <ListItem
-              button
-              key={index}
-              onClick={() => {
-                if (item === '🏠') {
-                  handleUserProfileModalOpenModal();
-                }
-                if (item === '⚙') {
-                  handleIconGalleryOpenModal();
-                }
-              }}
-            >
-              <ListItemText primary={item} />
-            </ListItem>
-          ))}
+        
+          {initialized && keycloak.authenticated ? ( // Keycloak が初期化されており、ユーザーが認証済みかどうかをチェック
+
+
+
+            dummyData.map((item, index) => (
+              <ListItem
+                button
+                key={index}
+                onClick={() => {
+                  if (item === '🏠') {
+                    handleUserProfileModalOpenModal();
+                  }
+                  if (item === '⚙') {
+                    handleIconGalleryOpenModal();
+                  }
+                  if (item === '🔌') {
+                     handleLogout(); // 🔌をクリックしたらログアウト
+                  }
+                }}
+              >
+                <ListItemText primary={item} />
+              </ListItem>
+            ))
+          ) : (
+<Button
+  onClick={() => keycloak.login()}
+  style={{ width: '15px', fontSize: '10px' }} // フォントサイズを大きくするスタイルを設定
+>
+⚡ログイン
+</Button>
+          )}
         </List>
         <Divider />
       </Drawer>
-
-
     </div>
   );
 };
