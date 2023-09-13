@@ -55,6 +55,32 @@ const UserProfileModal = ({ user, onClose, onSave }) => {
             rows={4}
             margin="normal"
           />
+          {/* 新しいフィールドを追加 */}
+          <TextField
+            label="Trip"
+            name="trip"
+            value={editedUser.trip}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Life"
+            name="life"
+            value={editedUser.life}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Karma"
+            name="karma"
+            value={editedUser.karma}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          {/* 他のフィールドも同様に追加 */}
           <Button variant="contained" color="primary" onClick={handleSave}>
             Save
           </Button>
