@@ -22,9 +22,8 @@ const RoomList = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false); // ダイアログの開閉状態
   const [passwordInput, setPasswordInput] = useState(""); // パスワード入力
   const [selectedRoom, setSelectedRoom] = useState(null); // 新しく追加
-
-const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
-const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
+  const [isPasswordIncorrect, setIsPasswordIncorrect] = useState(false);
+  const [passwordErrorMessage, setPasswordErrorMessage] = useState("");
 
   // ダイアログを開く関数
   const openPasswordModal = (room) => {
@@ -81,8 +80,6 @@ function PasswordIncorrectModal() {
     </Dialog>
   );
 }
-
-
 
   // パスワードを送信する関数
 const handlePasswordSubmit = async ({ passwordInput }) => {

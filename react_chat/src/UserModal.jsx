@@ -128,9 +128,6 @@ function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
           overflowY: 'auto', // Enable vertical scrolling if content overflows
         }}
       >
-        <Typography variant="h6" component="h2" gutterBottom>
-          User Menu
-        </Typography>
         {/* Display the room member data in a table */}
         <TableContainer component={Paper}>
           <Table>

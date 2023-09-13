@@ -55,12 +55,10 @@ class Room(Base):
     messages = relationship("Message", back_populates="room")
     images = relationship("Image", back_populates="room")
 
-
 class AvatarList(Base):
     __tablename__ = "avatar_list"
     avatar_id = Column(Integer, primary_key=True)
     avatar_url = Column(String(255), nullable=False)
-
 
 class UserNGList(Base):
     __tablename__ = "user_ng_lists"
@@ -71,7 +69,6 @@ class UserNGList(Base):
 
     user = relationship("User", back_populates="ng_lists", foreign_keys=[user_id])
     blocked_user = relationship("User", foreign_keys=[blocked_user_id])
-
 
 # avatr_url_signatue
 # signatue

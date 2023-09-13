@@ -2,24 +2,53 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Drawer, List, ListItem, ListItemText, Divider } from '@mui/material';
+import IconsGallery from './IconsGallery';
+
 
 const NaviBar = () => {
   const dummyData = ['🏠', '⚙', '🔌']; // ダミーデータ
-   const navBarRef = useRef(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+
+  // ボタンがクリックされたときにモーダルを開く関数
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  // モーダルが閉じられたときに呼び出される関数
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
-    <div ref={navBarRef}>
-    <Drawer variant="permanent" anchor="left">
-      <List>
-        {dummyData.map((item, index) => (
-          <ListItem button key={index}>
-            <ListItemText primary={item} />
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-    </Drawer>
-     </div>
+    <div>
+      <Drawer variant="permanent" anchor="left">
+   
+
+        <List>
+      {/* モーダルをアイコンがクリックされたときに表示 */}
+      {isModalOpen && (
+        <IconsGallery onClose={handleCloseModal} />
+      )}
+          {dummyData.map((item, index) => (
+            <ListItem
+              button
+              key={index}
+              onClick={() => {
+                if (item === '⚙') {
+                  handleOpenModal();
+                }
+              }}
+            >
+              <ListItemText primary={item} />
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+      </Drawer>
+
+
+    </div>
   );
 };
 

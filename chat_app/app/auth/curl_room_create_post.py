@@ -2,6 +2,7 @@ import requests
 from config import TOKEN  # Import your token from the config.py file
 
 url = "http://localhost:7777/room/create"
+url = "https://ron-the-rocker.net/ndrr/api/room/create"
 headers = {"Authorization": f"Bearer {TOKEN}", "Content-Type": "application/json"}
 
 data = {

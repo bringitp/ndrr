@@ -42,6 +42,8 @@ function App() {
 
 function Home() {
   return <div>Hello  <a href="./room/1">room -1 </a></div>;
+  return <div>Hello  <a href="./rooms">rooms</a></div>;
+
 }
 
 export default App;
