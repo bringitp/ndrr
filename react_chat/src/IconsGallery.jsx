@@ -13,7 +13,7 @@ const IconsGallery = ({ onClose }) => {
                "https://ron-the-rocker.net/"
              )
             ? `https://ron-the-rocker.net/ndrr/api/system/icons`
-            : `http://localhost:7777/room/system/icons`;
+            : `http://localhost:7777/system/icons`;
 
         const response = await fetch(apiUrl);
         const data = await response.json();
@@ -26,7 +26,7 @@ const IconsGallery = ({ onClose }) => {
     fetchIcons();
   }, []);
 
-  const handleCloseModal = () => {
+  const handleIconGalleryCloseModal = () => {
     if (onClose) {
       onClose(); // モーダルを閉じる関数を呼び出す
     }
@@ -41,12 +41,12 @@ const IconsGallery = ({ onClose }) => {
   return (
     <div>
       {/* モーダルの内容 */}
-      <Modal open={true} onClose={handleCloseModal}>
+      <Modal open={true} onClose={handleIconGalleryCloseModal}>
         <Box
           sx={{
             position: 'absolute',
-            width: '380px', // タイルの幅に合わせて調整してください
-            maxHeight: '80vh',
+            width: '300px', //aquos4 
+            maxHeight: '65vh',
             overflowY: 'auto',
             bgcolor: 'background.paper',
             border: '2px solid #000',
