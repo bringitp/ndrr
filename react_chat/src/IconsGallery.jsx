@@ -9,7 +9,13 @@ const IconsGallery = ({ onClose }) => {
   useEffect(() => {
     const fetchIcons = async () => {
       try {
-        const response = await fetch('http://localhost:7777/system/icons');
+             const apiUrl = window.location.href.startsWith(
+               "https://ron-the-rocker.net/"
+             )
+            ? `https://ron-the-rocker.net/ndrr/api/system/icons`
+            : `http://localhost:7777/room/system/icons`;
+
+        const response = await fetch(apiUrl);
         const data = await response.json();
         setIcons(data);
       } catch (error) {
@@ -26,6 +32,12 @@ const IconsGallery = ({ onClose }) => {
     }
   };
 
+  // アイコンをクリックしたときの処理
+  const handleIconClick = (iconId) => {
+    // アイコンのIDを表示する
+    alert(`Icon ID: ${iconId}`);
+  };
+
   return (
     <div>
       {/* モーダルの内容 */}
@@ -33,7 +45,7 @@ const IconsGallery = ({ onClose }) => {
         <Box
           sx={{
             position: 'absolute',
-            width: "90%", // タイルの幅に合わせて調整してください
+            width: '380px', // タイルの幅に合わせて調整してください
             maxHeight: '80vh',
             overflowY: 'auto',
             bgcolor: 'background.paper',
@@ -47,8 +59,8 @@ const IconsGallery = ({ onClose }) => {
         >
           <Grid container spacing={2}>
             {Object.keys(icons).map((iconId) => (
-              <Grid item xs={3} key={iconId}> {/* 1行に4つのアイコンを表示 */}
-                <Paper elevation={3}>
+              <Grid item xs={3} key={iconId}>
+                <Paper elevation={3} onClick={() => handleIconClick(iconId)}>
                   <img
                     src={
                       process.env.NODE_ENV === 'development'
