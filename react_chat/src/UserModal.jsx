@@ -27,8 +27,8 @@ function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
     const apiUrl = window.location.href.startsWith(
       "https://ron-the-rocker.net/"
     )
-      ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
-      : `http://localhost:7777/users/ng-list`;
+      ? `https://ron-the-rocker.net/ndrr/api/user/ng-list`
+      : `http://localhost:7777/user/ng-list`;
 
     const data = {
       "blocked_user_id": userId,
@@ -67,8 +67,8 @@ function UserModal({ isUserModalOpen, handleModalClose, token ,jsonData}) {
     const apiUrl = window.location.href.startsWith(
       "https://ron-the-rocker.net/"
     )
-      ? `https://ron-the-rocker.net/ndrr/api/users/ng-list`
-      : `http://localhost:7777/users/ng-list`;
+      ? `https://ron-the-rocker.net/ndrr/api/user/ng-list`
+      : `http://localhost:7777/user/ng-list`;
 
     const data = {
       "blocked_user_id": userId,

@@ -2,7 +2,7 @@ import requests
 import json
 from config import TOKEN  # config.py ファイルからトークンをインポート
 #url = "https://ron-the-rocker.net/ndrr/api/rooms"
-url = "http://localhost:7777/user/ng-list"
+url = "http://localhost:7777/user/profile"
 #url = "http://localhost:7777"
 
 headers = {
@@ -17,3 +17,5 @@ if response.status_code == 200:
 else:
     print("Error:", response.status_code) 
     print("Error:", response.text) 
+
+print (response.headers)
