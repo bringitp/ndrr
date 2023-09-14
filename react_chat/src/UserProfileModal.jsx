@@ -22,7 +22,7 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
      ? `https://ron-the-rocker.net/ndrr/api/user/profile`
      : `http://localhost:7777/user/profile`;
 
-      const response = await fetch('http://localhost:7777/user/profile', {
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${userToken}`,
