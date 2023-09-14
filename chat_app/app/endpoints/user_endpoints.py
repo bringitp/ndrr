@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request, Header
 from sqlalchemy.orm import Session, joinedload
-from chat_app.app.database.models import Message, Room, User, RoomMember, UserNGList
+from chat_app.app.database.models import Message, Room, User, RoomMember, UserNGList,AvatarList
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from datetime import datetime, timedelta
 from pydantic import BaseModel, ValidationError
@@ -64,7 +64,18 @@ async def get_user_ng_list(
     user_id = current_user.id  # Use the user ID from the current user's JWT token
     if not user_id:
         raise HTTPException(status_code=404, detail="User not found")
-    return {"user_profile":current_user}
+
+    avatar_url = (
+            db.query(AvatarList.avatar_url)
+            .filter_by(avatar_id=current_user.avatar_id)
+            .scalar()
+            )
+
+    response = dict()
+    response["user_profile"] = current_user
+    response["avatar_url"] = avatar_url
+
+    return response
 
 
 

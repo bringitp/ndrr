@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState ,useEffect} from 'react';
 import { Drawer, List, ListItem, ListItemText, Divider, Button } from '@mui/material';
 import IconsGallery from './IconsGallery';
 import UserProfileModal from './UserProfileModal';
@@ -9,9 +9,14 @@ const NaviBar = () => {
   const [isIconsGalleryModalOpen, setIconsGalleryModalOpen] = useState(false);
   const [isIconsUserProfileModalOpen, setIconsUserProfileModalOpen] = useState(false);
   const { keycloak, initialized } = useKeycloak(); // useKeycloak フックを使用
+  const [userToken, setUserToken] = useState(null); // トークンをstateとして管理
+
+
+
 
   const handleUserProfileModalOpenModal = () => {
-    setIconsUserProfileModalOpen(true);
+    // Keycloakから取得したトークンを渡す
+      setIconsUserProfileModalOpen(true);
   };
 
   const handleUserProfileModalCloseModal = () => {
@@ -26,30 +31,30 @@ const NaviBar = () => {
     setIconsGalleryModalOpen(false);
   };
 
-const handleLogout = () => {
+  const handleLogout = () => {
     keycloak.logout(); // Keycloakからログアウト
   };
+
+
+
 
   return (
     <div>
       <Drawer variant="permanent" anchor="left">
         <List>
-
-
       {/* モーダルをアイコンがクリックされたときに表示 */}
       {isIconsGalleryModalOpen && (
         <IconsGallery onClose={handleIconGalleryCloseModal} />
       )}
 
       {isIconsUserProfileModalOpen && (
-        <UserProfileModal onClose={handleUserProfileModalCloseModal} />
+        <UserProfileModal 
+         onClose={handleUserProfileModalCloseModal} 
+         userToken={userToken} // トークンをUserProfileModalに渡す
+         />
       )}
 
-        
           {initialized && keycloak.authenticated ? ( // Keycloak が初期化されており、ユーザーが認証済みかどうかをチェック
-
-
-
             dummyData.map((item, index) => (
               <ListItem
                 button
@@ -57,12 +62,15 @@ const handleLogout = () => {
                 onClick={() => {
                   if (item === '🏠') {
                     handleUserProfileModalOpenModal();
+                    setUserToken(keycloak.token);
                   }
                   if (item === '⚙') {
                     handleIconGalleryOpenModal();
+                    setUserToken(keycloak.token);
                   }
                   if (item === '🔌') {
-                     handleLogout(); // 🔌をクリックしたらログアウト
+                    handleLogout(); // 🔌をクリックしたらログアウト
+                    setUserToken(null);
                   }
                 }}
               >
@@ -72,9 +80,15 @@ const handleLogout = () => {
           ) : (
 <Button
   onClick={() => keycloak.login()}
-  style={{ width: '15px', fontSize: '10px' }} // フォントサイズを大きくするスタイルを設定
+  style={{
+    width: '15px',
+    fontFamily: '"Material Symbols Outlined", sans-serif', // Google Fontsで追加したフォントファミリー
+    fontSize: '10px'
+  }}
 >
-⚡ログイン
+<span class="material-symbols-outlined">
+login
+</span>
 </Button>
           )}
         </List>

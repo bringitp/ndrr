@@ -1,7 +1,6 @@
 import requests
 import json
 from config import TOKEN  # config.py ファイルからトークンをインポート
-#url = "https://ron-the-rocker.net/ndrr/api/rooms"
 url = "http://localhost:7777/user/profile"
 #url = "http://localhost:7777"
 
