@@ -2,8 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button } from '@mui/material';
 
 const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
-  const [editedUser, setEditedUser] = useState({ ...user });
-  const [avatarUrl, setAvatarUrl] = useState(''); // アバター画像のURLを格納するステート
+  const [editedUser, setEditedUser] = useState({
+    username: '',
+    profile: '',
+    trip: '',
+    life: '',
+    karma: '',
+    // 他のフィールドも同様に初期値を設定
+  });
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   // データを取得する関数
   const fetchUserProfileData = async () => {
@@ -23,7 +30,15 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
             : `https://ron-the-rocker.net/ndrr/api/static/img/${userData.avatar_url}`
         );
 
-        setEditedUser(userData.user_profile); // アバター画像のURLをステートに設定
+        // ユーザー情報を更新
+        setEditedUser({
+          username: userData.user_profile.username,
+          profile: userData.user_profile.profile,
+          trip: userData.user_profile.trip,
+          life: userData.user_profile.life,
+          karma: userData.user_profile.karma,
+          // 他のフィールドも同様に設定
+        });
       } else {
         // エラーハンドリング
         console.error('Failed to fetch user profile data');
@@ -39,7 +54,14 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
   }, []); // 空の依存リストを指定して一度だけ実行
 
   const handleClose = () => {
-    setEditedUser({ ...user });
+    setEditedUser({
+      username: '',
+      profile: '',
+      trip: '',
+      life: '',
+      karma: '',
+      // 他のフィールドも同様に初期値に戻す
+    });
     onClose();
   };
 
@@ -69,7 +91,6 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
         }}
       >
         <Typography variant="h6">Edit User Profile</Typography>
-        {/* アバター画像を表示し、中央に揃える */}
         <img
           src={avatarUrl}
           alt="Avatar"
