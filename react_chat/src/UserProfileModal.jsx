@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Box, Typography, TextField, Button } from '@mui/material';
+import { Modal, Box, Typography, TextField, Button, InputLabel } from '@mui/material';
 
 const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
   const [editedUser, setEditedUser] = useState({
@@ -15,12 +15,11 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
   // データを取得する関数
   const fetchUserProfileData = async () => {
     try {
-
-    const apiUrl = window.location.href.startsWith(
-    "https://ron-the-rocker.net/"
-   )
-     ? `https://ron-the-rocker.net/ndrr/api/user/profile`
-     : `http://localhost:7777/user/profile`;
+      const apiUrl = window.location.href.startsWith(
+        "https://ron-the-rocker.net/"
+      )
+        ? `https://ron-the-rocker.net/ndrr/api/user/profile`
+        : `http://localhost:7777/user/profile`;
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -122,26 +121,20 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
             rows={4}
             margin="normal"
           />
+          <InputLabel htmlFor="karma">Karma</InputLabel> {/* KarmaのInputLabel */}
           <TextField
-            label="Trip"
-            name="trip"
-            value={editedUser.trip}
-            onChange={handleInputChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Life"
-            name="life"
-            value={editedUser.life}
-            onChange={handleInputChange}
-            fullWidth
-            margin="normal"
-          />
-          <TextField
-            label="Karma"
+            id="karma"
             name="karma"
             value={editedUser.karma}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <InputLabel htmlFor="life">Life</InputLabel> {/* LifeのInputLabel */}
+          <TextField
+            id="life"
+            name="life"
+            value={editedUser.life}
             onChange={handleInputChange}
             fullWidth
             margin="normal"
