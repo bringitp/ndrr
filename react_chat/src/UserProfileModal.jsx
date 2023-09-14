@@ -15,6 +15,13 @@ const UserProfileModal = ({ user, onClose, onSave, userToken }) => {
   // データを取得する関数
   const fetchUserProfileData = async () => {
     try {
+
+    const apiUrl = window.location.href.startsWith(
+    "https://ron-the-rocker.net/"
+   )
+     ? `https://ron-the-rocker.net/ndrr/api/user/profile`
+     : `http://localhost:7777/user/profile`;
+
       const response = await fetch('http://localhost:7777/user/profile', {
         method: 'GET',
         headers: {
