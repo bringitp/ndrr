@@ -4,7 +4,7 @@ from chat_app.app.database.models import Message, Room, User, RoomMember, UserNG
 from chat_app.app.utils import create_db_engine_and_session, load_ng_words
 from datetime import datetime, timedelta
 from pydantic import BaseModel, ValidationError
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import jwt
 import requests
 from janome.tokenizer import Tokenizer
@@ -56,9 +56,8 @@ def db_get_user_ng_list(user_id: int, db: Session):
     user_ng_list = db.query(UserNGList).filter(UserNGList.user_id == user_id).all()
     return user_ng_list
 
-
 @router.get("/user/profile", response_model=Dict[str, Any])
-async def get_user_ng_list(
+async def get_user_profile(
     current_user: LoginUser = Depends(get_current_user), db: Session = Depends(get_db)
 ):
     user_id = current_user.id  # Use the user ID from the current user's JWT token
@@ -71,13 +70,62 @@ async def get_user_ng_list(
             .scalar()
             )
 
+    # LoginUserモデルから必要なフィールドを抽出して辞書に格納
+    user_data = {
+        "id": current_user.id,
+        "username": current_user.username,
+        "trip": current_user.trip,
+        "profile": current_user.profile,
+        "life": current_user.life,
+        "created_at": current_user.created_at,
+        "profile": current_user.profile,
+        "penalty_points": current_user.penalty_points,
+        "sub": current_user.sub,
+        # 他の必要なフィールドを追加
+    }
+
     response = dict()
-    response["user_profile"] = current_user
+    response["user_profile"] = user_data  # user_dataを"user_profile"というキーで追加
     response["avatar_url"] = avatar_url
 
-    return response
+    return response  # JSONとしてuser_dataとavatar_urlを含むレスポンスを返す
 
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    profile: Optional[str] = None
+    trip: Optional[str] = None
+    life: Optional[int] = None
+    karma: Optional[float] = None
 
+@router.put("/user/profile", response_model=Dict[str, Any])
+async def update_user_profile(
+    user_update_data: UserUpdate,
+    current_user: User = Depends(get_current_user),  # ログインユーザーを取得
+    db: Session = Depends(get_db)
+):
+    # ログインユーザーの ID とユーザ情報更新データを使用して、データベースからユーザを取得
+    user = db.query(User).filter(User.id == current_user.id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # ユーザ情報を更新
+    for field, value in user_update_data.dict(exclude_unset=True).items():
+        setattr(user, field, value)
+
+    # データベースに変更をコミット
+    db.commit()
+    db.refresh(user)
+
+    # 更新後のユーザ情報を返す
+    updated_user_data = {
+        "username": user.username,
+        "profile": user.profile,
+        "trip": user.trip
+        # 必要に応じて他のフィールドを追加
+    }
+
+    return {"message": "User profile updated successfully", "user_profile": updated_user_data}
 
 @router.get("/user/ng-list", response_model=List[Any])
 async def get_user_ng_list(
