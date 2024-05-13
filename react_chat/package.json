@@ -11,7 +11,7 @@
     "@mui/styled-engine-sc": "^5.14.6",
     "@mui/system": "^5.14.6",
     "@react-keycloak/web": "^3.4.0",
-    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/jest-dom": "^6.0.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "keycloak-js": "^22.0.1",
